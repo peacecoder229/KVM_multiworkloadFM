@@ -104,41 +104,7 @@ function run_VM()
    do
     result_file=${workload_name}_rep_${iteration}_ncores
     # ssh -oStrictHostKeyChecking=no root@${ip} "rm -rf /root/results/*"
-    ssh -oStrictHostKeyChecking=no root@${ip} "/root/run_$workload_name.sh $result_file" &
-   done
-  done
- fi
-
- for job in `jobs -p`
- do
- echo $job
-   wait $job
- done
-}
-
-function copy_result_from_VM()
-{ 
-  rm -f ${HOME}/.ssh/known_hosts
- iplist=() #list for the IPs of running vms
- #pids=()   #list for the pids used to wait the wrk load to complete before collecting the results
- declare -A dic # ip:pid dict
- ips=$( virsh net-list --name | xargs -i virsh net-dhcp-leases --network {} | cut -f 1 -d "/" | cut -f 16 -d " "| grep -v "-")
- for ip in ${ips}
- do
-  ping -c 3 -w 3 ${ip} > /dev/null
-  if (( $? == 0 ))
-   then
-    iplist+=($ip)
-  fi
-  done
- if [ -n "${iplist[0]}" ]
- then
-  for ip in ${iplist[@]}
-  do
-   for iteration in 1
-   do
-    result_file=${workload_name}_rep_${iteration}_ncores
-    # ssh -oStrictHostKeyChecking=no root@${ip} "rm -rf /root/results/*"
+    ssh -oStrictHostKeyChecking=no root@${ip} "/root/run_$workload_name.sh $result_file"
     scp -oStrictHostKeyChecking=no root@${ip}:/root/$result_file* /root/muktadir/
    done
   done
@@ -187,7 +153,6 @@ function run_exp()
  elif [ "vm" = "${TARGET}" ]
  then
   run_VM
-  copy_result_from_VM
  fi
 }
 
