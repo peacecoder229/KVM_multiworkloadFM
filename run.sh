@@ -3,6 +3,7 @@ TARGET=""
 STAGE=""
 TestCase_s=""
 n_cpus_per_vm=""
+workload_name=""
 
 function get_config()
 {
@@ -35,7 +36,7 @@ function get_config()
 
 function handle_args() 
 {
- while getopts ":T:S:C:" opt
+ while getopts ":T:S:C:W:" opt
  do 
    case $opt in 
      T) TARGET="$OPTARG"
@@ -44,6 +45,8 @@ function handle_args()
      S) STAGE="$OPTARG"
         ;;
      C) n_cpus_per_vm="$OPTARG"
+	;;
+     W) workload_name="$OPTARG"
 	;;
      \?)
         echo "Invalid option: -$OPTARG"
@@ -67,10 +70,11 @@ function summary()
 
 function setup_VM()
 {
- python3 vm_cloud-init.py -c $n_cpus_per_vm
+ echo "setup_VM: Calling vm_cloud_init.py"
+ python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_name
  chmod 777 ./virt-install-cmds.sh
  ./virt-install-cmds.sh
- mkdir -p results
+ #mkdir -p results
  echo "Waiting 3 minutes for the VM to boot"
  sleep 180
 }
@@ -94,13 +98,13 @@ function run_VM()
  then
   for ip in ${iplist[@]}
   do
-   scp -oStrictHostKeyChecking=no run_mlc.sh root@${ip}:/root
-   
+   scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${ip}:/usr/local/bin/
+   scp -oStrictHostKeyChecking=no run_${workload_name}.sh root@${ip}:/root
    for iteration in 1
    do
-    result_file=mlc_$iteration_ncores
+    result_file=${workload_name}_rep_${iteration}_ncores
     # ssh -oStrictHostKeyChecking=no root@${ip} "rm -rf /root/results/*"
-    ssh -oStrictHostKeyChecking=no root@${ip} "/root/run_mlc.sh $result_file"
+    ssh -oStrictHostKeyChecking=no root@${ip} "/root/run_$workload_name.sh $result_file"
     scp -oStrictHostKeyChecking=no root@${ip}:/root/$result_file* /root/muktadir/
    done
   done
@@ -109,6 +113,7 @@ function run_VM()
 
 function setup_5G()
 {
+ echo "In setup_5g"
  if [ "host" = "${TARGET}" ]
  then
   docker -v &>2
@@ -132,16 +137,16 @@ function setup_5G()
 
 function run_exp()
 {
- mkdir -p results 
- mkdir -p results.old
- mv results/* results.old/*
- rm -rf /tmp/5g_kernel_perf* &>2
+ #mkdir -p results 
+ #mkdir -p results.old
+ #mv results/* results.old/*
+ #rm -rf /tmp/5g_kernel_perf* &>2
  if [ "host" = "${TARGET}" ]
  then
   virsh list --name | xargs -i destroy {}
   for iteration in 1 2 3
   do
-   ./run_mlc.sh
+   ./run_${workload_name}.sh
    #mv results/*/5g_kernel_perf.csv /tmp/5g_kernel_perf${iteration}.csv &>2
    #mv results/* results.old/
   done
@@ -161,7 +166,7 @@ function main ()
  elif [ "run" = "${STAGE}" ]
  then
   run_exp
-  summary "${TestCase_s}"
+  # summary "${TestCase_s}"
  else
   echo "Stage not available"
  fi

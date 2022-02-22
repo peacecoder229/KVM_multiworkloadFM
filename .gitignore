@@ -1,0 +1,4 @@
+virt-install-cmds.sh
+remove-cd-virt-install-cmds.sh
+*.log
+__pycache__/

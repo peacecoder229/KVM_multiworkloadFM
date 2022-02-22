@@ -308,6 +308,7 @@ ip_count = 0
 ip_sub = 123
 
 LIST_CPUS_PER_VM = []
+WORKLOAD_NAME = ""
 
 def get_qat_vf():
 
@@ -802,7 +803,7 @@ def generate_commands(assign_random=False):
         
         # Loop over each tile (workload:no of copies) in the list of tiles
         for tile in sorted(tiles.keys()):
-            # Go inside the loop only if a workload has atleast 1 copy 
+            # If a workload has atleast 1 copy, go inside the loop create that many VMs
             for count in range(0, tiles.get(tile)):
                 print(f"********Creating {tile} vm#{count}*******")
                 tile_no = EXEC_TASKS[tile]
@@ -811,7 +812,8 @@ def generate_commands(assign_random=False):
 
                 num_nics=len([v for k, v in PT_Device.items()if k.startswith('NIC')])
                 #print("number of num_nics=",num_nics)
-
+                
+                ###################  Networking(start)  ####################
                 for i in range (1,(num_nics+1)):
                     dev="NIC{}".format(i)
 
@@ -849,15 +851,19 @@ def generate_commands(assign_random=False):
                     port_to_use = virtual_ports.pop()
                     network_cmd = "--network bridge=virbr0 --host-device={} {} ".format(port_to_use, nic_dev)
 
+                ###################  Networking(end)  ####################
 
                 # print("qat_device_to_use=",qat_device_to_use)
                 # corp_port_to_use = corp_virtual_ports.pop()
+
+                # Get the specified resource(vm memory, vcpus) for the current tile (workload)
                 t_resource = Tile_Resource[tile]
+                
                 # print("cpus=", t_resource, "tile=", tile)
                 # Purposefully added 'A' in front of DB to make sure that DB starts before Cassandra-tiles
-
+                
+                # create an iso for the current tile (workload)
                 iso_name = "%s-%02d" % (tile.lower(), tile_no)
-
                 print("iso-name= ", iso_name)
                 if not DRY_RUN :
                     create_iso_centos(iso_name, tile_no, tile)
@@ -909,16 +915,18 @@ def generate_commands(assign_random=False):
                     print("Genrating command for 5G")
                     cpu_set=str(cpupool.pop())
                     #for _ in range(Tile_Resource["QAT"]['VCPU'] - 1):
-                    for _ in range(LIST_CPUS_PER_VM[count] - 1):
+                    for _ in range(1, LIST_CPUS_PER_VM[count]):
                         cpu_set = cpu_set + "," + str(cpupool.pop())
                     
                     cpuaffinity = f"--cpuset {cpu_set}"
-                    n_vcpus = len(LIST_CPUS_PER_VM) # number of virtual cpus same as host's physical cpu
-                    vm_name = "nginx"
+                    
+                    # number of virtual cpus same as host's physical cpu
+                    n_vcpus = LIST_CPUS_PER_VM[count] 
+                    vm_name = WORKLOAD_NAME
 
                     CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
-                    test_cmd = CMD_FORMAT % (tile.lower(), tile_no,
+                    test_cmd = CMD_FORMAT % (vm_name.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), n_vcpus,  # t_resource["VCPU"],
                                              vm_storage, iso_name, vm_storage,
@@ -1068,10 +1076,13 @@ if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-c', '--LIST_CPUS_PER_VM', type=str, help = 'Comma seperated list of physical cpus each vm is pinned to.')
+    parser.add_argument('-w', '--workload_name', type=str, help = 'Name of the workload')
 
     args = parser.parse_args()
     
     LIST_CPUS_PER_VM = [int(cpu) for cpu in args.LIST_CPUS_PER_VM.split(',')]
+    WORKLOAD_NAME = args.workload_name
+    print ("Workload Name: ", WORKLOAD_NAME , "List of physcial and virtual cpus for each vm: ", LIST_CPUS_PER_VM)
 
     #get_cports()
     if is_vm_available():

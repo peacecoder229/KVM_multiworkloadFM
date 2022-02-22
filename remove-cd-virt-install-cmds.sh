@@ -1,2 +1,0 @@
-virt-install --import -n 5g-01 -r 40960 --vcpus=2 --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/vmimages2/5g-01.qcow2,format=raw,bus=virtio,cache=writeback --network bridge=virbr0 --noautoconsole --cpu host-passthrough,cache.mode=passthrough
-virt-install --import -n 5g-02 -r 40960 --vcpus=2 --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/vmimages2/5g-02.qcow2,format=raw,bus=virtio,cache=writeback --network bridge=virbr0 --noautoconsole --cpu host-passthrough,cache.mode=passthrough
