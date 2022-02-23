@@ -1,4 +1,8 @@
 # Description
+
+Pre-requisite:
+
+Ensure that VT-X is enabled in the BIOS
  
 Set up vm: 
 
