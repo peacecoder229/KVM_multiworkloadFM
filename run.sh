@@ -88,22 +88,24 @@ function run_VM()
  ips=$( virsh net-list --name | xargs -i virsh net-dhcp-leases --network {} | cut -f 1 -d "/" | cut -f 16 -d " "| grep -v "-")
  for ip in ${ips}
  do
+  #echo "pinging ${ip}"
   ping -c 3 -w 3 ${ip} > /dev/null
   if (( $? == 0 ))
    then
     iplist+=($ip)
   fi
   done
+ 
  if [ -n "${iplist[0]}" ]
  then
   for ip in ${iplist[@]}
   do
+   # echo "Copying to ${ip}"
    scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${ip}:/usr/local/bin/
    scp -oStrictHostKeyChecking=no run_${workload_name}.sh root@${ip}:/root
    for iteration in 1
    do
     result_file=${workload_name}_rep_${iteration}_ncores
-    # ssh -oStrictHostKeyChecking=no root@${ip} "rm -rf /root/results/*"
     ssh -oStrictHostKeyChecking=no root@${ip} "/root/run_$workload_name.sh $result_file" &
    done
   done
@@ -111,7 +113,7 @@ function run_VM()
 
  for job in `jobs -p`
  do
-   echo "Waiting for $job to finish ...."
+   #echo "Waiting for $job to finish ...."
    wait $job
  done
 }
