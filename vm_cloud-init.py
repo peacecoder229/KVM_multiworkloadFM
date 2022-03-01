@@ -454,6 +454,7 @@ def is_vm_available():
 
 def create_iso(iso_name, tile_no, tile):
     os.system("mkdir -p /{}/iso_test".format(vm_storage))
+    print(f"create_iso(): mkdir -p /{vm_storage}/iso_test")
 
     global ip_count
     global ip_sub
@@ -583,7 +584,8 @@ users:
 
 def create_iso_centos(iso_name, tile_no, tile):
     os.system("mkdir -p /{}/iso_test".format(vm_storage))
-
+    print(f"create_iso_centos(): mkdir -p /{vm_storage}/iso_test")
+    
     global ip_count
     global ip_sub
 
