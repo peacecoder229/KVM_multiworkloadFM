@@ -60,7 +60,7 @@ path_prefix = r"/home"
 def download_qcow(image,path="%s/vmimages" % (path_prefix)):
     if not os.path.exists(path):
         os.makedirs(path)
-        os.makedirs("%s/vmimages2" % (path_prefix))
+        #os.makedirs("%s/vmimages2" % (path_prefix))
     print(f"trying to download the image {image} to {path}")
     # golden images are in JF5300-B11A235T , if ip is not working, just fix it 
     url = "http://10.165.84.177/images/" + image
@@ -581,12 +581,9 @@ users:
     #p = subprocess.run(["genisoimage",cmd], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #print("the commandline is {}".format(p.args))
 
-
-
-
 def create_iso_centos(iso_name, tile_no, tile):
-    os.system("mkdir -p /{}/iso_test".format(vm_storage))
-    print(f"create_iso_centos(): mkdir -p /{vm_storage}/iso_test")
+    os.system("mkdir -p {}/{}/iso_test".format(path_prefix, vm_storage))
+    print(f"create_iso_centos(): mkdir -p {path_prefix}/{vm_storage}/iso_test")
     
     global ip_count
     global ip_sub
@@ -602,7 +599,7 @@ def create_iso_centos(iso_name, tile_no, tile):
     print("tile = %s \t ip= %s" % (tile, ip))
 
     network_config_file = open(
-        "/{}/iso_test/network-config".format(vm_storage), "w")
+        "{}/{}/iso_test/network-config".format(path_prefix, vm_storage), "w")
 
     network_config_file.write('''
 version: 2
@@ -623,13 +620,13 @@ ethernets:
     
 ''' % (ip, ip))
 
-    meta_data_file = open("/{}/iso_test/meta-data".format(vm_storage), "w")
+    meta_data_file = open("{}/{}/iso_test/meta-data".format(path_prefix, vm_storage), "w")
     meta_data_file.write('''
 instance-id: %s
 local-hostname: %s
 dsmode: local
 ''' % (iso_name, iso_name))
-    user_data_file = open("/{}/iso_test/user-data".format(vm_storage), "w")
+    user_data_file = open("{}/{}/iso_test/user-data".format(path_prefix, vm_storage), "w")
     user_data_file.write('''
 #cloud-config
 preserve_hostname: false
@@ -687,16 +684,16 @@ users:
     meta_data_file.flush()
     network_config_file.flush()
     os.system("sleep 1")
-    os.system("ls /{}/iso_test".format(vm_storage))
-    os.system("cat /{}/iso_test/user-data".format(vm_storage))
-    os.system("cat /{}/iso_test/meta-data".format(vm_storage))
-    os.system("cat /{}/iso_test/network-config".format(vm_storage))
+    os.system("ls {}/{}/iso_test".format(path_prefix, vm_storage))
+    os.system("cat {}/{}/iso_test/user-data".format(path_prefix, vm_storage))
+    os.system("cat {}/{}/iso_test/meta-data".format(path_prefix, vm_storage))
+    os.system("cat {}/{}/iso_test/network-config".format(path_prefix, vm_storage))
     os.system(
-        "mkisofs -input-charset=utf-8 -output /%s/%s.iso -volid cidata -joliet -rock  /%s/iso_test/ >>iso.log"
-        % (vm_storage, iso_name, vm_storage))
-    os.system("rm /{}/iso_test/user-data".format(vm_storage))
-    os.system("rm /{}/iso_test/meta-data".format(vm_storage))
-    os.system("rm /{}/iso_test/network-config".format(vm_storage))
+        "mkisofs -input-charset=utf-8 -output %s/%s/%s.iso -volid cidata -joliet -rock  %s/%s/iso_test/ >>iso.log"
+        % (path_prefix, vm_storage, iso_name, path_prefix, vm_storage))
+    os.system("rm {}/{}/iso_test/user-data".format(path_prefix, vm_storage))
+    os.system("rm {}/{}/iso_test/meta-data".format(path_prefix, vm_storage))
+    os.system("rm {}/{}/iso_test/network-config".format(path_prefix, vm_storage))
     if ("qat" in iso_name):
         print("using qat golden image ")
         image_name = Tile_Resource.get('QAT').get('IMG')
@@ -732,15 +729,18 @@ users:
         image_name = Tile_Resource.get('SPEC').get('IMG')
         if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
             download_qcow(image_name)
+        
+        print(f"Copying  {path_prefix}/vmimages/spec-golden-image.qcow2 {path_prefix}/{vm_storage}/{iso_name}.qcow2")
         os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
                   (path_prefix, path_prefix, vm_storage,iso_name))
-    elif ("5g" in iso_name):   
+    elif ("5g" in iso_name): 
         print("using CPU golden image ")
         image_name = Tile_Resource.get('FIO').get('IMG')
         if not os.path.isfile(f"%s/vmimages/{image_name}" %(path_prefix)):
             download_qcow(image_name)
         os.system("cp %s/vmimages/cpu_inference_golden_vmimage.qcow2 %s/%s/%s.qcow2" %
                   (path_prefix, path_prefix, vm_storage,iso_name))
+
     else:
         print("using generic redis  golden image ")
 
