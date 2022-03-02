@@ -55,10 +55,12 @@ rsa_key = get_ssh_key()
 
 QAT_VF_SOCKET = collections.OrderedDict()
 vm_storage = r"vmimages2"
+path_prefix = r"/home"
 
-def download_qcow(image,path="/vmimages"):
+def download_qcow(image,path="%s/vmimages" % (path_prefix)):
     if not os.path.exists(path):
         os.makedirs(path)
+        os.makedirs("%s/vmimages2" % (path_prefix))
     print(f"trying to download the image {image} to {path}")
     # golden images are in JF5300-B11A235T , if ip is not working, just fix it 
     url = "http://10.165.84.177/images/" + image
@@ -557,23 +559,23 @@ users:
     if ("qat" in iso_name):
         print("using qat golden image ")
         image_name = Tile_Resource.get('QAT').get('IMG')
-        if not os.path.isfile(f"/vmimages/{image_name}"):
+        if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
             download_qcow(image_name)
-        os.system("cp /vmimages/qat-golden-images.qcow2 /%s/%s.qcow2" %
-                  (vm_storage,iso_name))
+        os.system("cp %s/vmimages/qat-golden-images.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage,iso_name))
     elif ("spec" in iso_name):
         print("using SPEC golden image ")
         
         image_name = Tile_Resource.get('SPEC').get('IMG')
-        if not os.path.isfile(f"/vmimages/{image_name}"):
+        if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
             download_qcow(image_name)
-        os.system("cp /vmimages/centos_generic_golden_image.qcow2 /%s/%s.qcow2" %
-                  (vm_storage,iso_name))
+        os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage,iso_name))
     else:
         print("using  redis  golden image ")
 
-        os.system("cp /vmimages/golden_vmimage.qcow2 /%s/%s.qcow2" %
-                  (vm_storage,iso_name))
+        os.system("cp %s/vmimages/golden_vmimage.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage,iso_name))
 
     #print("HelloXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     #p = subprocess.run(["genisoimage",cmd], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -698,52 +700,52 @@ users:
     if ("qat" in iso_name):
         print("using qat golden image ")
         image_name = Tile_Resource.get('QAT').get('IMG')
-        if not os.path.isfile(f"/vmimages/{image_name}"):
+        if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
             download_qcow(image_name)
         
-        os.system("cp /vmimages/qat-golden-images.qcow2 /%s/%s.qcow2" %
-                  (vm_storage, iso_name))
+        os.system("cp %s/vmimages/qat-golden-images.qcow2 /%s/%s.qcow2" %
+                  (path_prefix, vm_storage, iso_name))
 
     elif ("cpu_inference" in iso_name):
         print("using GPU  golden image ")
 
-        os.system("cp /vmimages/cpu_inference_golden_vmimage.qcow2 /%s/%s.qcow2" %
-                  (vm_storage, iso_name))
+        os.system("cp %s/vmimages/cpu_inference_golden_vmimage.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage, iso_name))
 
     elif ("gpu_inference" in iso_name):
         print("using CPU   golden image ")
 
         os.system(
-            "cp /vmimages/cpu_inference_golden_vmimage.qcow2 /%s/%s.qcow2" %
-            (vm_storage, iso_name))
+            "cp %s/vmimages/cpu_inference_golden_vmimage.qcow2 %s/%s/%s.qcow2" %
+            (path_prefix, path_prefix, vm_storage, iso_name))
     
     elif ("spec" in iso_name):   
         print("using SPEC golden image ")
         
         image_name = Tile_Resource.get('SPEC').get('IMG')
-        if not os.path.isfile(f"/vmimages/{image_name}"):
+        if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
             download_qcow(image_name)
-        os.system("cp /vmimages/spec-golden-image.qcow2 /%s/%s.qcow2" %
-                  (vm_storage,iso_name))
+        os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage,iso_name))
     elif ("5g" in iso_name):   
         print("using CPU golden image ")
-        image_name = Tile_Resource.get('5G').get('IMG')
-        if not os.path.isfile(f"/vmimages/{image_name}"):
+        image_name = Tile_Resource.get('SPEC').get('IMG')
+        if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
             download_qcow(image_name)
-        os.system("cp /vmimages/cpu_inference_golden_vmimage.qcow2 /%s/%s.qcow2" %
-                  (vm_storage,iso_name))
+        os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage,iso_name))
     elif ("5g" in iso_name):   
         print("using CPU golden image ")
         image_name = Tile_Resource.get('FIO').get('IMG')
-        if not os.path.isfile(f"/vmimages/{image_name}"):
+        if not os.path.isfile(f"%s/vmimages/{image_name}" %(path_prefix)):
             download_qcow(image_name)
-        os.system("cp /vmimages/cpu_inference_golden_vmimage.qcow2 /%s/%s.qcow2" %
-                  (vm_storage,iso_name))
+        os.system("cp %s/vmimages/cpu_inference_golden_vmimage.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage,iso_name))
     else:
         print("using generic redis  golden image ")
 
-        os.system("cp /vmimages/golden_vmimage.qcow2 /%s/%s.qcow2" %
-                  (vm_storage, iso_name))
+        os.system("cp %s/vmimages/golden_vmimage.qcow2 %s/%s/%s.qcow2" %
+                  (path_prefix, path_prefix, vm_storage, iso_name))
 
     #print("HelloXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX")
     #p = subprocess.run(["genisoimage",cmd], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
@@ -882,17 +884,18 @@ def generate_commands(assign_random=False):
                     for _ in range(Tile_Resource["QAT"]['VCPU'] - 1):
                      cpu_set = cpu_set + "," + str(cpupool.pop())
                     cpuaffinity = f"--cpuset {cpu_set}"
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --nographics"
                     test_cmd = CMD_FORMAT % (
                         tile.lower(), tile_no,
                         (int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"],
-                        vm_storage, iso_name, vm_storage, iso_name,
+                        path_prefix, vm_storage, iso_name, path_prefix,
+                        vm_storage, iso_name,
                         network_cmd, qat_device_to_use, cpuaffinity)
-                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole"
+                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
                         tile.lower(), tile_no,
                         (int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"],
-                        vm_storage, iso_name, network_cmd, qat_device_to_use )
+                        path_prefix, vm_storage, iso_name, network_cmd, qat_device_to_use )
 
                 elif (tile == "CPU_INFERENCE"):
                     cpu_set=str(cpupool.pop())
@@ -901,17 +904,17 @@ def generate_commands(assign_random=False):
                     cpuaffinity = f"--cpuset {cpu_set}"
 
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     test_cmd = CMD_FORMAT % (tile.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), t_resource["VCPU"],
-                                             vm_storage, iso_name, vm_storage,
+                                             path_prefix, vm_storage, iso_name, vm_storage,
                                              iso_name, network_cmd,cpuaffinity)
-                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
+                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
                         tile.lower(), tile_no,
                         (int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"],
-                        vm_storage, iso_name, network_cmd)
+                        path_prefix, vm_storage, iso_name, network_cmd)
 
                 elif (tile == "5G"):
                     print("Genrating command for 5G")
@@ -926,19 +929,20 @@ def generate_commands(assign_random=False):
                     n_vcpus = LIST_CPUS_PER_VM[count] 
                     vm_name = WORKLOAD_NAME
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
                     test_cmd = CMD_FORMAT % (vm_name.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), n_vcpus,  # t_resource["VCPU"],
-                                             vm_storage, iso_name, vm_storage,
+                                             path_prefix, vm_storage, iso_name, 
+                                             path_prefix, vm_storage,
                                              iso_name, network_cmd,cpuaffinity)
                     print(test_cmd)
-                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
+                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
                         tile.lower(), tile_no,
                         (int(t_resource["MEMORY"]) * 1024), n_vcpus, # t_resource["VCPU"],
-                        vm_storage, iso_name, network_cmd)
+                        path_prefix, vm_storage, iso_name, network_cmd)
 
                 elif(tile == "GPU_INFERENCE"):
 
@@ -955,18 +959,19 @@ def generate_commands(assign_random=False):
                     cpuaffinity = f"--cpuset {cpu_set}"
 
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
 
                     test_cmd = CMD_FORMAT % (tile.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), t_resource["VCPU"],
-                                             vm_storage, iso_name, vm_storage,
+                                             path_prefix, vm_storage, iso_name, 
+                                             path_prefix, vm_storage,
                                              iso_name, network_cmd,gpu_pt, cpuaffinity)
-                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
+                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
                         tile.lower(), tile_no,
                         (int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"],
-                        vm_storage, iso_name, network_cmd, gpu_pt)
+                        path_prefix, vm_storage, iso_name, network_cmd, gpu_pt)
 
                 elif(tile == "FIO"):
                     num_nvme =len( PT_Device["NVME"])
@@ -982,26 +987,28 @@ def generate_commands(assign_random=False):
                      cpu_set = cpu_set + "," + str(cpupool.pop())
                     cpuaffinity = f"--cpuset {cpu_set}"
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
 
                     test_cmd = CMD_FORMAT % (tile.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), t_resource["VCPU"],
-                                             vm_storage, iso_name, vm_storage,
+                                             path_prefix, vm_storage, iso_name, 
+                                             path_prefix, vm_storage,
                                              iso_name, network_cmd, storage_pt, cpuaffinity)
-                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
+                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
                         tile.lower(), tile_no,
-                        (int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"],
+                        (int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"], path_prefix,
                         vm_storage, iso_name, network_cmd, storage_pt)
 
                 else:
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s --noautoconsole --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s --noautoconsole --nographics"
                     test_cmd = CMD_FORMAT % (tile.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), t_resource["VCPU"],
-                                             vm_storage, iso_name, vm_storage,
+                                             path_prefix, vm_storage, iso_name, 
+                                             path_prefix, vm_storage,
                                              iso_name, network_cmd)
                     
                     cpu_set=str(cpupool.pop())
@@ -1009,11 +1016,11 @@ def generate_commands(assign_random=False):
                      cpu_set = cpu_set + "," + str(cpupool.pop())
                     cpuaffinity = f"--cpuset {cpu_set}"
 
-                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole"
+                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
                         tile.lower(), tile_no,
                         (int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"],
-                        vm_storage, iso_name, network_cmd, cpuaffinity)
+                        path_prefix, vm_storage, iso_name, network_cmd, cpuaffinity)
 
                 EXEC_TASKS[tile] = tile_no + 1
                 test_commands.append(test_cmd)
