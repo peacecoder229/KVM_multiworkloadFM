@@ -141,7 +141,7 @@ function copy_result_from_VM()
    do
     result_file=${workload_name}_rep_${iteration}_ncores
     # ssh -oStrictHostKeyChecking=no root@${ip} "rm -rf /root/results/*"
-    scp -oStrictHostKeyChecking=no root@${ip}:/root/$result_file* /root/muktadir/
+    scp -oStrictHostKeyChecking=no root@${ip}:/root/$result_file* /root/
    done
   done
  fi
