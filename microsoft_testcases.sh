@@ -18,38 +18,64 @@ HVSVM=2
 LPVM1=14
 LPVM2=14
 
+rm -rf /root/mlc_*
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh undefine {}
+
+
 echo off > /sys/devices/system/cpu/smt/control
 
-./run.sh -T vm -S setup -C $HPVM1,$HPVM2,$HVSVM,$LPVM1,$LPVM2 -W mlc 
+echo "Running HPVM1 Solo"
+
+sed -i 's/"5G" :0/"5G" :1/g' vm_cloud-init.py
+./run.sh -T vm -S setup -C $HPVM1 -W mlc
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh start {}
 
 sleep 30
-
-virsh destroy mlc-01 --graceful
-virsh destroy mlc-02 --graceful
-virsh destroy mlc-03 --graceful
-virsh destroy mlc-04 --graceful
-virsh destroy mlc-05 --graceful
-
-
-virsh start mlc-01
-virsh start mlc-02
-virsh start mlc-03
-virsh start mlc-04
-virsh start mlc-05
-
-sleep 30
-
+echo "Starting benchmark now"
 
 ./run.sh -T vm -S run -W mlc
 
-#virsh domiflist mlc-01
-#virsh domiflist mlc-02
-#virsh domiflist mlc-03
-#virsh domiflist mlc-04
-#virsh domiflist mlc-05
+
+cat /root/mlc_rep_1_ncores_13
 
 
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh undefine {}
 
-#scp /usr/bin/mlc root@192.168.122.52:/usr/bin/
-#ssh root@192.168.122.52 "mlc --loaded_latency -R -t${30} -T -k${HPVM1} -d0 | grep 00000 | awk '{print $3}'" 
+sed -i 's/"5G" :1/"5G" :0/g' vm_cloud-init.py
+rm -rf /home/vmimages2/*
+rm -rf /root/mlc_rep_1_ncores_13
 
+
+echo "CoScheduling HPVM1 with HPVM2|HPSVM|LPVM1|LPVM2"
+
+sudo dhclient -r $ sudo dhclient
+sed -i 's/"5G" :0/"5G" :5/g' vm_cloud-init.py
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+./run.sh -T vm -S setup -C $HPVM1,$HPVM2,$HVSVM,$LPVM1,$LPVM2 -W mlc
+
+sleep 30
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh start {}
+
+sleep 60
+echo "Starting benchmark now"
+
+./run.sh -T vm -S run -W mlc
+
+
+cat /root/mlc_rep_1_ncores_13
+
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh undefine {}
+
+
+sed -i 's/"5G" :5/"5G" :0/g' vm_cloud-init.py
+rm -rf /home/vmimages2/*
