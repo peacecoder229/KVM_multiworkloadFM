@@ -76,7 +76,7 @@ function setup_VM()
  ./virt-install-cmds.sh
  #mkdir -p results
  echo "Waiting 3 minutes for the VM to boot"
- sleep 180
+ sleep 30
 }
 
 function run_VM()
@@ -86,6 +86,7 @@ function run_VM()
  #pids=()   #list for the pids used to wait the wrk load to complete before collecting the results
  declare -A dic # ip:pid dict
  ips=$( virsh net-list --name | xargs -i virsh net-dhcp-leases --network {} | cut -f 1 -d "/" | cut -f 16 -d " "| grep -v "-")
+ echo $ips
  for ip in ${ips}
  do
   #echo "pinging ${ip}"
@@ -101,7 +102,7 @@ function run_VM()
   for ip in ${iplist[@]}
   do
    # echo "Copying to ${ip}"
-   scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${ip}:/usr/local/bin/
+   scp -oStrictHostKeyChecking=no /usr/bin/mlc root@${ip}:/usr/local/bin/
    scp -oStrictHostKeyChecking=no run_${workload_name}.sh root@${ip}:/root
    for iteration in 1
    do
@@ -179,8 +180,8 @@ function run_exp()
  #rm -rf /tmp/5g_kernel_perf* &>2
  if [ "host" = "${TARGET}" ]
  then
-  virsh list --name | xargs -i destroy {}
-  for iteration in 1 2 3
+  virsh list --name | xargs -i destroy {} --graceful
+  for iteration in 1 2 3 4 5
   do
    ./run_${workload_name}.sh
    #mv results/*/5g_kernel_perf.csv /tmp/5g_kernel_perf${iteration}.csv &>2

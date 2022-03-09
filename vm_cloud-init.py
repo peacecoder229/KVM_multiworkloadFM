@@ -190,7 +190,7 @@ Tile_Map = {
         "QAT": 0,
         "SGX": 0,
         "SPEC":0,
-        "5G": 2
+        "5G": 5
     },
     
     "SOCKET1": {
@@ -1037,7 +1037,7 @@ def run_test(test_commands, test_commands_remove_cd):
     file2 = open("remove-cd-virt-install-cmds.sh".format(vm_storage), "w")
     
     #file1.write("for x in `virsh list --all|tr -s \" \" |cut -f 3 -d \" \" | tail -n +3`; do virsh destroy $x;virsh undefine $x;done;sleep 5 \n")
-    file1.write("virsh list --all --name|xargs -i virsh destroy {} ;  virsh list --all --name|xargs -i virsh undefine {} ; sleep 5 \n ")
+    file1.write("virsh list --all --name|xargs -i virsh destroy {} --graceful;  virsh list --all --name|xargs -i virsh undefine {} ; sleep 5 \n ")
     for command in test_commands:
         print(command)
         file1.write(command + "\n")
