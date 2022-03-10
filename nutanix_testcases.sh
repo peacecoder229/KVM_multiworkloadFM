@@ -70,7 +70,7 @@ sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
 
 #virsh list --all --name|xargs -i virsh destroy {} --graceful
-./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc
+./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc,mlc
 
 sleep 30
 
@@ -118,7 +118,7 @@ sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
 
 #virsh list --all --name|xargs -i virsh destroy {} --graceful
-./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc
+./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc,mlc
 
 sleep 30
 
