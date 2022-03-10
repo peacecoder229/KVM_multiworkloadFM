@@ -23,19 +23,21 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 
 echo off > /sys/devices/system/cpu/smt/control
-'
+
 echo "Running HPVM1 Solo"
 
 sed -i 's/"5G" :0/"5G" :1/g' vm_cloud-init.py
 
 ./run.sh -T vm -S setup -C $HPVM -W mlc
 
-virsh destroy mlc-01
+sleep 30
+virsh destroy mlc-01 --graceful
 virsh start mlc-01
 
 #virsh list --all --name|xargs -i virsh destroy {} --graceful
 #virsh list --all --name|xargs -i virsh start {}
 virsh list
+sleep 60
 echo "Starting benchmark now"
 
 #virsh list
@@ -46,7 +48,6 @@ virsh list
 
 cat /root/mlc_rep_1_ncores_34
 
-./clean.sh mlc-01
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
@@ -56,7 +57,7 @@ rm -rf /home/vmimages2/*
 rm -rf /root/mlc_rep_1_ncores_34
 
 
-'
+
 
 
 
