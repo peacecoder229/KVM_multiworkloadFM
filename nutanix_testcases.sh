@@ -12,9 +12,13 @@
 HPVM=34
 LPVM=22
 
+pqos -R
+
 #rmid and clos
 #pqos rmid add monitoring 
 #
+source hwdrc_osmailbox_config.inc.sh
+cpupower frequency-set -u 2700Mhz
 
 rm -rf /root/mlc_*
 
@@ -58,10 +62,9 @@ rm -rf /root/mlc_rep_1_ncores_34
 
 
 
-
-
-
-echo "CoScheduling HPVM1 with HPVM2|HPSVM|LPVM1|LPVM2"
+echo "================================================="
+echo "CoScheduling HPVM with LPVM"
+echo "================================================="
 
 sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
@@ -96,5 +99,51 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
+rm -rf /root/mlc_rep_1_ncores_34
 
 
+echo "========================================================="
+echo "CoScheduling HPVM with LPVM with static MBA"
+echo "========================================================="
+
+pqos -e 'mba:0=10'
+pqos -e 'mba:3=90'
+
+pqos -a 'core:0=0-33'
+pqos -a 'core:3=34-55'
+
+
+
+sudo dhclient -r $ sudo dhclient
+sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
+
+#virsh list --all --name|xargs -i virsh destroy {} --graceful
+./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc
+
+sleep 30
+
+virsh destroy mlc-02 --graceful
+virsh destroy mlc-03 --graceful
+
+virsh start mlc-02
+virsh start mlc-03
+
+#virsh list --all --name|xargs -i virsh destroy {} --graceful
+#virsh list --all --name|xargs -i virsh start {}
+
+sleep 60
+echo "Starting benchmark now"
+
+./run.sh -T vm -S run -W mlc
+
+
+cat /root/mlc_rep_1_ncores_34
+
+
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh undefine {}
+
+
+sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
+rm -rf /home/vmimages2
