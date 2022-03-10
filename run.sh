@@ -76,7 +76,7 @@ function setup_VM()
  ./virt-install-cmds.sh
  #mkdir -p results
  echo "Waiting 3 minutes for the VM to boot"
- sleep 30
+ sleep 120
 }
 
 function run_VM()
@@ -101,7 +101,7 @@ function run_VM()
  then
   for ip in ${iplist[@]}
   do
-   # echo "Copying to ${ip}"
+   echo "Copying to ${ip}"
    scp -oStrictHostKeyChecking=no /usr/bin/mlc root@${ip}:/usr/local/bin/
    scp -oStrictHostKeyChecking=no run_${workload_name}.sh root@${ip}:/root
    for iteration in 1
@@ -114,7 +114,7 @@ function run_VM()
 
  for job in `jobs -p`
  do
-   #echo "Waiting for $job to finish ...."
+   echo "Waiting for $job to finish ...."
    wait $job
  done
 }
