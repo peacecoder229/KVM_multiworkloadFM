@@ -12,12 +12,14 @@
 HPVM=34
 LPVM=22
 
+HPWORKLOAD=$1
+LPWORKLOAD=$2
+
 pqos -R
 
 #rmid and clos
 #pqos rmid add monitoring 
 #
-source hwdrc_osmailbox_config.inc.sh
 cpupower frequency-set -u 2700Mhz
 
 rm -rf /root/mlc_*
@@ -32,21 +34,22 @@ echo "Running HPVM1 Solo"
 
 sed -i 's/"5G" :0/"5G" :1/g' vm_cloud-init.py
 
-./run.sh -T vm -S setup -C $HPVM -W mlc
+./run.sh -T vm -S setup -C $HPVM -W $HPWORKLOAD
 
 sleep 30
-virsh destroy mlc-01 --graceful
-virsh start mlc-01
+#virsh destroy $HPWORKLOAD-01 --graceful
+#virsh start $HPWORKLOAD-01
 
-#virsh list --all --name|xargs -i virsh destroy {} --graceful
-#virsh list --all --name|xargs -i virsh start {}
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh start {}
 virsh list
+
 sleep 60
 echo "Starting benchmark now"
 
 #virsh list
 
-./run.sh -T vm -S run -W mlc
+./run.sh -T vm -S run -W $HPWORKLOAD
 
 virsh list
 
@@ -70,23 +73,23 @@ sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
 
 #virsh list --all --name|xargs -i virsh destroy {} --graceful
-./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc,mlc
+./run.sh -T vm -S setup -C $HPVM,$LPVM -W $HPWORKLOAD,$LPWORKLOAD
 
 sleep 30
 
-virsh destroy mlc-02 --graceful
-virsh destroy mlc-03 --graceful
+#virsh destroy mlc-02 --graceful
+#virsh destroy mlc-03 --graceful
 
-virsh start mlc-02
-virsh start mlc-03
+#virsh start mlc-02
+#virsh start mlc-03
 
-#virsh list --all --name|xargs -i virsh destroy {} --graceful
-#virsh list --all --name|xargs -i virsh start {}
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh start {}
 
 sleep 60
 echo "Starting benchmark now"
 
-./run.sh -T vm -S run -W mlc
+./run.sh -T vm -S run -W $HPWORKLOAD
 
 
 cat /root/mlc_rep_1_ncores_34
@@ -118,23 +121,23 @@ sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
 
 #virsh list --all --name|xargs -i virsh destroy {} --graceful
-./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc,mlc
+./run.sh -T vm -S setup -C $HPVM,$LPVM -W $HPWORKLOAD,$LPWORKLOAD
 
 sleep 30
 
-virsh destroy mlc-02 --graceful
-virsh destroy mlc-03 --graceful
+#virsh destroy mlc-02 --graceful
+#virsh destroy mlc-03 --graceful
 
-virsh start mlc-02
-virsh start mlc-03
+#virsh start mlc-02
+#virsh start mlc-03
 
-#virsh list --all --name|xargs -i virsh destroy {} --graceful
-#virsh list --all --name|xargs -i virsh start {}
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh start {}
 
 sleep 60
 echo "Starting benchmark now"
 
-./run.sh -T vm -S run -W mlc
+./run.sh -T vm -S run -W $HPWORKLOAD
 
 
 cat /root/mlc_rep_1_ncores_34
