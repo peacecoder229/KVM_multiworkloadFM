@@ -309,7 +309,6 @@ ip_sub = 123
 
 CPUS_PER_VM = []
 WORKLOAD_PER_VM = []
-WORKLOAD_NAME = ""
 
 def get_qat_vf():
 
@@ -1105,7 +1104,7 @@ if __name__ == '__main__':
     CPUS_PER_VM = [int(cpu) for cpu in args.CPUS_PER_VM.split(',')]
     WORKLOAD_PER_VM = [str(wl) for wl in args.WORKLOAD_PER_VM.split(',')]
    
-    print ("Workload Name: ", WORKLOAD_NAME , "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)
+    print ("List Workload Name per vm: ", WORKLOAD_PER_VM, "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)
 
     #get_cports()
     if is_vm_available():

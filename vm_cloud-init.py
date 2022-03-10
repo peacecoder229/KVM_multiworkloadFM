@@ -309,8 +309,8 @@ CORP_PORT = collections.OrderedDict()
 ip_count = 0
 ip_sub = 123
 
-LIST_CPUS_PER_VM = []
-WORKLOAD_NAME = ""
+CPUS_PER_VM = []
+WORKLOAD_PER_VM = []
 
 def get_qat_vf():
 
@@ -920,14 +920,15 @@ def generate_commands(assign_random=False):
                     print("Genrating command for 5G")
                     cpu_set=str(cpupool.pop())
                     #for _ in range(Tile_Resource["QAT"]['VCPU'] - 1):
-                    for _ in range(1, LIST_CPUS_PER_VM[count]):
+                    for _ in range(1, CPUS_PER_VM[count]):
                         cpu_set = cpu_set + "," + str(cpupool.pop())
                     
                     cpuaffinity = f"--cpuset {cpu_set}"
                     
                     # number of virtual cpus same as host's physical cpu
-                    n_vcpus = LIST_CPUS_PER_VM[count] 
-                    vm_name = WORKLOAD_NAME
+                    n_vcpus = CPUS_PER_VM[count] 
+                    # name of the same as workload name
+                    vm_name = WORKLOAD_PER_VM[count]
 
                     CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
@@ -1084,14 +1085,19 @@ if __name__ == '__main__':
             sys.exit("QAT VM is requested but QAT VF devices are not present, check QAT driver installed ")
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-    parser.add_argument('-c', '--LIST_CPUS_PER_VM', type=str, help = 'Comma seperated list of physical cpus each vm is pinned to.')
-    parser.add_argument('-w', '--workload_name', type=str, help = 'Name of the workload')
+    parser.add_argument('-c', '--CPUS_PER_VM', type=str, help = 'Comma seperated list of physical cpus each vm is pinned to.')
+    parser.add_argument('-w', '--WORKLOAD_PER_VM', type=str, help = 'Comma seperated list of the name of the workloads each VM will run.')
 
     args = parser.parse_args()
     
-    LIST_CPUS_PER_VM = [int(cpu) for cpu in args.LIST_CPUS_PER_VM.split(',')]
-    WORKLOAD_NAME = args.workload_name
-    print ("Workload Name: ", WORKLOAD_NAME , "List of physcial and virtual cpus for each vm: ", LIST_CPUS_PER_VM)
+    CPUS_PER_VM = [int(cpu) for cpu in args.CPUS_PER_VM.split(',')]
+    
+    WORKLOAD_PER_VM = [str(wl) for wl in args.WORKLOAD_PER_VM.split(',')]
+   
+    print ("List Workload Name per vm: ", WORKLOAD_PER_VM, "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)
+
+    #WORKLOAD_NAME = args.workload_name
+    #print ("Workload Name: ", WORKLOAD_NAME , "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)
 
     #get_cports()
     if is_vm_available():

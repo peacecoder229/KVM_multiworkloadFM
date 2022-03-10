@@ -67,8 +67,8 @@ function get_ip_from_vm_name() {
 
 function setup_vm()
 {
- echo "setup_vm: Calling vm_cloud_init.py"
- python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm
+ echo "setup_vm: Calling vm_cloud-init_uefi.py"
+ python3 vm_cloud-init_uefi.py -c $n_cpus_per_vm -w $workload_per_vm
  chmod 777 ./virt-install-cmds.sh
  ./virt-install-cmds.sh
  #mkdir -p results
