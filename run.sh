@@ -7,6 +7,7 @@ workload_per_vm=""
 
 MLC_STRING="mlc"
 FIO_STRING="fio"
+RN50_STRING="rn50"
 
 function get_config()
 {
@@ -74,7 +75,7 @@ function setup_vm()
  ./virt-install-cmds.sh
  #mkdir -p results
  echo "Waiting 3 minutes for the VM to boot"
- sleep 180
+ sleep 60
 }
 
 function run_exp_vm()
@@ -89,7 +90,9 @@ function run_exp_vm()
       *"$MLC_STRING"*)
       run_mlc_vm "$vm_name" "$vm_ip"
       ;;
-      
+      *"$RN50_STRING"*)
+      run_rn50_vm "$vm_name" "$vm_ip"
+      ;;
       *"$FIO_STRING"*)
       run_fio_vm "$vm_name" "$vm_ip"
       ;;
@@ -108,13 +111,18 @@ function run_exp_vm()
 
 }
 
-function run_mlc_vm()
+
+
+
+
+function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
 {
   vm_name=$1
   vm_ip=$2
   echo "Run mlc in $vm_name: $vm_ip"   
   # echo "Copying to ${ip}"
   scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
+  #scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${ip}:/root/
   scp -oStrictHostKeyChecking=no run_${MLC_STRING}.sh root@${vm_ip}:/root
   
   for iteration in 1
@@ -123,6 +131,25 @@ function run_mlc_vm()
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_mlc.sh $result_file" &
   done
 }
+
+function run_rn50_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
+{
+  vm_name=$1
+  vm_ip=$2
+  echo "Run rn50 in $vm_name: $vm_ip"   
+  echo "Copying to ${vm_ip}"
+  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
+  scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
+  scp -oStrictHostKeyChecking=no run_${RN50_STRING}.sh root@${vm_ip}:/root
+  
+  for iteration in 1
+  do
+    result_file=${RN50_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_rn50.sh $result_file" &
+  done
+}
+
+
 
 function run_fio_vm()
 {
@@ -136,7 +163,7 @@ function run_fio_vm()
   for iteration in 1
   do
     result_file=${FIO_STRING}_rep_${iteration}_ncores
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_fio.sh $result_file" &
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_${vm_name}.sh $result_file" &
   done 
 }
 

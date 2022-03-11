@@ -190,7 +190,7 @@ Tile_Map = {
         "QAT": 0,
         "SGX": 0,
         "SPEC":0,
-        "5G" :0
+        "5G" :2
     },
     
     "SOCKET1": {
@@ -285,7 +285,7 @@ EXEC_TASKS = {
     "QAT": 1,
     "SGX": 1,
     "SPEC": 1,
-    "5G" :0
+    "5G" :2
 }
 
 

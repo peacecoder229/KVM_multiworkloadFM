@@ -9,8 +9,8 @@
 # More to be added
 #################################################################
 
-HPVM=4
-LPVM=2
+HPVM=34
+LPVM=22
 
 HPWORKLOAD=$1
 LPWORKLOAD=$2
@@ -52,7 +52,7 @@ echo "Starting benchmark now"
 
 virsh list
 
-cat /root/mlc_rep_1_ncores_34
+cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
 
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
@@ -60,7 +60,7 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :1/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
-rm -rf /root/mlc_rep_1_ncores_34
+rm -rf /root/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
 
 
 
@@ -91,10 +91,8 @@ echo "Starting benchmark now"
 ./run.sh -T vm -S run -W $HPWORKLOAD
 
 
-cat /root/mlc_rep_1_ncores_34
+cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
 
-
-cat /root/nutanix_data/mlc_rep_1_ncores_4
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
@@ -108,11 +106,11 @@ echo "========================================================="
 echo "CoScheduling HPVM with LPVM with static MBA"
 echo "========================================================="
 
-pqos -e 'mba:0=10'
-pqos -e 'mba:3=90'
+pqos -a 'core:0=22-55'
+pqos -a 'core:3=0-21'
 
-pqos -a 'core:0=0-33'
-pqos -a 'core:3=34-55'
+pqos -e 'mba:0=100'
+pqos -e 'mba:3=10'
 
 
 
@@ -139,7 +137,7 @@ echo "Starting benchmark now"
 ./run.sh -T vm -S run -W $HPWORKLOAD
 
 
-cat /root/mlc_rep_1_ncores_34
+cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
 
 
 
