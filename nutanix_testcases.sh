@@ -9,8 +9,8 @@
 # More to be added
 #################################################################
 
-HPVM=34
-LPVM=22
+HPVM=4
+LPVM=2
 
 #rmid and clos
 #pqos rmid add monitoring 
@@ -20,7 +20,6 @@ rm -rf /root/mlc_*
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
-
 
 echo off > /sys/devices/system/cpu/smt/control
 
@@ -42,7 +41,7 @@ echo "Starting benchmark now"
 
 #virsh list
 
-./run.sh -T vm -S run -W mlc
+./run.sh -T vm -S run
 
 virsh list
 
@@ -54,12 +53,7 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :1/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
-rm -rf /root/mlc_rep_1_ncores_34
-
-
-
-
-
+rm -rf /root/nutanix_data/mlc_rep_1_ncores_4
 
 echo "CoScheduling HPVM1 with HPVM2|HPSVM|LPVM1|LPVM2"
 
@@ -67,7 +61,7 @@ sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
 
 #virsh list --all --name|xargs -i virsh destroy {} --graceful
-./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc
+./run.sh -T vm -S setup -C $HPVM,$LPVM -W mlc,mlc
 
 sleep 30
 
@@ -83,18 +77,12 @@ virsh start mlc-03
 sleep 60
 echo "Starting benchmark now"
 
-./run.sh -T vm -S run -W mlc
+./run.sh -T vm -S run
 
-
-cat /root/mlc_rep_1_ncores_34
-
-
+cat /root/nutanix_data/mlc_rep_1_ncores_4
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
 
-
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
-
-

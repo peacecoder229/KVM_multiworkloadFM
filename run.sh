@@ -3,7 +3,10 @@ TARGET=""
 STAGE=""
 TestCase_s=""
 n_cpus_per_vm=""
-workload_name=""
+workload_per_vm=""
+
+MLC_STRING="mlc"
+FIO_STRING="fio"
 
 function get_config()
 {
@@ -32,9 +35,7 @@ function get_config()
 # echo "${TestCase_s}"
 }
 
-
-
-function handle_args() 
+function handle_args()
 {
  while getopts ":T:S:C:W:" opt
  do 
@@ -46,7 +47,7 @@ function handle_args()
         ;;
      C) n_cpus_per_vm="$OPTARG"
 	;;
-     W) workload_name="$OPTARG"
+     W) workload_per_vm="$OPTARG"
 	;;
      \?)
         echo "Invalid option: -$OPTARG"
@@ -56,99 +57,120 @@ function handle_args()
  done
 }
 
-function summary()
+function get_ip_from_vm_name()
 {
- id=$1
- sed -n 1p /tmp/5g_kernel_perf* | tail -n 1 > ${id}_summary.csv
- for test_case in $(seq 2 1 8)
- do
-  WL=$(ls /tmp/5g_kernel_perf* | xargs -i sed -n ${test_case}p {} |tail -n 1 | cut -d',' -f1)
-  avgs=$(ls /tmp/5g_kernel_perf* | xargs -i sed -n ${test_case}p {} | awk -v n=$( ls /tmp/5g_kernel_perf* | wc -l ) -F',' '{sum+=$2;sum2+=$3} END{print sum/n","sum2/n}')
-  echo "${WL},${avgs}" >> ${id}_summary.csv
- done
+  local vm_name=$1
+  local mac=$(virsh domiflist $vm_name | awk '{ print $5 }' | tail -2 | head -1)
+  #echo $mac
+  local ip=$(arp -a | grep $mac | awk '{ print $2 }' | sed 's/[()]//g')
+  echo $ip
 }
 
-function setup_VM()
+function setup_vm()
 {
- echo "setup_VM: Calling vm_cloud_init.py"
- python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_name
+ echo "setup_vm: Calling vm_cloud-init.py"
+ python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm
  chmod 777 ./virt-install-cmds.sh
  ./virt-install-cmds.sh
  #mkdir -p results
  echo "Waiting 3 minutes for the VM to boot"
- sleep 120
+ sleep 180
 }
 
-function run_VM()
+function run_exp_vm()
 {
- rm -f ${HOME}/.ssh/known_hosts
- iplist=() #list for the IPs of running vms
- #pids=()   #list for the pids used to wait the wrk load to complete before collecting the results
- declare -A dic # ip:pid dict
- ips=$( virsh net-list --name | xargs -i virsh net-dhcp-leases --network {} | cut -f 1 -d "/" | cut -f 16 -d " "| grep -v "-")
- echo $ips
- for ip in ${ips}
- do
-  #echo "pinging ${ip}"
-  ping -c 3 -w 3 ${ip} > /dev/null
-  if (( $? == 0 ))
-   then
-    iplist+=($ip)
-  fi
+  vm_name_list=$(virsh list --name)
+  
+  for vm_name in $vm_name_list
+  do
+    local vm_ip=$(get_ip_from_vm_name "$vm_name")
+    
+    case $vm_name in
+      *"$MLC_STRING"*)
+      run_mlc_vm "$vm_name" "$vm_ip"
+      ;;
+      
+      *"$FIO_STRING"*)
+      run_fio_vm "$vm_name" "$vm_ip"
+      ;;
+    *)
+      echo "The VM name should match the name of the workload in lowercase."
+      ;;
+    esac
   done
  
- if [ -n "${iplist[0]}" ]
- then
-  for ip in ${iplist[@]}
-  do
-   echo "Copying to ${ip}"
-   scp -oStrictHostKeyChecking=no /usr/bin/mlc root@${ip}:/usr/local/bin/
-   scp -oStrictHostKeyChecking=no run_${workload_name}.sh root@${ip}:/root
-   for iteration in 1
-   do
-    result_file=${workload_name}_rep_${iteration}_ncores
-    ssh -oStrictHostKeyChecking=no root@${ip} "/root/run_$workload_name.sh $result_file" &
-   done
-  done
- fi
-
+ # waiting for the jobs to finish before we copy results back
  for job in `jobs -p`
  do
-   echo "Waiting for $job to finish ...."
+   #echo "Waiting for $job to finish ...."
    wait $job
  done
+
 }
 
-function copy_result_from_VM()
-{ 
-  rm -f ${HOME}/.ssh/known_hosts
- iplist=() #list for the IPs of running vms
- #pids=()   #list for the pids used to wait the wrk load to complete before collecting the results
- declare -A dic # ip:pid dict
- ips=$( virsh net-list --name | xargs -i virsh net-dhcp-leases --network {} | cut -f 1 -d "/" | cut -f 16 -d " "| grep -v "-")
- for ip in ${ips}
- do
-  ping -c 3 -w 3 ${ip} > /dev/null
-  if (( $? == 0 ))
-   then
-    iplist+=($ip)
-  fi
-  done
- if [ -n "${iplist[0]}" ]
- then
-  for ip in ${iplist[@]}
+function run_mlc_vm()
+{
+  vm_name=$1
+  vm_ip=$2
+  echo "Run mlc in $vm_name: $vm_ip"   
+  # echo "Copying to ${ip}"
+  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
+  scp -oStrictHostKeyChecking=no run_${MLC_STRING}.sh root@${vm_ip}:/root
+  
+  for iteration in 1
   do
+    result_file=${MLC_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_mlc.sh $result_file" &
+  done
+}
+
+function run_fio_vm()
+{
+  vm_name=$1
+  vm_ip=$2
+  echo "Run fio in $vm_name: $vm_ip"   
+  # echo "Copying to ${ip}"
+  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
+  scp -oStrictHostKeyChecking=no run_${FIO_STRING}.sh root@${vm_ip}:/root
+  
+  for iteration in 1
+  do
+    result_file=${FIO_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_fio.sh $result_file" &
+  done 
+}
+
+function copy_result_from_vms() 
+{
+  # Copy the result data to `nutanix_data` directory, create if does not exist.
+  mkdir -p /root/nutanix_data
+
+  vm_name_list=$(virsh list --name)
+  
+  for vm_name in $vm_name_list
+  do
+   local vm_ip=$(get_ip_from_vm_name "$vm_name")
+   
    for iteration in 1
    do
-    result_file=${workload_name}_rep_${iteration}_ncores
-    # ssh -oStrictHostKeyChecking=no root@${ip} "rm -rf /root/results/*"
-    scp -oStrictHostKeyChecking=no root@${ip}:/root/$result_file* /root/
-   done
+      case $vm_name in
+        *"$MLC_STRING"*)
+        result_file=${MLC_STRING}_rep_${iteration}_ncores
+        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        ;;
+        *"$FIO_STRING"*)
+        result_file=${FIO_STRING}_rep_${iteration}_ncores
+        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        ;;
+        *)
+        echo "The VM name should match the name of the workload in lowercase."
+        ;;
+      esac
+    done
   done
- fi
 }
 
-function setup_5G()
+function setup_exp()
 {
  echo "In setup_5g"
  if [ "host" = "${TARGET}" ]
@@ -166,7 +188,7 @@ function setup_5G()
   fi
  elif [ "vm" = "${TARGET}" ]
  then
-  setup_VM
+  setup_vm
  else
   echo "Target not valid use 'host' or 'vm' as option"
  fi
@@ -180,8 +202,8 @@ function run_exp()
  #rm -rf /tmp/5g_kernel_perf* &>2
  if [ "host" = "${TARGET}" ]
  then
-  virsh list --name | xargs -i destroy {} --graceful
-  for iteration in 1 2 3 4 5
+  virsh list --name | xargs -i destroy {}
+  for iteration in 1 2 3
   do
    ./run_${workload_name}.sh
    #mv results/*/5g_kernel_perf.csv /tmp/5g_kernel_perf${iteration}.csv &>2
@@ -189,8 +211,8 @@ function run_exp()
   done
  elif [ "vm" = "${TARGET}" ]
  then
-  run_VM
-  copy_result_from_VM
+  run_exp_vm
+  copy_result_from_vms
  fi
 }
 
@@ -200,11 +222,10 @@ function main ()
  handle_args $@
  if [ "setup" = "${STAGE}" ]
  then
-  setup_5G
+  setup_exp
  elif [ "run" = "${STAGE}" ]
  then
   run_exp
-  # summary "${TestCase_s}"
  else
   echo "Stage not available"
  fi

@@ -919,6 +919,7 @@ def generate_commands(assign_random=False):
                 elif (tile == "5G"):
                     print("Genrating command for 5G")
                     cpu_set=str(cpupool.pop())
+                    print("No of cpus needed is : ", CPUS_PER_VM[count], cpu_set, cpupool)
                     #for _ in range(Tile_Resource["QAT"]['VCPU'] - 1):
                     for _ in range(1, CPUS_PER_VM[count]):
                         cpu_set = cpu_set + "," + str(cpupool.pop())
