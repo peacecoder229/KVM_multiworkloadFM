@@ -17,9 +17,6 @@ LPWORKLOAD=$2
 
 pqos -R
 
-#rmid and clos
-#pqos rmid add monitoring 
-#
 cpupower frequency-set -u 2700Mhz
 
 rm -rf /root/mlc_*
@@ -36,8 +33,6 @@ sed -i 's/"5G" :0/"5G" :1/g' vm_cloud-init.py
 ./run.sh -T vm -S setup -C $HPVM -W $HPWORKLOAD
 
 sleep 30
-#virsh destroy $HPWORKLOAD-01 --graceful
-#virsh start $HPWORKLOAD-01
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh start {}
@@ -71,16 +66,9 @@ echo "================================================="
 sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
 
-#virsh list --all --name|xargs -i virsh destroy {} --graceful
 ./run.sh -T vm -S setup -C $HPVM,$LPVM -W $HPWORKLOAD,$LPWORKLOAD
 
 sleep 30
-
-#virsh destroy mlc-02 --graceful
-#virsh destroy mlc-03 --graceful
-
-#virsh start mlc-02
-#virsh start mlc-03
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh start {}
@@ -117,16 +105,9 @@ pqos -e 'mba:3=10'
 sudo dhclient -r $ sudo dhclient
 sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
 
-#virsh list --all --name|xargs -i virsh destroy {} --graceful
 ./run.sh -T vm -S setup -C $HPVM,$LPVM -W $HPWORKLOAD,$LPWORKLOAD
 
 sleep 30
-
-#virsh destroy mlc-02 --graceful
-#virsh destroy mlc-03 --graceful
-
-#virsh start mlc-02
-#virsh start mlc-03
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh start {}
