@@ -20,6 +20,7 @@ pqos -R
 cpupower frequency-set -u 2700Mhz
 
 rm -rf /root/mlc_*
+rm -rf /root/.ssh/known_hosts
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
@@ -80,7 +81,7 @@ echo "Starting benchmark now"
 
 
 cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
-
+cat /root/nutanix_data/mlc_rep_1_ncores_${LPVM}_${LPWORKLOAD}
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
@@ -119,7 +120,7 @@ echo "Starting benchmark now"
 
 
 cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
-
+cat /root/nutanix_data/mlc_rep_1_ncores_${LPVM}_${LPWORKLOAD}
 
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
