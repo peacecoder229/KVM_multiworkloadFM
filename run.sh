@@ -8,6 +8,7 @@ workload_per_vm=""
 MLC_STRING="mlc"
 FIO_STRING="fio"
 RN50_STRING="rn50"
+REDIS_STRING="redis"
 
 function get_config()
 {
@@ -86,15 +87,22 @@ function run_exp_vm()
   do
     local vm_ip=$(get_ip_from_vm_name "$vm_name")
     
+    # setup yum
+    scp -oStrictHostKeyChecking=no update_yum_repo.sh root@${vm_ip}:/root
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/update_yum_repo.sh" &
+
     case $vm_name in
       *"$MLC_STRING"*)
       run_mlc_vm "$vm_name" "$vm_ip"
       ;;
       *"$RN50_STRING"*)
-      run_rn50_vm "$vm_name" "$vm_ip"
+      #run_rn50_vm "$vm_name" "$vm_ip"
       ;;
       *"$FIO_STRING"*)
       run_fio_vm "$vm_name" "$vm_ip"
+      ;;
+      *"$REDIS_STRING"*)
+      run_redis_vm "$vm_name" "$vm_ip"
       ;;
     *)
       echo "The VM name should match the name of the workload in lowercase."
@@ -108,12 +116,7 @@ function run_exp_vm()
    #echo "Waiting for $job to finish ...."
    wait $job
  done
-
 }
-
-
-
-
 
 function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
 {
@@ -145,11 +148,9 @@ function run_rn50_vm() # [TODO Rohan]: Have one function and take the name of be
   for iteration in 1
   do
     result_file=${RN50_STRING}_rep_${iteration}_ncores
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_rn50.sh $result_file" &
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_${RN50_STRING}.sh $result_file" &
   done
 }
-
-
 
 function run_fio_vm()
 {
@@ -163,7 +164,23 @@ function run_fio_vm()
   for iteration in 1
   do
     result_file=${FIO_STRING}_rep_${iteration}_ncores
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_${vm_name}.sh $result_file" &
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_${FIO_STRING}.sh $result_file" &
+  done 
+}
+
+function run_redis_vm()
+{
+  vm_name=$1
+  vm_ip=$2
+  echo "Run redis in $vm_name: $vm_ip"   
+  # echo "Copying to ${ip}"
+  scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh $result_file"
+  
+  for iteration in 1
+  do
+    result_file=${REDIS_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/run_${REDIS_STRING}.sh $result_file" &
   done 
 }
 
@@ -189,7 +206,15 @@ function copy_result_from_vms()
         result_file=${FIO_STRING}_rep_${iteration}_ncores
         scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
-        *)
+	*"$RN50_STRING"*)
+	result_file=${RN50_STRING}_rep_${iteration}_ncores
+        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        ;;
+       	*"$REDIS_STRING"*)
+	result_file=${REDIS_STRING}_rep_${iteration}_ncores
+        scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        ;;
+	*)
         echo "The VM name should match the name of the workload in lowercase."
         ;;
       esac
