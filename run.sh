@@ -9,7 +9,9 @@ mlc_STRING=
 fio_STRING=
 rn50_STRING=
 stressapp_STRING=
+redis_STRING=redis_hp
 
+# Since we don't support host experiments, we don't use it.
 function get_config()
 {
  if compgen -G "/sys/kernel/iommu_groups/*/devices/*" > /dev/null
@@ -70,13 +72,14 @@ function get_ip_from_vm_name()
 
 function setup_vm()
 {
- echo "setup_vm: Calling vm_cloud-init.py"
+ echo "Creating VMs with the following configurations: number of cpus per vm = $n_cpus_per_vm, workload per vm = $workload_per_vm."
+ 
  python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm
  chmod 777 ./virt-install-cmds.sh
  ./virt-install-cmds.sh
- #mkdir -p results
- echo "Waiting 3 minutes for the VM to boot"
- sleep 60
+ 
+ echo "Waiting 2 minutes for the VM to boot"
+ sleep 120
 }
 
 function run_exp_vm()
@@ -87,18 +90,25 @@ function run_exp_vm()
   do
     local vm_ip=$(get_ip_from_vm_name "$vm_name")
     
+    # setup yum
+    scp -oStrictHostKeyChecking=no update_yum_repo.sh root@${vm_ip}:/root
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/update_yum_repo.sh" &
+
     case $vm_name in
       *"mlc"*)
-      run_mlc_vm "$vm_name" "$vm_ip"
+        run_mlc_vm "$vm_name" "$vm_ip"
       ;;
       *"rn50"*)
-      run_rn50_vm "$vm_name" "$vm_ip"
+        run_rn50_vm "$vm_name" "$vm_ip"
       ;;
       *"fio"*)
-      run_fio_vm "$vm_name" "$vm_ip"
+        run_fio_vm "$vm_name" "$vm_ip"
       ;;
       *"stressapp"*)
-      run_stressapp_vm "$vm_name" "$vm_ip"
+        run_stressapp_vm "$vm_name" "$vm_ip"
+      ;;
+      *"redis"*)
+        run_redis_vm "$vm_name" "$vm_ip"
       ;;
     *)
       echo "The VM name should match the name of the workload in lowercase."
@@ -112,12 +122,7 @@ function run_exp_vm()
    #echo "Waiting for $job to finish ...."
    wait $job
  done
-
 }
-
-
-
-
 
 function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
 {
@@ -171,9 +176,6 @@ function run_stressapp_vm() # [TODO Rohan]: Have one function and take the name 
   done
 }
 
-
-
-
 function run_fio_vm()
 {
   vm_name=$1
@@ -190,7 +192,23 @@ function run_fio_vm()
   done 
 }
 
-function copy_result_from_vms() 
+function run_redis_vm()
+{
+  vm_name=$1
+  vm_ip=$2
+  echo "Run redis in $vm_name: $vm_ip"   
+  # echo "Copying to ${ip}"
+  scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh $result_file"
+  
+  for iteration in 1
+  do
+    result_file=${redis_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/run_redis.sh $result_file" &
+  done
+}
+
+function copy_result_from_vms()
 {
   # Copy the result data to `nutanix_data` directory, create if does not exist.
   mkdir -p /root/nutanix_data
@@ -205,22 +223,26 @@ function copy_result_from_vms()
    do
       case $vm_name in
         *"mlc"*)
-        result_file=${mlc_STRING}_rep_${iteration}_ncores
-        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+          result_file=${mlc_STRING}_rep_${iteration}_ncores
+          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
         *"fio"*)
-        result_file=${fio_STRING}_rep_${iteration}_ncores
-        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+          result_file=${fio_STRING}_rep_${iteration}_ncores
+          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
 	;;
  	*"rn50"*)
-        result_file=${rn50_STRING}_rep_${iteration}_ncores
-        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+          result_file=${rn50_STRING}_rep_${iteration}_ncores
+          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
 	*"stressapp"*)
-        result_file=${stressapp_STRING}_rep_${iteration}_ncores
-        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+          result_file=${stressapp_STRING}_rep_${iteration}_ncores
+          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
-        *)
+       	*"redis"*)
+	  result_file=${redis_STRING}_rep_${iteration}_ncores
+          scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        ;;
+	*)
         echo "The VM name should match the name of the workload in lowercase."
         ;;
       esac
@@ -230,7 +252,6 @@ function copy_result_from_vms()
 
 function setup_exp()
 {
- echo "In setup_5g"
  if [ "host" = "${TARGET}" ]
  then
   docker -v &>2
@@ -254,18 +275,13 @@ function setup_exp()
 
 function run_exp()
 {
- #mkdir -p results 
- #mkdir -p results.old
- #mv results/* results.old/*
- #rm -rf /tmp/5g_kernel_perf* &>2
  if [ "host" = "${TARGET}" ]
  then
   virsh list --name | xargs -i destroy {}
   for iteration in 1 2 3
   do
-   ./run_${workload_name}.sh
-   #mv results/*/5g_kernel_perf.csv /tmp/5g_kernel_perf${iteration}.csv &>2
-   #mv results/* results.old/
+    echo "Running experiements in host is not supported yet. Exiting ..."
+    exit
   done
  elif [ "vm" = "${TARGET}" ]
  then
@@ -275,19 +291,21 @@ function run_exp()
 }
 
 function main ()
-{
- get_config
- handle_args $@
- if [ "setup" = "${STAGE}" ]
- then
-  setup_exp
- elif [ "run" = "${STAGE}" ]
- then
-  run_exp
- else
-  echo "Stage not available"
- fi
+{  
+  # Since we don't support host experiments, we don't use it.
+  get_config
+ 
+  handle_args $@
+ 
+  if [ "setup" = "${STAGE}" ]
+  then
+    setup_exp
+  elif [ "run" = "${STAGE}" ]
+  then
+    run_exp
+  else
+    echo "Stage not available"
+  fi
 }
 
 main $@
-
