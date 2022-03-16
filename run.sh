@@ -199,12 +199,13 @@ function run_redis_vm()
   echo "Run redis in $vm_name: $vm_ip"   
   # echo "Copying to ${ip}"
   scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+  scp -oStrictHostKeyChecking=no run_redis.sh root@${vm_ip}:/root
   ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh $result_file"
   
   for iteration in 1
   do
     result_file=${redis_STRING}_rep_${iteration}_ncores
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/run_redis.sh $result_file" &
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/run_redis.sh $result_file" &
   done
 }
 
