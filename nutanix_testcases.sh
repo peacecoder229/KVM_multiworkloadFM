@@ -15,11 +15,17 @@ LPVM=22
 HPWORKLOAD=$1
 LPWORKLOAD=$2
 
+cpupower frequency-set -u 2700Mhz
 pqos -R
 
-cpupower frequency-set -u 2700Mhz
 
-rm -rf /root/mlc_*
+
+#sed -i "0,/${HPWORKLOAD}_STRING=/s//${HPWORKLOAD}_STRING=${HPWORKLOAD}_solo/" run.sh
+#sed -i "0,/${HPWORKLOAD}_STRING=${HPWORKLOAD}_solo/s//$HPWORKLOAD_STRING=${HPWORKLOAD}_stress/" run.sh
+
+sed -i "s/${HPWORKLOAD}_STRING=/${HPWORKLOAD}_STRING=${HPWORKLOAD}_hp/g" run.sh
+
+
 rm -rf /root/.ssh/known_hosts
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
@@ -48,7 +54,6 @@ echo "Starting benchmark now"
 
 virsh list
 
-cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
 
 
 virsh list --all --name|xargs -i virsh destroy {} --graceful
@@ -56,9 +61,13 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :1/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
-rm -rf /root/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
 
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_hp/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed/g" run.sh
 
+if [$LPWORKLOAD != $HPWORKLOAD]
+then
+	sed -i "s/${LPWORKLOAD}_STRING=/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed/g" run.sh
+fi
 
 echo "================================================="
 echo "CoScheduling HPVM with LPVM"
@@ -80,17 +89,17 @@ echo "Starting benchmark now"
 ./run.sh -T vm -S run -W $HPWORKLOAD
 
 
-cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
-cat /root/nutanix_data/mlc_rep_1_ncores_${LPVM}_${LPWORKLOAD}
-
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
-rm -rf /root/mlc_rep_1_ncores_34
 
-
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed_MBA/g" run.sh
+if [$LPWORKLOAD != $HPWORKLOAD]
+then
+	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed_MBA/g" run.sh
+fi
 echo "========================================================="
 echo "CoScheduling HPVM with LPVM with static MBA"
 echo "========================================================="
@@ -119,13 +128,14 @@ echo "Starting benchmark now"
 ./run.sh -T vm -S run -W $HPWORKLOAD
 
 
-cat /root/nutanix_data/mlc_rep_1_ncores_${HPVM}_${HPWORKLOAD}
-cat /root/nutanix_data/mlc_rep_1_ncores_${LPVM}_${LPWORKLOAD}
-
-
 virsh list --all --name|xargs -i virsh destroy {} --graceful
 virsh list --all --name|xargs -i virsh undefine {}
 
 
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed_MBA/${HPWORKLOAD}_STRING=/g" run.sh
+if [$LPWORKLOAD != $HPWORKLOAD]
+then
+	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed_MBA/${LPWORKLOAD}_STRING=/g" run.sh
+fi

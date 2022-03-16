@@ -5,9 +5,10 @@ TestCase_s=""
 n_cpus_per_vm=""
 workload_per_vm=""
 
-MLC_STRING="mlc"
-FIO_STRING="fio"
-RN50_STRING="rn50"
+mlc_STRING=
+fio_STRING=
+rn50_STRING=
+stressapp_STRING=
 
 function get_config()
 {
@@ -87,14 +88,17 @@ function run_exp_vm()
     local vm_ip=$(get_ip_from_vm_name "$vm_name")
     
     case $vm_name in
-      *"$MLC_STRING"*)
+      *"mlc"*)
       run_mlc_vm "$vm_name" "$vm_ip"
       ;;
-      *"$RN50_STRING"*)
+      *"rn50"*)
       run_rn50_vm "$vm_name" "$vm_ip"
       ;;
-      *"$FIO_STRING"*)
+      *"fio"*)
       run_fio_vm "$vm_name" "$vm_ip"
+      ;;
+      *"stressapp"*)
+      run_stressapp_vm "$vm_name" "$vm_ip"
       ;;
     *)
       echo "The VM name should match the name of the workload in lowercase."
@@ -123,11 +127,11 @@ function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of ben
   # echo "Copying to ${ip}"
   scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
   #scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${ip}:/root/
-  scp -oStrictHostKeyChecking=no run_${MLC_STRING}.sh root@${vm_ip}:/root
+  scp -oStrictHostKeyChecking=no run_mlc.sh root@${vm_ip}:/root
   
   for iteration in 1
   do
-    result_file=${MLC_STRING}_rep_${iteration}_ncores
+    result_file=${mlc_STRING}_rep_${iteration}_ncores
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_mlc.sh $result_file" &
   done
 }
@@ -140,14 +144,33 @@ function run_rn50_vm() # [TODO Rohan]: Have one function and take the name of be
   echo "Copying to ${vm_ip}"
   scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
   scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
-  scp -oStrictHostKeyChecking=no run_${RN50_STRING}.sh root@${vm_ip}:/root
+  scp -oStrictHostKeyChecking=no run_rn50.sh root@${vm_ip}:/root
   
   for iteration in 1
   do
-    result_file=${RN50_STRING}_rep_${iteration}_ncores
+    result_file=${rn50_STRING}_rep_${iteration}_ncores
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_rn50.sh $result_file" &
   done
 }
+
+
+function run_stressapp_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
+{
+  vm_name=$1
+  vm_ip=$2
+  echo "Run rn50 in $vm_name: $vm_ip"   
+  echo "Copying to ${vm_ip}"
+  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
+  scp -oStrictHostKeyChecking=no /root/streeapp.tar root@${vm_ip}:/root/
+  scp -oStrictHostKeyChecking=no run_stressapp.sh root@${vm_ip}:/root
+  
+  for iteration in 1
+  do
+    result_file=${stressapp_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_stressapp.sh $result_file" &
+  done
+}
+
 
 
 
@@ -158,12 +181,12 @@ function run_fio_vm()
   echo "Run fio in $vm_name: $vm_ip"   
   # echo "Copying to ${ip}"
   scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
-  scp -oStrictHostKeyChecking=no run_${FIO_STRING}.sh root@${vm_ip}:/root
+  scp -oStrictHostKeyChecking=no run_fio.sh root@${vm_ip}:/root
   
   for iteration in 1
   do
-    result_file=${FIO_STRING}_rep_${iteration}_ncores
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_${vm_name}.sh $result_file" &
+    result_file=${fio_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_fio.sh $result_file" &
   done 
 }
 
@@ -181,12 +204,20 @@ function copy_result_from_vms()
    for iteration in 1
    do
       case $vm_name in
-        *"$MLC_STRING"*)
-        result_file=${MLC_STRING}_rep_${iteration}_ncores
+        *"mlc"*)
+        result_file=${mlc_STRING}_rep_${iteration}_ncores
         scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
-        *"$FIO_STRING"*)
-        result_file=${FIO_STRING}_rep_${iteration}_ncores
+        *"fio"*)
+        result_file=${fio_STRING}_rep_${iteration}_ncores
+        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+	;;
+ 	*"rn50"*)
+        result_file=${rn50_STRING}_rep_${iteration}_ncores
+        scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        ;;
+	*"stressapp"*)
+        result_file=${stressapp_STRING}_rep_${iteration}_ncores
         scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
         *)
