@@ -9,7 +9,7 @@ mlc_STRING=
 fio_STRING=
 rn50_STRING=
 stressapp_STRING=
-redis_STRING=redis_hp
+redis_STRING=
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -130,7 +130,7 @@ function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of ben
   vm_ip=$2
   echo "Run mlc in $vm_name: $vm_ip"   
   # echo "Copying to ${ip}"
-  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
+  scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
   #scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${ip}:/root/
   scp -oStrictHostKeyChecking=no run_mlc.sh root@${vm_ip}:/root
   
