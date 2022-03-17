@@ -62,11 +62,11 @@ virsh list --all --name|xargs -i virsh undefine {}
 sed -i 's/"5G" :1/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
 
-sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_hp/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed/g" run.sh
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_hp/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}/g" run.sh
 
-if [$LPWORKLOAD != $HPWORKLOAD]
+if [ $LPWORKLOAD != $HPWORKLOAD ]
 then
-	sed -i "s/${LPWORKLOAD}_STRING=/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed/g" run.sh
+	sed -i "s/${LPWORKLOAD}_STRING=/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}/g" run.sh
 fi
 
 echo "================================================="
@@ -95,10 +95,10 @@ virsh list --all --name|xargs -i virsh undefine {}
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2/*
 
-sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed_MBA/g" run.sh
-if [$LPWORKLOAD != $HPWORKLOAD]
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_MBA/g" run.sh
+if [ $LPWORKLOAD != $HPWORKLOAD ]
 then
-	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed_MBA/g" run.sh
+	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_MBA/g" run.sh
 fi
 echo "========================================================="
 echo "CoScheduling HPVM with LPVM with static MBA"
@@ -134,8 +134,9 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2
-sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_stressed_MBA/${HPWORKLOAD}_STRING=/g" run.sh
-if [$LPWORKLOAD != $HPWORKLOAD]
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_MBA/${HPWORKLOAD}_STRING=/g" run.sh
+if [ $LPWORKLOAD != $HPWORKLOAD ]
 then
-	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_stressed_MBA/${LPWORKLOAD}_STRING=/g" run.sh
+	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_MBA/${LPWORKLOAD}_STRING=/g" run.sh
 fi
+
