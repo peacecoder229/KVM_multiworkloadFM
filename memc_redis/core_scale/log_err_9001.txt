@@ -1,0 +1,70 @@
+
+Ram-cache and Swap Cleared
+numactl: execution of `memtier_benchmark': No such file or directory
+numactl: execution of `memtier_benchmark': No such file or directory
+numactl: execution of `memtier_benchmark': No such file or directory
+numactl: execution of `memtier_benchmark': No such file or directory
+numactl: numactl: execution of `memtier_benchmark': No such file or directory
+execution of `memtier_benchmark': No such file or directory
+numactl: execution of `memtier_benchmark': No such file or directory
+numactl: execution of `memtier_benchmark': No such file or directory
+numactl: numactl: execution of `memtier_benchmark': No such file or directory
+execution of `memtier_benchmark': No such file or directory
+numactl: numactl: numactl: execution of `memtier_benchmark': No such file or directory
+execution of `memtier_benchmark': No such file or directory
+execution of `memtier_benchmark': No such file or directory
+Executing actual 4:1 test and using all clinet cores
+Works only when number of server ports is less than clinet cores
+numactl --membind=0 --physcpubind=25 memtier_benchmark -p 9001 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=24 memtier_benchmark -p 9002 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=23 memtier_benchmark -p 9003 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=22 memtier_benchmark -p 9004 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=21 memtier_benchmark -p 9005 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=20 memtier_benchmark -p 9006 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=19 memtier_benchmark -p 9007 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=18 memtier_benchmark -p 9008 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=17 memtier_benchmark -p 9009 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=16 memtier_benchmark -p 9010 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=15 memtier_benchmark -p 9011 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=14 memtier_benchmark -p 9012 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+numactl --membind=0 --physcpubind=13 memtier_benchmark -p 9013 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+*******************numactl --membind=0 --physcpubind=24 memtier_benchmark -p 9002 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9002
+{'ip6_inst0_d2048_c16': 1, 'IP': '127.0.0.1', 'port': '9002'}
+*******************numactl --membind=0 --physcpubind=22 memtier_benchmark -p 9004 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9004
+{'ip6_inst0_d2048_c16': 2, 'IP': '127.0.0.1', 'port': '9004'}
+*******************numactl --membind=0 --physcpubind=20 memtier_benchmark -p 9006 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9006
+{'ip6_inst0_d2048_c16': 3, 'IP': '127.0.0.1', 'port': '9006'}
+*******************numactl --membind=0 --physcpubind=18 memtier_benchmark -p 9008 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9008
+{'ip6_inst0_d2048_c16': 4, 'IP': '127.0.0.1', 'port': '9008'}
+*******************numactl --membind=0 --physcpubind=16 memtier_benchmark -p 9010 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9010
+{'ip6_inst0_d2048_c16': 5, 'IP': '127.0.0.1', 'port': '9010'}
+*******************numactl --membind=0 --physcpubind=14 memtier_benchmark -p 9012 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9012
+{'ip6_inst0_d2048_c16': 6, 'IP': '127.0.0.1', 'port': '9012'}
+*******************numactl --membind=0 --physcpubind=25 memtier_benchmark -p 9001 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9001
+{'ip6_inst0_d2048_c16': 7, 'IP': '127.0.0.1', 'port': '9001'}
+*******************numactl --membind=0 --physcpubind=21 memtier_benchmark -p 9005 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9005
+{'ip6_inst0_d2048_c16': 8, 'IP': '127.0.0.1', 'port': '9005'}
+*******************numactl --membind=0 --physcpubind=17 memtier_benchmark -p 9009 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9009
+{'ip6_inst0_d2048_c16': 9, 'IP': '127.0.0.1', 'port': '9009'}
+*******************numactl --membind=0 --physcpubind=13 memtier_benchmark -p 9013 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9013
+{'ip6_inst0_d2048_c16': 10, 'IP': '127.0.0.1', 'port': '9013'}
+*******************numactl --membind=0 --physcpubind=23 memtier_benchmark -p 9003 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9003
+{'ip6_inst0_d2048_c16': 11, 'IP': '127.0.0.1', 'port': '9003'}
+*******************numactl --membind=0 --physcpubind=15 memtier_benchmark -p 9011 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9011
+{'ip6_inst0_d2048_c16': 12, 'IP': '127.0.0.1', 'port': '9011'}
+*******************numactl --membind=0 --physcpubind=19 memtier_benchmark -p 9007 -s 127.0.0.1 -d 2048 -c 16 --ratio=1:4 --key-pattern G:G --key-maximum 1500001 -P redis -n 393216 --thread=1 --pipeline=6
+9007
+{'ip6_inst0_d2048_c16': 13, 'IP': '127.0.0.1', 'port': '9007'}
+CLINT1 DONE!!!!
