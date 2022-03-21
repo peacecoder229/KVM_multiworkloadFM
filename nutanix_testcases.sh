@@ -135,10 +135,10 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2
-sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_MBA/${HPWORKLOAD}_STRING=/g" run.sh
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_MBA/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_HWDRC/g" run.sh
 if [ $LPWORKLOAD != $HPWORKLOAD ]
 then
-	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_MBA/${LPWORKLOAD}_STRING=/g" run.sh
+	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_MBA/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_HWDRC/g" run.sh
 fi
 
 
@@ -174,10 +174,10 @@ virsh list --all --name|xargs -i virsh undefine {}
 
 sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
 rm -rf /home/vmimages2
-sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_MBA/${HPWORKLOAD}_STRING=/g" run.sh
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_HWDRC/${HPWORKLOAD}_STRING=/g" run.sh
 if [ $LPWORKLOAD != $HPWORKLOAD ]
 then
-	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_MBA/${LPWORKLOAD}_STRING=/g" run.sh
+	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_HWDRC/${LPWORKLOAD}_STRING=/g" run.sh
 fi
 
 
