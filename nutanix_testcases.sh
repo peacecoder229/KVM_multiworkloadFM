@@ -15,6 +15,7 @@ LPVM=22
 HPWORKLOAD=$1
 LPWORKLOAD=$2
 
+
 cpupower frequency-set -u 2700Mhz
 pqos -R
 
@@ -139,4 +140,46 @@ if [ $LPWORKLOAD != $HPWORKLOAD ]
 then
 	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_MBA/${LPWORKLOAD}_STRING=/g" run.sh
 fi
+
+
+echo "========================================================="
+echo "CoScheduling HPVM with LPVM with HWDRC"
+echo "========================================================="
+
+pqos -R
+
+cd $PWD/hwdrc_postsi/scripts
+./hwdrc_icx_2S_xcc_init_to_default_pqos_CAS.sh
+cd -
+
+sudo dhclient -r $ sudo dhclient
+sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
+
+./run.sh -T vm -S setup -C $HPVM,$LPVM -W $HPWORKLOAD,$LPWORKLOAD
+
+sleep 30
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh start {}
+
+sleep 60
+echo "Starting benchmark now"
+
+./run.sh -T vm -S run -W $HPWORKLOAD
+
+
+virsh list --all --name|xargs -i virsh destroy {} --graceful
+virsh list --all --name|xargs -i virsh undefine {}
+
+
+sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
+rm -rf /home/vmimages2
+sed -i "s/${HPWORKLOAD}_STRING=${HPWORKLOAD}_${LPWORKLOAD}_MBA/${HPWORKLOAD}_STRING=/g" run.sh
+if [ $LPWORKLOAD != $HPWORKLOAD ]
+then
+	sed -i "s/${LPWORKLOAD}_STRING=${LPWORKLOAD}_${HPWORKLOAD}_MBA/${LPWORKLOAD}_STRING=/g" run.sh
+fi
+
+
+
 
