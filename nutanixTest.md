@@ -18,6 +18,27 @@ HP=redis, LP=rn50 -> Throughput: 3.7e+06 op/s, P99: 11.73, P75: 1.57, avg: 2.55;
 
 HP=redis, LP=mlc -> Throughput: 2.67e+06 op/s, P99: 7.54, P75: .63, avg: .67
 
+## Results Solo, Coscheduled, Coscheduled with static MBA (HPVM =90 percent, LPVM 10 percent)
+
+MLC ONLY (34) HPVM ->  113.73   222714.6
+MLC(34) +MLC (22) HPVM ->  171.14   146782.5  LPVM -> 162.57    92392.4
+MLC (34)+ MLC(22) HPVM ->  110.67   207438.6 LPVM -> 126.09    17893.4
+
+RN50 (34) Solo 244.54
+RN50 (34) -> Coscheduled RN50 (22) ->  202.893737, LPVM -> 131.71
+RN50 (34) -> LPVM throttled -> 217.157338, LPVM (22) -> 33.652539 
+
+RN50 (34) Solo 242.478392
+RN50 (34) Coscheduled Stressapp 186.815485 Stress app 20 mthread and 2 cthread
+RN50 (34) 213.642287 Stress app 20 mthread and 2 cthread
+
+RN50 (34) Solo -> 243
+RN50 (34) -> 192.97, LPVM (22) MLC -> 93.42   158860.0 (BW)
+RN50 (34) -> 214.31, Throttled LPVM (22) MLC -> 109.54    19097.2
+
+
+
+
 
 The experiments were run in the following SPR system in GDC.
 
