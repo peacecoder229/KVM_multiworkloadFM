@@ -1,9 +1,13 @@
+node0_cpus=$(($(lscpu |grep node0 | cut -c24-25) + 1))
 
-HPVM=4
-LPVM=2
+
+HPVM=$(( node0_cpus / 2))
+LPVM=$(( node0_cpus / 2)) # default we split the cores equally
 
 HPWORKLOAD=$1
 LPWORKLOAD=$2
+
+cpupower frequency-set -u 2700000 -d 2700000
 
 function setup_env() {
   cpupower frequency-set -u 2700Mhz
