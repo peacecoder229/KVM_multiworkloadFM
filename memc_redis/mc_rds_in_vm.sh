@@ -21,7 +21,7 @@ rundir="/root/memc_redis"
 
 #ci=48
 lcore=$1
-res_dir=$2
+res_file=$2
 ins=$3
 mccon=$4
 type=$5
@@ -48,12 +48,8 @@ ci=$memtiercore
 pkill -9 memcached
 pkill -9 redis-server
 
-mkdir -p $res_dir
-if [ ! -f $res_dir/processed_results.txt ]
-then
-	touch $res_dir/processed_results.txt
-fi
-echo "physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol" >> $res_dir/processed_results.txt
+
+echo "physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol" >> $res_file
 
 
 # Need to update start of physical core i and start of HT cores j 
@@ -289,14 +285,9 @@ cd -
 sleep 1
 #echo "${core} ${ins} ${connections} ${res}  ${metric}" >> memc_scale_sum_halfc_HT_july5th_lphp.txt
 
-mkdir -p $res_dir
-if [ ! -f $res_dir/processed_results.txt ]
-then
-	touch $res_dir/processed_results.txt
-fi
 
 tot_con=$(( connections*32 ))
-echo "$lcore ${total} ${ins} ${connections} ${reshp} ${hpthrput} ${hypt} ${protocol}" >> $res_dir/processed_results.txt
+echo "$lcore, ${total}, ${ins}, ${connections}, ${reshp}, ${hpthrput}, ${hypt}, ${protocol}" >> $res_file
 echo "cur-physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus"
 echo "mcresults:${stc1}-${edc1},${total},${ins},${tot_con},${reshp},${hpthrput},${hypt}"
 

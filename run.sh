@@ -8,9 +8,9 @@ workload_per_vm=""
 mlc_STRING=
 fio_STRING=
 rn50_STRING=
-stressapp_STRING=stressapp_memcache_HWDRC
+stressapp_STRING=
 redis_STRING=
-memcache_STRING=memcache_stressapp_HWDRC
+memcache_STRING=
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -140,7 +140,7 @@ function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of ben
   
   for iteration in 1
   do
-    result_file=${mlc_STRING}_rep_${iteration}_ncores
+    result_file=${mlc_STRING}_rep_${iteration}
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_mlc.sh $result_file" &
   done
 }
@@ -157,7 +157,7 @@ function run_rn50_vm() # [TODO Rohan]: Have one function and take the name of be
   
   for iteration in 1
   do
-    result_file=${rn50_STRING}_rep_${iteration}_ncores
+    result_file=${rn50_STRING}_rep_${iteration}
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_rn50.sh $result_file" &
   done
 }
@@ -175,7 +175,7 @@ function run_stressapp_vm() # [TODO Rohan]: Have one function and take the name 
   
   for iteration in 1
   do
-    result_file=${stressapp_STRING}_rep_${iteration}_ncores
+    result_file=${stressapp_STRING}_rep_${iteration}
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_stressapp.sh $result_file" &
   done
 }
@@ -191,7 +191,7 @@ function run_fio_vm()
   
   for iteration in 1
   do
-    result_file=${fio_STRING}_rep_${iteration}_ncores
+    result_file=${fio_STRING}_rep_${iteration}
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_fio.sh $result_file" &
   done 
 }
@@ -208,7 +208,7 @@ function run_redis_vm()
   
   for iteration in 1
   do
-    result_file=${redis_STRING}_rep_${iteration}_ncores
+    result_file=${redis_STRING}_rep_${iteration}
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/run_redis.sh $result_file" &
   done
 }
@@ -225,7 +225,7 @@ function run_memcache_vm()
   
   for iteration in 1
   do
-    result_file=${redis_STRING}_rep_${iteration}_ncores
+    result_file=${memcache_STRING}_rep_${iteration}
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/run_memcache.sh $result_file" &
   done
 }
@@ -245,27 +245,27 @@ function copy_result_from_vms()
    do
       case $vm_name in
         *"mlc"*)
-          result_file=${mlc_STRING}_rep_${iteration}_ncores
+          result_file=${mlc_STRING}_rep_${iteration}
           scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
         *"fio"*)
-          result_file=${fio_STRING}_rep_${iteration}_ncores
+          result_file=${fio_STRING}_rep_${iteration}
           scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
 	;;
  	*"rn50"*)
-          result_file=${rn50_STRING}_rep_${iteration}_ncores
+          result_file=${rn50_STRING}_rep_${iteration}
           scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
 	*"stressapp"*)
-          result_file=${stressapp_STRING}_rep_${iteration}_ncores
+          result_file=${stressapp_STRING}_rep_${iteration}
           scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
        	*"redis"*)
-	  result_file=${redis_STRING}_rep_${iteration}_ncores
-          scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+	  result_file=${redis_STRING}_rep_${iteration}
+          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
        	*"memcache"*)
-	  result_file=${memcache_STRING}_rep_${iteration}_ncores
+	  result_file=${memcache_STRING}_rep_${iteration}
           scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
 	*)

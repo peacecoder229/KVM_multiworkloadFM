@@ -1,5 +1,10 @@
-ip="10.219.66.160"
-#scp -oStrictHostKeyChecking=no root@${ip}:/usr/local/bin/mlc /usr/local/bin/
+result_file=$1
 
-result_file=$1_$(getconf _NPROCESSORS_ONLN)
-mlc --loaded_latency -R -t300 -d0 -k1-$[$(getconf _NPROCESSORS_ONLN)-1] > $result_file
+mlc --loaded_latency -R -t300 -d0 -k1-$[$(getconf _NPROCESSORS_ONLN)-1] > ${result_file}_temp
+
+lat=$(cat ${result_file}_temp | grep 00000 | awk '{print $2}')
+bw=$(cat ${result_file}_temp | grep 00000 | awk '{print $3}')
+echo "Latency(ns), Bandwidth(MB/s)" > $result_file
+echo "$lat, $bw" >> $result_file
+
+rm -f ${result_file}_temp

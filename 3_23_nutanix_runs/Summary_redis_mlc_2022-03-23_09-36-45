@@ -1,0 +1,28 @@
+Solo Run (redis only) 
+-----------------------------
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 1, 16, 0.415,17.663,3.40,14.47,4.71, 3.40652e+06, off, redis
+-----------------------------
+HP and LP Co-Run (redis and mlc) 
+-----------------------------
+redis:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 1, 16, 0.5429999999999999,16.639,3.52,13.52,5.31, 2.75696e+06, off, redis
+mlc:
+Latency(ns), Bandwidth(MB/s)
+159.02, 189043.8
+-----------------------------
+HP and LP Co-Run (redis and mlc) with static MBA.
+-----------------------------
+redis:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 1, 16, 0.535,16.895,3.43,13.38,4.93, 2.70707e+06, off, redis
+mlc:
+Latency(ns), Bandwidth(MB/s)
+155.85, 188914.7
+-----------------------------
+HP and LP Co-Run (redis and mlc) with HWDRC.
+-----------------------------
+redis:
+mlc:
+-----------------------------

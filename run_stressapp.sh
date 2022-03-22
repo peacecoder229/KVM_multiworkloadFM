@@ -1,7 +1,5 @@
-ip="10.219.66.160"
 
-
-result_file=$1_$(getconf _NPROCESSORS_ONLN)
+result_file=$1
 
 docker load < streeapp.tar
 
