@@ -10,6 +10,7 @@ fio_STRING=
 rn50_STRING=
 stressapp_STRING=
 redis_STRING=
+memcache_STRING=
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -110,6 +111,9 @@ function run_exp_vm()
       *"redis"*)
         run_redis_vm "$vm_name" "$vm_ip"
       ;;
+      *"memcache"*)
+        run_memcache_vm "$vm_name" "$vm_ip"
+      ;;
     *)
       echo "The VM name should match the name of the workload in lowercase."
       ;;
@@ -209,6 +213,23 @@ function run_redis_vm()
   done
 }
 
+function run_memcache_vm()
+{
+  vm_name=$1
+  vm_ip=$2
+  echo "Run memcache in $vm_name: $vm_ip"   
+  # echo "Copying to ${ip}"
+  scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+  scp -oStrictHostKeyChecking=no run_memcache.sh root@${vm_ip}:/root
+  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh $result_file"
+  
+  for iteration in 1
+  do
+    result_file=${redis_STRING}_rep_${iteration}_ncores
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/run_memcache.sh $result_file" &
+  done
+}
+
 function copy_result_from_vms()
 {
   # Copy the result data to `nutanix_data` directory, create if does not exist.
@@ -241,6 +262,10 @@ function copy_result_from_vms()
         ;;
        	*"redis"*)
 	  result_file=${redis_STRING}_rep_${iteration}_ncores
+          scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        ;;
+       	*"memcache"*)
+	  result_file=${memcache_STRING}_rep_${iteration}_ncores
           scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
         ;;
 	*)
