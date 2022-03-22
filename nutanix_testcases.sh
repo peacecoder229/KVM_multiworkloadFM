@@ -5,6 +5,8 @@ LPVM=2
 HPWORKLOAD=$1
 LPWORKLOAD=$2
 
+cpupower frequency-set -u 2700000 -d 2700000
+
 function setup_env() {
   cpupower frequency-set -u 2700Mhz
   pqos -R
