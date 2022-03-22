@@ -8,9 +8,9 @@ workload_per_vm=""
 mlc_STRING=
 fio_STRING=
 rn50_STRING=
-stressapp_STRING=
+stressapp_STRING=stressapp_memcache_HWDRC
 redis_STRING=
-memcache_STRING=
+memcache_STRING=memcache_stressapp_HWDRC
 
 # Since we don't support host experiments, we don't use it.
 function get_config()

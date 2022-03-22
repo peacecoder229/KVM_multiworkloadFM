@@ -1,8 +1,21 @@
-node0_cpus=$(($(lscpu |grep node0 | cut -c24-25) + 1))
+#!/bin/bash
+echo " Disabling HT"
+echo off > /sys/devices/system/cpu/smt/control
+sleep 15
+
+
+lcore=$(lscpu |grep node0 | cut -f2 -d:)
+phyc_hi=$(echo $lcore | cut -f2 -d-)
+phyc_lo=$(echo $lcore | cut -f1 -d-)
+
+node0_cpus=$(( phyc_hi-phyc_lo+1 ))
 
 
 HPVM=$(( node0_cpus / 2))
 LPVM=$(( node0_cpus / 2)) # default we split the cores equally
+lpcore_hi=$(( LPVM-1))
+LPCORE="0-${lpcore_hi}"
+HPCORE="${LPVM}-${phyc_hi}"
 
 HPWORKLOAD=$1
 LPWORKLOAD=$2
@@ -86,8 +99,8 @@ function hp_lp_corun() {
 }
 
 function hp_lp_corun_mba() {
-  pqos -a 'core:0=22-55'
-  pqos -a 'core:3=0-21'
+  pqos -a "core:0=$HPCORE"
+  pqos -a "core:3=$LPCORE"
 
   pqos -e 'mba:0=100'
   pqos -e 'mba:3=10'
