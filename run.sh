@@ -5,10 +5,10 @@ TestCase_s=""
 n_cpus_per_vm=""
 workload_per_vm=""
 
-mlc_STRING=
+mlc_STRING=mlc_stressapp_24_24_HWDRC
 fio_STRING=
 rn50_STRING=
-stressapp_STRING=
+stressapp_STRING=stressapp_mlc_24_24_HWDRC
 redis_STRING=
 memcache_STRING=
 

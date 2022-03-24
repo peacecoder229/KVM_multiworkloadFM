@@ -5,13 +5,19 @@ Individual results are stored in a file in /root/nutanix_data directory in the f
 Summary of all the runs are stored in a file in /root/nutanix_data directory in the following format: Summary_<HPWORKLOAD>_<LPWORKLOAD>_<Timestamp in Year/Month/Data/Hour/Min/Sec format>
 '
 
-MONITORING=1 # 1:on; 0:off
 HPWORKLOAD=$1
 LPWORKLOAD=$2
+CSV_FILENAME=$3 # stores the results from different HPWORKLOAD, LPWORKLOAD combo
+
+# pqos monitoring on/off
+MONITORING=1 # 1:on; 0:off
+
+# hwdrc and mba parameters
 HWDRC_CAS=20 # 1 to 255
 MBA_CLOS_0=100
 MBA_CLOS_3=10
 
+# core variables
 HPVM=""
 LPVM=""
 HPCORE_RANGE=""
@@ -201,16 +207,66 @@ function create_summary() {
   echo "-----------------------------" >> $summary_file_name
 }
 
+function append_compiled_csv() {
+  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_na_${HPVM}_na"
+  HPSCORE=$(get_score "$hpworkload_string")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, N/A, N/A, N/A, N/A" >> $CSV_FILENAME
+  
+  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_${LPWORKLOAD}_${HPVM}_${LPVM}"
+  lpworkload_string="/root/nutanix_data/${LPWORKLOAD}_${HPWORKLOAD}_${LPVM}_${HPVM}"
+  
+  HPSCORE=$(get_score "$hpworkload_string")
+  LPSCORE=$(get_score "$lpworkload_string")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, $LPWORKLOAD, $LPCORE_RANGE, $LPSCORE, N/A" >> $CSV_FILENAME
+  
+  HPSCORE=$(get_score "${hpworkload_string}_MBA")
+  LPSCORE=$(get_score "${lpworkload_string}_MBA")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, $LPWORKLOAD, $LPCORE_RANGE, $LPSCORE, MBA" >> $CSV_FILENAME
+
+  HPSCORE=$(get_score "${hpworkload_string}_HWDRC")
+  LPSCORE=$(get_score "${lpworkload_string}_HWDRC")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, $LPWORKLOAD, $LPCORE_RANGE, $LPSCORE, HWDRC" >> $CSV_FILENAME
+}
+
+function get_score() {
+  filename=$1
+   
+  workload=$(echo $filename | rev | cut -d"/" -f1 | rev | cut -d"_" -f1)
+  #echo "Getting score for $workload."
+
+  case $workload in
+    mlc)
+      echo "$(cat ${filename}_* | tail -1 | cut -d','  -f2)"
+    ;;
+    rn50)
+      echo "$(cat ${filename}_* | tail -1)"
+    ;;
+    fio)
+      echo "N/A"
+    ;;
+    stressapp)
+      echo "N/A"
+    ;;
+    redis | memcache)
+      echo "$(cat ${filename}_* | cut -d',' -f10 | tail -1)"
+    ;;
+    *)
+      echo "N/A"
+    ;;
+  esac
+}
+
 function main() {
   setup_env
   init_core_variables
 
   #hp_solo_run
   hp_lp_corun
-  #hp_lp_corun_mba
+  hp_lp_corun_mba
   hp_lp_corun_hwdrc
 
-  create_summary
+  #create_summary
+  append_compiled_csv
 }
 
 main $@
