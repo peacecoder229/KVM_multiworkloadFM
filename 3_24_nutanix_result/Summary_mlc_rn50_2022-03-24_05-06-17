@@ -1,0 +1,32 @@
+Solo Run (mlc only) 
+-----------------------------
+Latency(ns), Bandwidth(MB/s)
+145.54, 196013.4
+-----------------------------
+HP and LP Co-Run (mlc and rn50) 
+-----------------------------
+mlc:
+Latency(ns), Bandwidth(MB/s)
+167.43, 175563.1
+rn50:
+img/sec
+135.893464
+-----------------------------
+HP and LP Co-Run (mlc and rn50) with static MBA.
+-----------------------------
+mlc:
+Latency(ns), Bandwidth(MB/s)
+154.66, 190934.3
+rn50:
+img/sec
+40.293814
+-----------------------------
+HP and LP Co-Run (mlc and rn50) with HWDRC.
+-----------------------------
+mlc:
+Latency(ns), Bandwidth(MB/s)
+118.13, 51093.2
+rn50:
+img/sec
+154.430246
+-----------------------------

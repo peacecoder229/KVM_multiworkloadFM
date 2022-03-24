@@ -1,28 +1,26 @@
 Solo Run (redis only) 
 -----------------------------
 physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
-0-11, 12, 1, 16, 0.415,17.663,3.40,14.47,4.71, 3.40652e+06, off, redis
+0-11, 12, 1, 16, 0.415,13.055,3.00,11.45,2.70, 3.575e+06, off, redis
 -----------------------------
-HP and LP Co-Run (redis and mlc) 
------------------------------
-redis:
-physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
-0-11, 12, 1, 16, 0.5429999999999999,16.639,3.52,13.52,5.31, 2.75696e+06, off, redis
-mlc:
-Latency(ns), Bandwidth(MB/s)
-159.02, 189043.8
------------------------------
-HP and LP Co-Run (redis and mlc) with static MBA.
+HP and LP Co-Run (redis and stressapp) 
 -----------------------------
 redis:
 physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
-0-11, 12, 1, 16, 0.535,16.895,3.43,13.38,4.93, 2.70707e+06, off, redis
-mlc:
-Latency(ns), Bandwidth(MB/s)
-155.85, 188914.7
+0-11, 12, 1, 16, 0.479,16.191,3.79,15.10,9.02, 2.80188e+06, off, redis
+stressapp:
 -----------------------------
-HP and LP Co-Run (redis and mlc) with HWDRC.
+HP and LP Co-Run (redis and stressapp) with static MBA.
 -----------------------------
 redis:
-mlc:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 1, 16, 0.431,13.887,2.90,12.86,1.73, 3.35334e+06, off, redis
+stressapp:
+-----------------------------
+HP and LP Co-Run (redis and stressapp) with HWDRC.
+-----------------------------
+redis:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 1, 16, 1.015,150.52700000000002,8.80,45.61,12.09, 1.02259e+06, off, redis
+stressapp:
 -----------------------------

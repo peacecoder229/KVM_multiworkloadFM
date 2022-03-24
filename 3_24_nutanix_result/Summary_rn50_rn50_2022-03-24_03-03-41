@@ -1,28 +1,32 @@
 Solo Run (rn50 only) 
 -----------------------------
 img/sec
-210.193764
+206.904682
 -----------------------------
-HP and LP Co-Run (rn50 and mlc) 
------------------------------
-rn50:
-img/sec
-153.116030
-mlc:
-Latency(ns), Bandwidth(MB/s)
-167.77, 173311.0
------------------------------
-HP and LP Co-Run (rn50 and mlc) with static MBA.
+HP and LP Co-Run (rn50 and rn50) 
 -----------------------------
 rn50:
 img/sec
-149.631497
-mlc:
-Latency(ns), Bandwidth(MB/s)
-168.61, 173431.6
+142.000898
+rn50:
+img/sec
+142.000898
 -----------------------------
-HP and LP Co-Run (rn50 and mlc) with HWDRC.
+HP and LP Co-Run (rn50 and rn50) with static MBA.
 -----------------------------
 rn50:
-mlc:
+img/sec
+40.843379
+rn50:
+img/sec
+40.843379
+-----------------------------
+HP and LP Co-Run (rn50 and rn50) with HWDRC.
+-----------------------------
+rn50:
+img/sec
+155.506186
+rn50:
+img/sec
+155.506186
 -----------------------------

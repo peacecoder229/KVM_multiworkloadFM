@@ -1,28 +1,32 @@
 Solo Run (memcache only) 
 -----------------------------
 physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
-0-11, 12, 2, 16, 0.7829999999999999,7.678999999999999,2.45,6.84,3.72, 2.6298e+06, off, memcache_text
+0-11, 12, 2, 16, 0.7909999999999999,6.047000000000001,2.30,5.40,3.48, 2.52148e+06, off, memcache_text
 -----------------------------
 HP and LP Co-Run (memcache and rn50) 
 -----------------------------
 memcache:
 physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
-0-11, 12, 2, 16, nan,nan,0,0,0, , off, memcache_text
+0-11, 12, 2, 16, 0.775,7.167000000000001,2.43,6.38,3.74, 2.5706e+06, off, memcache_text
 rn50:
 img/sec
-205.976609
+176.168051
 -----------------------------
 HP and LP Co-Run (memcache and rn50) with static MBA.
 -----------------------------
 memcache:
 physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
-0-11, 12, 2, 16, 0.7909999999999999,5.279,1.92,4.57,2.77, 2.62907e+06, off, memcache_text
+0-11, 12, 2, 16, 0.759,6.559,2.11,5.52,3.09, 2.64714e+06, off, memcache_text
 rn50:
 img/sec
-204.833738
+42.029792
 -----------------------------
 HP and LP Co-Run (memcache and rn50) with HWDRC.
 -----------------------------
 memcache:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 2, 16, 0.775,7.007000000000001,2.20,5.66,3.34, 2.66124e+06, off, memcache_text
 rn50:
+img/sec
+176.165227
 -----------------------------

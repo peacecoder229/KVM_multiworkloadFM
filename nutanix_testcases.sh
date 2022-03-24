@@ -132,12 +132,18 @@ function hp_lp_corun_mba() {
 
 function hp_lp_corun_hwdrc() {
   pqos -R
-
+	
+  # enable HWDRC
   cd $PWD/hwdrc_postsi/scripts
   ./hwdrc_icx_2S_xcc_init_to_default_pqos_CAS.sh
   cd -
 
   hp_lp_corun "HWDRC" #HWDRC_CAS (1 to 255)
+  
+  # disable HWDRC
+  cd $PWD/hwdrc_postsi/scripts
+  ./hwdrc_icx_2S_xcc_disable.sh
+  cd -
 }
 
 function create_summary() {
