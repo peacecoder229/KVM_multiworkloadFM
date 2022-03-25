@@ -72,7 +72,7 @@ function hp_solo_run() {
   
   if (( $MONITORING == 1 ))
   then
-	exec ./pqos_mon_tool.py "pqos -r -i 20 -m mbl:$LPCORE_RANGE,$HPCORE_RANGE" ${hpworkload_string}_mon &
+	exec ./pqos_mon_tool.py "pqos -r -i 20 -m mbl:[$LPCORE_RANGE],[$HPCORE_RANGE]" ${hpworkload_string}_mon &
 	mon_pid=$!
   fi
 
@@ -117,7 +117,7 @@ function hp_lp_corun() {
   # for monitoring
   if (( $MONITORING == 1))
   then
-        exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:$LPCORE_RANGE,$HPCORE_RANGE" ${hpworkload_string}_${lpworkload_string}_mon &
+        exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:[$LPCORE_RANGE],[$HPCORE_RANGE]" ${hpworkload_string}_${lpworkload_string}_mon &
   	mon_pid=$!
    fi
  
@@ -205,9 +205,9 @@ function main() {
   setup_env
   init_core_variables
 
-  hp_solo_run
+  #hp_solo_run
   hp_lp_corun
-  hp_lp_corun_mba
+  #hp_lp_corun_mba
   hp_lp_corun_hwdrc
 
   create_summary
