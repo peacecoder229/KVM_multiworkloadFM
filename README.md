@@ -1,6 +1,6 @@
 # Pre-requisite: 
 Ensure that VT-X is enabled in the BIOS
-## Eanble SR-IOV:
+## Enable SR-IOV:
 
 ## Workload script:
 The script assumes that you have a `run_<workload name>.sh` script in the current directory. You also need to install the workload specific softwares in the VM in the run_VM() function of the run.sh script.
