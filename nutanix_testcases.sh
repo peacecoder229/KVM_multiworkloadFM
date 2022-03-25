@@ -5,6 +5,7 @@ Individual results are stored in a file in /root/nutanix_data directory in the f
 Summary of all the runs are stored in a file in /root/nutanix_data directory in the following format: Summary_<HPWORKLOAD>_<LPWORKLOAD>_<Timestamp in Year/Month/Data/Hour/Min/Sec format>
 '
 
+MONITORING=1 # 1:on; 0:off
 HPWORKLOAD=$1
 LPWORKLOAD=$2
 HWDRC_CAS=20 # 1 to 255
@@ -69,10 +70,19 @@ function hp_solo_run() {
   ./run.sh -T vm -S setup -C $HPVM -W $HPWORKLOAD
   restart_vms 
   
+  if (( $MONITORING == 1 ))
+  then
+	exec ./pqos_mon_tool.py "pqos -r -i 20 -m mbl:$LPCORE_RANGE,$HPCORE_RANGE" ${hpworkload_string}_mon &
+	mon_pid=$!
+  fi
+
   # run the experiment
   echo "Starting benchmark now ...."
   ./run.sh -T vm -S run
-  
+   
+  echo "Stop Monitoring now ......"
+  kill -SIGINT $mon_pid
+
   #clean up 
   #destroy_vms
   sed -i "s/${HPWORKLOAD}_STRING=${hpworkload_string}/${HPWORKLOAD}_STRING=/g" run.sh
@@ -104,9 +114,18 @@ function hp_lp_corun() {
   ./run.sh -T vm -S setup -C $HPVM,$LPVM -W $HPWORKLOAD,$LPWORKLOAD
   restart_vms
 
+  # for monitoring
+  if (( $MONITORING == 1))
+  then
+        exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:$LPCORE_RANGE,$HPCORE_RANGE" ${hpworkload_string}_${lpworkload_string}_mon &
+  	mon_pid=$!
+   fi
+ 
   # Run experiments in the VMs
   ./run.sh -T vm -S run
   
+  kill -SIGINT $mon_pid
+
   # Reset and clean up
   destroy_vms
   sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
