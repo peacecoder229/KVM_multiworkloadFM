@@ -1,16 +1,16 @@
 #!/bin/bash
 
 : '
-Individual results are stored in a file in /root/nutanix_data directory in the following format: <HPWORKLOAD>_<LPWORKLOAD>_<HPVM>_<LPVM>_rep_<repetition number>
+Individual results are stored in a file in /root/nutanix_data directory in the following format: <HPWORKLOAD>_<LPWORKLOAD>_<HPVM_CORES>_<LPVM_CORES>_rep_<repetition number>
 Summary of all the runs are stored in a file in /root/nutanix_data directory in the following format: Summary_<HPWORKLOAD>_<LPWORKLOAD>_<Timestamp in Year/Month/Data/Hour/Min/Sec format>
 '
 
-HPWORKLOAD=$1
-LPWORKLOAD=$2
+HPWORKLOAD=${1}-hp
+LPWORKLOAD=${2}-lp
 CSV_FILENAME=$3 # stores the results from different HPWORKLOAD, LPWORKLOAD combo
 
 # pqos monitoring on/off
-MONITORING=1 # 1:on; 0:off
+MONITORING=0 # 1:on; 0:off
 
 # hwdrc and mba parameters
 HWDRC_CAS=20 # 1 to 255
@@ -18,8 +18,8 @@ MBA_CLOS_0=100
 MBA_CLOS_3=10
 
 # core variables
-HPVM=""
-LPVM=""
+HPVM_CORES=""
+LPVM_CORES=""
 HPCORE_RANGE=""
 LPCORE_RANGE=""
 
@@ -32,13 +32,13 @@ function init_core_variables() {
 
   local node0_cpus=$(( phyc_hi-phyc_lo+1 ))
 
-  HPVM=$(( node0_cpus / 2))
-  LPVM=$(( node0_cpus / 2)) # default we split the cores equally
+  HPVM_CORES=$(( node0_cpus / 2))
+  LPVM_CORES=$(( node0_cpus / 2)) # default we split the cores equally
   
-  local lpcore_hi=$(( LPVM-1))
+  local lpcore_hi=$(( LPVM_CORES-1))
   
   LPCORE_RANGE="0-${lpcore_hi}"
-  HPCORE_RANGE="${LPVM}-${phyc_hi}"
+  HPCORE_RANGE="${LPVM_CORES}-${phyc_hi}"
 }
 
 function setup_env() {
@@ -49,7 +49,7 @@ function setup_env() {
   rm -rf /root/.ssh/known_hosts
   
   echo off > /sys/devices/system/cpu/smt/control
-  sleep 15  
+  sleep 5 
   
   destroy_vms
 }
@@ -67,84 +67,78 @@ function destroy_vms() {
   virsh list --all --name|xargs -i virsh undefine {}
 }
 
+function start_monitoring() {
+  hpworkload_file=$1
+  if (( $MONITORING == 1))
+  then
+    exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:[$LPCORE_RANGE],[$HPCORE_RANGE]" ${hpworkload_file}_mon &
+    mon_pid=$!
+  fi
+}
+
+function stop_monitoring() {
+  if (( $MONITORING == 1))
+  then
+    kill -SIGINT $mon_pid
+  fi
+}
+
 function hp_solo_run() {
-  local hpworkload_string=${HPWORKLOAD}_na_${HPVM}_na
-  sed -i "s/${HPWORKLOAD}_STRING=/${HPWORKLOAD}_STRING=${hpworkload_string}/g" run.sh
+  echo "hp solo run"
   sed -i 's/"5G" :0/"5G" :1/g' vm_cloud-init.py
   
-
-  ./run.sh -T vm -S setup -C $HPVM -W $HPWORKLOAD
-  restart_vms 
+  local hpworkload_file="${HPWORKLOAD}_na_${HPCORE_RANGE}_na_na"
+  ./run.sh -T vm -S setup -C $HPVM_CORES -W ${HPWORKLOAD}
+  restart_vms
   
-  if (( $MONITORING == 1 ))
-  then
-	exec ./pqos_mon_tool.py "pqos -r -i 20 -m mbl:[$LPCORE_RANGE],[$HPCORE_RANGE]" ${hpworkload_string}_mon &
-	mon_pid=$!
-  fi
+  # monitor, if enabled
+  start_monitoring "$hpworkload_file"
 
   # run the experiment
   echo "Starting benchmark now ...."
-  ./run.sh -T vm -S run
+  ./run.sh -T vm -S run -O $hpworkload_file
    
-  echo "Stop Monitoring now ......"
-  kill -SIGINT $mon_pid
-
-  #clean up 
-  #destroy_vms
-  sed -i "s/${HPWORKLOAD}_STRING=${hpworkload_string}/${HPWORKLOAD}_STRING=/g" run.sh
+  #clean up
+  stop_monitoring # stop monitor, if enabled
+  destroy_vms
   sed -i 's/"5G" :1/"5G" :0/g' vm_cloud-init.py
   rm -rf /home/vmimages2/*
 }
 
 function hp_lp_corun() {
-  hpworkload_string=${HPWORKLOAD}_${LPWORKLOAD}_${HPVM}_${LPVM}
-  lpworkload_string=${LPWORKLOAD}_${HPWORKLOAD}_${LPVM}_${HPVM}
-  if [[ $# -eq 1 ]]; then
-    mode=$1 # MBA or HWDRC
-    hpworkload_string=${hpworkload_string}_$mode
-    lpworkload_string=${lpworkload_string}_$mode
-  else
-    hpworkload_string=${hpworkload_string}_na
-    lpworkload_string=${lpworkload_string}_na
-  fi
-
-  sed -i "s/${HPWORKLOAD}_STRING=/${HPWORKLOAD}_STRING=${hpworkload_string}/g" run.sh
-  if [ $LPWORKLOAD != $HPWORKLOAD ]
-  then
-    sed -i "s/${LPWORKLOAD}_STRING=/${LPWORKLOAD}_STRING=${lpworkload_string}/g" run.sh
-  fi
+  echo "hp,lp corun."
   sed -i 's/"5G" :0/"5G" :2/g' vm_cloud-init.py
   
+  # init output file for hp and lp workloads 
+  local hpworkload_file="${HPWORKLOAD}_${LPWORKLOAD}_${HPCORE_RANGE}_${LPCORE_RANGE}"
+  local lpworkload_file="${LPWORKLOAD}_${HPWORKLOAD}_${LPCORE_RANGE}_${HPCORE_RANGE}"
+  local mode="na"
+  if [[ $# -eq 1 ]]; then
+    mode=$1 # MBA or HWDRC
+  fi
+  hpworkload_file=${hpworkload_file}_${mode}
+  lpworkload_file=${lpworkload_file}_${mode}
+
   # set up the VMs
   sudo dhclient -r $ sudo dhclient
-  ./run.sh -T vm -S setup -C $HPVM,$LPVM -W $HPWORKLOAD,$LPWORKLOAD
+  ./run.sh -T vm -S setup -C $HPVM_CORES,$LPVM_CORES -W $HPWORKLOAD,$LPWORKLOAD
   restart_vms
 
-  # for monitoring
-  if (( $MONITORING == 1))
-  then
-        exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:[$LPCORE_RANGE],[$HPCORE_RANGE]" ${hpworkload_string}_${lpworkload_string}_mon &
-  	mon_pid=$!
-   fi
+  # monitor, if enabled
+  start_monitoring "$hpworkload_file"
  
   # Run experiments in the VMs
-  ./run.sh -T vm -S run
-  
-  kill -SIGINT $mon_pid
+  ./run.sh -T vm -S run -O $hpworkload_file,$lpworkload_file
 
   # Reset and clean up
+  stop_monitoring # stop monitor, if enabled
   destroy_vms
   sed -i 's/"5G" :2/"5G" :0/g' vm_cloud-init.py
-  sed -i "s/${HPWORKLOAD}_STRING=${hpworkload_string}/${HPWORKLOAD}_STRING=/g" run.sh
-  if [ $LPWORKLOAD != $HPWORKLOAD ]
-  then
-    sed -i "s/${LPWORKLOAD}_STRING=${lpworkload_string}/${LPWORKLOAD}_STRING=/g" run.sh
-  fi
   rm -rf /home/vmimages2/*
 }
 
 function hp_lp_corun_mba() {
-  echo "Setting COS0 to HPVM cores $HPCORE_RANGE and COS3 to LPVM cores $LPCORE_RANGE."
+  echo "Setting COS0 to HPVM_CORES cores $HPCORE_RANGE and COS3 to LPVM_CORES cores $LPCORE_RANGE."
 
   pqos -a "core:0=$HPCORE_RANGE"
   pqos -a "core:3=$LPCORE_RANGE"
@@ -171,61 +165,29 @@ function hp_lp_corun_hwdrc() {
   cd -
 }
 
-function create_summary() {
-  summary_file_name="/root/nutanix_data/Summary_${HPWORKLOAD}_${LPWORKLOAD}_$(date +%Y-%m-%d_%H-%M-%S)"
-  
-  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_na_${HPVM}_na"
-  echo "Solo Run ($HPWORKLOAD only) " > $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-  cat ${hpworkload_string}_* >> $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-
-  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_${LPWORKLOAD}_${HPVM}_${LPVM}"
-  lpworkload_string="/root/nutanix_data/${LPWORKLOAD}_${HPWORKLOAD}_${LPVM}_${HPVM}"
-  echo "HP and LP Co-Run ($HPWORKLOAD and $LPWORKLOAD) " >> $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-  echo "${HPWORKLOAD}:" >> $summary_file_name
-  cat ${hpworkload_string}_na_* >> $summary_file_name
-  echo "${LPWORKLOAD}:" >> $summary_file_name
-  cat ${lpworkload_string}_na_* >> $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-  
-  echo "HP and LP Co-Run ($HPWORKLOAD and $LPWORKLOAD) with static MBA." >> $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-  echo "${HPWORKLOAD}:" >> $summary_file_name
-  cat ${hpworkload_string}_MBA_* >> $summary_file_name
-  echo "${LPWORKLOAD}:" >> $summary_file_name
-  cat ${lpworkload_string}_MBA_* >> $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-  
-  echo "HP and LP Co-Run ($HPWORKLOAD and $LPWORKLOAD) with HWDRC." >> $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-  echo "${HPWORKLOAD}:" >> $summary_file_name
-  cat ${hpworkload_string}_HWDRC_* >> $summary_file_name
-  echo "${LPWORKLOAD}:" >> $summary_file_name
-  cat ${lpworkload_string}_HWDRC_* >> $summary_file_name
-  echo "-----------------------------" >> $summary_file_name
-}
-
 function append_compiled_csv() {
-  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_na_${HPVM}_na"
-  HPSCORE=$(get_score "$hpworkload_string")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, N/A, N/A, N/A, N/A" >> $CSV_FILENAME
+  # Append result for solo run
+  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_na_${HPCORE_RANGE}_na"
+  local hp_score=$(get_score "$hpworkload_string")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, N/A, N/A, N/A, N/A" >> $CSV_FILENAME
   
-  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_${LPWORKLOAD}_${HPVM}_${LPVM}"
-  lpworkload_string="/root/nutanix_data/${LPWORKLOAD}_${HPWORKLOAD}_${LPVM}_${HPVM}"
+  hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_${LPWORKLOAD}_${HPCORE_RANGE}_${LPCORE_RANGE}"
+  lpworkload_string="/root/nutanix_data/${LPWORKLOAD}_${HPWORKLOAD}_${LPCORE_RANGE}_${HPCORE_RANGE}"
   
-  HPSCORE=$(get_score "$hpworkload_string")
-  LPSCORE=$(get_score "$lpworkload_string")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, $LPWORKLOAD, $LPCORE_RANGE, $LPSCORE, N/A" >> $CSV_FILENAME
+  # Append result for HP,LP corun without QoS
+  hp_score=$(get_score "${hpworkload_string}_na")
+  lp_score=$(get_score "${lpworkload_string}_na")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, N/A" >> $CSV_FILENAME
   
-  HPSCORE=$(get_score "${hpworkload_string}_MBA")
-  LPSCORE=$(get_score "${lpworkload_string}_MBA")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, $LPWORKLOAD, $LPCORE_RANGE, $LPSCORE, MBA" >> $CSV_FILENAME
+  # Append result for HP,LP corun with MBA
+  hp_score=$(get_score "${hpworkload_string}_MBA")
+  lp_score=$(get_score "${lpworkload_string}_MBA")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, MBA" >> $CSV_FILENAME
 
-  HPSCORE=$(get_score "${hpworkload_string}_HWDRC")
-  LPSCORE=$(get_score "${lpworkload_string}_HWDRC")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $HPSCORE, $LPWORKLOAD, $LPCORE_RANGE, $LPSCORE, HWDRC" >> $CSV_FILENAME
+  # Append result for HP,LP corun with HWDRC
+  hp_score=$(get_score "${hpworkload_string}_HWDRC")
+  lp_score=$(get_score "${lpworkload_string}_HWDRC")
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, HWDRC" >> $CSV_FILENAME
 }
 
 function get_score() {
@@ -235,19 +197,19 @@ function get_score() {
   #echo "Getting score for $workload."
 
   case $workload in
-    mlc)
+    *"mlc"*)
       echo "$(cat ${filename}_* | tail -1 | cut -d','  -f2)"
     ;;
-    rn50)
+    *"rn50"*)
       echo "$(cat ${filename}_* | tail -1)"
     ;;
-    fio)
+    *"fio"*)
       echo "N/A"
     ;;
-    stressapp)
+    *"stressapp"*)
       echo "N/A"
     ;;
-    redis | memcache)
+    *"redis"* | *"memcache"*)
       echo "$(cat ${filename}_* | cut -d',' -f10 | tail -1)"
     ;;
     *)
@@ -260,12 +222,11 @@ function main() {
   setup_env
   init_core_variables
 
-  #hp_solo_run
+  hp_solo_run
   hp_lp_corun
   hp_lp_corun_mba
   hp_lp_corun_hwdrc
 
-  #create_summary
   append_compiled_csv
 }
 

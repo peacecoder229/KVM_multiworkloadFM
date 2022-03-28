@@ -1,7 +1,9 @@
-summary_file_name="/root/nutanix_data/Summary_${HPWORKLOAD}_${LPWORKLOAD}_$(date +%Y-%m-%d_%H-%M-%S)"
+summary_file_name="/root/nutanix_data/Summary_hp-redis-mlc_lp-stressapp-rn50_$(date +%Y-%m-%d_%H-%M-%S)"
 
-for hp_wl in "redis" "memcache" "rn50" "mlc"; do
-  for lp_wl in "stressapp" "rn50" "mlc"; do
+echo "HPWORKLOAD, HPCORE_RANGE, HPSCORE, LPWORKLOAD, LPCORE_RANGE, LPSCORE, QoS" > $summary_file_name
+
+for hp_wl in "memcache" "rn50"; do
+  for lp_wl in "rn50"; do
     ./nutanix_testcases.sh $hp_wl $lp_wl $summary_file_name
   done
 done

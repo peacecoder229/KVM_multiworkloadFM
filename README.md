@@ -14,9 +14,8 @@ To download the workloads call get_benchmark.sh and move them to /root/
 
 (2) Run the following script to launch the vm: ./run.sh -T vm -S setup -C <number of cpus for each vm> -W <list of workload names in lowercase>.
 ```
-./run.sh -T vm -S setup -C 4,8 -W mlc,fio
+./run.sh -T vm -S setup -C 4,8 -W mlc-hp,fio-lp
 ```
-The above command will create two VM one with physical core 4 and 8 respectively. The VM names are of the following format:  <workload-name>-<some id>. For example, the command above will create two VMs named mlc-01 and fio-02.
+The above command will create two VM one with physical core 4 and 8 respectively. The VM names are of the following format:  <workload-name>-<hp or lp>-<some id>. For example, the command above will create two VMs named mlc-hp-01 and fio-lp-02, where the former is the high priority(hp) VM and latter is the low priority (lp) VM.
 
-(3) ./run.sh -T vm -S run. The command will find the VMs available in this machine and run respective workload in each of the VM. For example, if there is a VM named mlc-02, then mlc will be run on the VM. 
-
+(3) ./run.sh -T vm -S run -O <hp-workload-result-file>, <lp-workload-result-file>. The command will find the VMs available in this machine and run respective workload in each of the VM. For example, if there is a VM named mlc-02, then mlc will be run on the VM. 

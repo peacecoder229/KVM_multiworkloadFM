@@ -5,12 +5,8 @@ TestCase_s=""
 n_cpus_per_vm=""
 workload_per_vm=""
 
-mlc_STRING=mlc_stressapp_24_24_HWDRC
-fio_STRING=
-rn50_STRING=
-stressapp_STRING=stressapp_mlc_24_24_HWDRC
-redis_STRING=
-memcache_STRING=
+HP_WL_FILE="" # <HP_WORKLOAD>-hp_<LP_WORKLOAD>-lp_<HPCORE_RANGE>_<LPCORE_RANGE>_<QoS Mode>
+LP_WL_FILE="" # <LP_WORKLOAD>-lp_<HP_WORKLOAD>-hp_<LPCORE_RANGE>_<HPCORE_RANGE>_<QoS Mode>
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -42,7 +38,8 @@ function get_config()
 
 function handle_args()
 {
- while getopts ":T:S:C:W:" opt
+ echo "handle args."
+ while getopts ":T:S:C:W:O:" opt
  do 
    case $opt in 
      T) TARGET="$OPTARG"
@@ -54,9 +51,17 @@ function handle_args()
 	;;
      W) workload_per_vm="$OPTARG"
 	;;
+     O) outfiles="$OPTARG"
+	local total_vms=$(echo $outfiles | awk -F',' '{print NF}')
+	HP_WL_FILE=$(echo $outfiles | cut -d"," -f1)
+	if (( $total_vms == 2 )); then
+	  LP_WL_FILE=$(echo $outfiles | cut -d"," -f2)
+	fi
+	echo "The results will be written to $HP_WL_FILE, $LP_WL_FILE"
+	;;
      \?)
         echo "Invalid option: -$OPTARG"
-        exit 1 
+        exit 1
        ;;
     esac 
  done
@@ -140,7 +145,14 @@ function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of ben
   
   for iteration in 1
   do
-    result_file=${mlc_STRING}_rep_${iteration}
+    result_file=$HP_WL_FILE
+    
+    if [[ $vm_name == *"mlc-lp"* ]]; then
+      result_file=$LP_WL_FILE
+    fi
+ 
+    result_file=${result_file}_rep_${iteration}
+    echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_mlc.sh $result_file" &
   done
 }
@@ -157,9 +169,16 @@ function run_rn50_vm() # [TODO Rohan]: Have one function and take the name of be
   
   for iteration in 1
   do
-    result_file=${rn50_STRING}_rep_${iteration}
+    result_file=$HP_WL_FILE
+    
+    if [[ $vm_name == *"rn50-lp"* ]]; then
+      result_file=$LP_WL_FILE
+    fi
+ 
+    result_file=${result_file}_rep_${iteration}
+    echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_rn50.sh $result_file" &
-  done
+  done 
 }
 
 
@@ -175,7 +194,7 @@ function run_stressapp_vm() # [TODO Rohan]: Have one function and take the name 
   
   for iteration in 1
   do
-    result_file=${stressapp_STRING}_rep_${iteration}
+    result_file="dummy"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_stressapp.sh $result_file" &
   done
 }
@@ -188,10 +207,17 @@ function run_fio_vm()
   # echo "Copying to ${ip}"
   scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
   scp -oStrictHostKeyChecking=no run_fio.sh root@${vm_ip}:/root
-  
+
   for iteration in 1
   do
-    result_file=${fio_STRING}_rep_${iteration}
+    result_file=$HP_WL_FILE
+    
+    if [[ $vm_name == *"fio-lp"* ]]; then
+      result_file=$LP_WL_FILE
+    fi
+ 
+    result_file=${result_file}_rep_${iteration}
+    echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_fio.sh $result_file" &
   done 
 }
@@ -204,12 +230,19 @@ function run_redis_vm()
   # echo "Copying to ${ip}"
   scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
   scp -oStrictHostKeyChecking=no run_redis.sh root@${vm_ip}:/root
-  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh $result_file"
-  
+  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
+
   for iteration in 1
   do
-    result_file=${redis_STRING}_rep_${iteration}
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/run_redis.sh $result_file" &
+    result_file=$HP_WL_FILE
+    
+    if [[ $vm_name == *"redis-lp"* ]]; then
+      result_file=$LP_WL_FILE
+    fi
+ 
+    result_file=${result_file}_rep_${iteration}
+    echo "Result file is $result_file"
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_redis.sh $result_file" &
   done
 }
 
@@ -221,12 +254,19 @@ function run_memcache_vm()
   # echo "Copying to ${ip}"
   scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
   scp -oStrictHostKeyChecking=no run_memcache.sh root@${vm_ip}:/root
-  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh $result_file"
-  
+  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
+
   for iteration in 1
   do
-    result_file=${memcache_STRING}_rep_${iteration}
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/run_memcache.sh $result_file" &
+    result_file=$HP_WL_FILE
+    
+    if [[ $vm_name == *"memcache-lp"* ]]; then
+      result_file=$LP_WL_FILE
+    fi
+ 
+    result_file=${result_file}_rep_${iteration}
+    echo "Result file is $result_file"
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_memcache.sh $result_file" &
   done
 }
 
@@ -244,32 +284,14 @@ function copy_result_from_vms()
    for iteration in 1
    do
       case $vm_name in
-        *"mlc"*)
-          result_file=${mlc_STRING}_rep_${iteration}
-          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        *"hp"*)
+          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${HP_WL_FILE}_rep_${iteration} /root/nutanix_data/
         ;;
-        *"fio"*)
-          result_file=${fio_STRING}_rep_${iteration}
-          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
+        *"lp"*)
+          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${LP_WL_FILE}_rep_${iteration} /root/nutanix_data/
 	;;
- 	*"rn50"*)
-          result_file=${rn50_STRING}_rep_${iteration}
-          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
-        ;;
-	*"stressapp"*)
-          result_file=${stressapp_STRING}_rep_${iteration}
-          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
-        ;;
-       	*"redis"*)
-	  result_file=${redis_STRING}_rep_${iteration}
-          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
-        ;;
-       	*"memcache"*)
-	  result_file=${memcache_STRING}_rep_${iteration}
-          scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/$result_file* /root/nutanix_data/
-        ;;
 	*)
-        echo "The VM name should match the name of the workload in lowercase."
+        echo "The VM name should contain "hp" or "lp"."
         ;;
       esac
     done
