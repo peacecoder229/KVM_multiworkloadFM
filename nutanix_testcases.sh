@@ -1,8 +1,7 @@
 #!/bin/bash
 
 : '
-Individual results are stored in a file in /root/nutanix_data directory in the following format: <HPWORKLOAD>_<LPWORKLOAD>_<HPVM_CORES>_<LPVM_CORES>_rep_<repetition number>
-Summary of all the runs are stored in a file in /root/nutanix_data directory in the following format: Summary_<HPWORKLOAD>_<LPWORKLOAD>_<Timestamp in Year/Month/Data/Hour/Min/Sec format>
+Individual results are stored in a file in /root/nutanix_data directory in the following format: <HPWORKLOAD>_<LPWORKLOAD>_<HPCORE_RANGE>_<LPCORE_RANGE>_<QoS>_rep_<repetition number>
 '
 
 HPWORKLOAD=${1}-hp
