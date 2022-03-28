@@ -19,3 +19,12 @@ To download the workloads call get_benchmark.sh and move them to /root/
 The above command will create two VM one with physical core 4 and 8 respectively. The VM names are of the following format:  <workload-name>-<hp or lp>-<some id>. For example, the command above will create two VMs named mlc-hp-01 and fio-lp-02, where the former is the high priority(hp) VM and latter is the low priority (lp) VM.
 
 (3) ./run.sh -T vm -S run -O <hp-workload-result-file>, <lp-workload-result-file>. The command will find the VMs available in this machine and run respective workload in each of the VM. For example, if there is a VM named mlc-02, then mlc will be run on the VM. 
+
+ (4) Changed the VM names to following format:  <workload-name>-<hp or lp>-<some id>. And when running run.sh you need to pass the hp and lp result file names to run.sh. The file names will have the following format: 
+
+HP workload file = <HP_WORKLOAD>-hp_<LP_WORKLOAD>-lp_<HPCORE_RANGE>_<LPCORE_RANGE>_<QoS Mode>
+LP_workoad_file = <LP_WORKLOAD>-lp_<HP_WORKLOAD>-hp_<LPCORE_RANGE>_<HPCORE_RANGE>_<QoS Mode>
+
+The filenames will be generated from run_nutanix_testcases.sh.
+
+ 
