@@ -8,8 +8,6 @@
 # Config # 3: HPVM1 (13) | HPVM2(13)
 # More to be added
 
-
-
 #################################################################
 
 HPVM1=13
@@ -17,6 +15,32 @@ HPVM2=13
 HVSVM=2
 LPVM1=14
 LPVM2=14
+
+:'
+Input:
+-----
+VM_CORES=[3, 3, 2, 1, 1] # no of cpus for different VMs according to their priority
+VM_WORKLOADS=["mlc", "redis", "mlc", "rn50", "memcache"] # name of workloads to be run on the VMs accroding to their priority
+
+The following is done from the input:
+------------------------------------
+1. VM_CORE_RANGE=["45-47", "42-44", "40-41", "39", "38"] # need to init core ranges for the VMs
+2. ./run.sh -T vm -S setup -C $VM_CORES -W $VM_WORKLOADS
+3. ./run.sh -T vm -S run -C $VM_CORES -W $VM_WORKLOADS -N <co/solo>_<QoS>
+	I.   Initialize core range for each VM ($VM_CORE_RANGE)
+	II.  Run experiments in all the VMs and write file to : <name of the workload>_<core_range>_<co/solo>_<QoS> (e.g. mlc_45-47_co_hwdrc) or <vm_name>_<co/solo>_<QoS>.
+	    Iterate through all the VMs that are running and get VM name. The VM name contains the name of the workload, e.g. mlc-01
+	III. After the exp is done, copy back the result file: <name of the workload>_<core_range>_<co/solo>_<QoS> (e.g. mlc_45-47_co_hwdrc)
+	  Iterate through all the VMs that are running and get VM name. The VM name contains the name of the workload, e.g. mlc-01
+	IV.  While compiling results, go through the VM_WORKLOADS list and generate filename: mlc_27-40_solo_na, mlc_27-40_co_na, mlc_27-40_co_mba, mlc_27-40_co_hwdrc
+
+Questions:
+1. Can there be multiple HP VMs?
+2. Can there
+3. One VM cpu pinning, others floating (do not pin).
+4. Priority Group: 
+
+'
 
 rm -rf /root/mlc_*
 

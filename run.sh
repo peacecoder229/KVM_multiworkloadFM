@@ -4,9 +4,7 @@ STAGE=""
 TestCase_s=""
 n_cpus_per_vm=""
 workload_per_vm=""
-
-HP_WL_FILE="" # <HP_WORKLOAD>-hp_<LP_WORKLOAD>-lp_<HPCORE_RANGE>_<LPCORE_RANGE>_<QoS Mode>
-LP_WL_FILE="" # <LP_WORKLOAD>-lp_<HP_WORKLOAD>-hp_<LPCORE_RANGE>_<HPCORE_RANGE>_<QoS Mode>
+file_suffix=""
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -51,13 +49,7 @@ function handle_args()
 	;;
      W) workload_per_vm="$OPTARG"
 	;;
-     O) outfiles="$OPTARG"
-	local total_vms=$(echo $outfiles | awk -F',' '{print NF}')
-	HP_WL_FILE=$(echo $outfiles | cut -d"," -f1)
-	if (( $total_vms == 2 )); then
-	  LP_WL_FILE=$(echo $outfiles | cut -d"," -f2)
-	fi
-	echo "The results will be written to $HP_WL_FILE, $LP_WL_FILE"
+     O) file_suffix="$OPTARG"
 	;;
      \?)
         echo "Invalid option: -$OPTARG"
@@ -145,13 +137,8 @@ function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of ben
   
   for iteration in 1
   do
-    result_file=$HP_WL_FILE
+    result_file=${vm_name}_${file_suffix}_${iteration}
     
-    if [[ $vm_name == *"mlc-lp"* ]]; then
-      result_file=$LP_WL_FILE
-    fi
- 
-    result_file=${result_file}_rep_${iteration}
     echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_mlc.sh $result_file" &
   done
@@ -169,18 +156,11 @@ function run_rn50_vm() # [TODO Rohan]: Have one function and take the name of be
   
   for iteration in 1
   do
-    result_file=$HP_WL_FILE
-    
-    if [[ $vm_name == *"rn50-lp"* ]]; then
-      result_file=$LP_WL_FILE
-    fi
- 
-    result_file=${result_file}_rep_${iteration}
+    result_file=${vm_name}_${file_suffix}_${iteration}
     echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_rn50.sh $result_file" &
   done 
 }
-
 
 function run_stressapp_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
 {
@@ -209,13 +189,7 @@ function run_fio_vm()
 
   for iteration in 1
   do
-    result_file=$HP_WL_FILE
-    
-    if [[ $vm_name == *"fio-lp"* ]]; then
-      result_file=$LP_WL_FILE
-    fi
- 
-    result_file=${result_file}_rep_${iteration}
+    result_file=${vm_name}_${file_suffix}_${iteration}
     echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_fio.sh $result_file" &
   done 
@@ -233,13 +207,7 @@ function run_redis_vm()
 
   for iteration in 1
   do
-    result_file=$HP_WL_FILE
-    
-    if [[ $vm_name == *"redis-lp"* ]]; then
-      result_file=$LP_WL_FILE
-    fi
- 
-    result_file=${result_file}_rep_${iteration}
+    result_file=${vm_name}_${file_suffix}_${iteration}
     echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_redis.sh $result_file" &
   done
@@ -257,13 +225,7 @@ function run_memcache_vm()
 
   for iteration in 1
   do
-    result_file=$HP_WL_FILE
-    
-    if [[ $vm_name == *"memcache-lp"* ]]; then
-      result_file=$LP_WL_FILE
-    fi
- 
-    result_file=${result_file}_rep_${iteration}
+    result_file=${vm_name}_${file_suffix}_${iteration}
     echo "Result file is $result_file"
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_memcache.sh $result_file" &
   done
@@ -282,17 +244,9 @@ function copy_result_from_vms()
    
    for iteration in 1
    do
-      case $vm_name in
-        *"hp"*)
-          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${HP_WL_FILE}_rep_${iteration} /root/nutanix_data/
-        ;;
-        *"lp"*)
-          scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${LP_WL_FILE}_rep_${iteration} /root/nutanix_data/
-	;;
-	*)
-        echo "The VM name should contain "hp" or "lp"."
-        ;;
-      esac
+     result_file=${vm_name}_${file_suffix}_${iteration}
+     echo "Copy result: $result_file"
+     scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${result_file} /root/nutanix_data/
     done
   done
 }

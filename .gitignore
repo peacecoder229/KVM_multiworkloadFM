@@ -5,3 +5,4 @@ remove-cd-virt-install-cmds.sh
 *na_mon
 *.pdf
 __pycache__/
+*_mon

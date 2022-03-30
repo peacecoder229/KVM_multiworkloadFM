@@ -86,6 +86,6 @@ hwdrc_reg_dump
 #pqos -e llc:7=0x7fff
 #pqos -e llc:4=0x7fff
 
-pqos -a llc:7=$LP_CORES
-pqos -a llc:4=$HP_CORES
 
+#pqos -a llc:7=$LP_CORES
+#pqos -a llc:4=$HP_CORES

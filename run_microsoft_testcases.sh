@@ -1,0 +1,21 @@
+summary_file_name="/root/nutanix_data/Summary_$(date +%Y-%m-%d_%H-%M-%S)"
+
+for workloads in '"rn50,mlc"'; do
+  cores='"5,3"'
+  config="ms_vm_config.sh"
+
+  echo 'NO_VMS=2' > $config
+  echo "VM_CORES=$cores" >> $config
+  echo "VM_WORKLOADS=$workloads" >> $config
+  echo 'MBA_COS_WL="0,3"' >> $config
+  echo 'MBA_COS_VAL="0=100,3=20"' >> $config
+  echo 'HWDRC_CAS_VAL=16' >> $config
+  echo 'LLC_COS_WL="4,7"' >> $config
+
+  workloads=$(echo ${workloads/,/-})
+  cores=$(echo ${cores/,/-})
+  result_dir="/root/nutanix_data/ms_resdir_${workloads}_${cores}"
+  
+  #./microsoft_testcases_v2.sh $summary_dir $config
+  # cat $summary_dir/summary >> summary_file_name="/root/nutanix_data/Summary_$(date +%Y-%m-%d_%H-%M-%S)"
+done
