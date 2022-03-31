@@ -12,9 +12,9 @@ CSV_FILENAME=$3 # stores the results from different HPWORKLOAD, LPWORKLOAD combo
 MONITORING=0 # 1:on; 0:off
 
 # hwdrc and mba parameters
-HWDRC_CAS=20 # 1 to 255
+HWDRC_CAS=$4 # 1 to 255
 MBA_CLOS_0=100
-MBA_CLOS_3=10
+MBA_CLOS_3=$5
 
 # core variables
 HPVM_CORES=""
@@ -143,7 +143,7 @@ function hp_lp_corun_mba() {
   pqos -a "core:3=$LPCORE_RANGE"
 
   pqos -e 'mba:0=100'
-  pqos -e 'mba:3=10'
+  pqos -e "mba:3=$MBA_CLOS_3"
   
   hp_lp_corun "MBA"
 }
@@ -153,7 +153,7 @@ function hp_lp_corun_hwdrc() {
 	
   # enable HWDRC
   cd $PWD/hwdrc_postsi/scripts
-  ./hwdrc_icx_2S_xcc_init_to_default_pqos_CAS.sh
+  ./hwdrc_icx_2S_xcc_init_to_default_pqos_CAS.sh $HWDRC_CAS
   cd -
 
   hp_lp_corun "HWDRC" #HWDRC_CAS (1 to 255)
