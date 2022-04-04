@@ -142,8 +142,8 @@ function hp_lp_corun_mba() {
   pqos -a "core:0=$HPCORE_RANGE"
   pqos -a "core:3=$LPCORE_RANGE"
 
-  pqos -e 'mba:0=100'
-  pqos -e "mba:3=$MBA_CLOS_3"
+  pqos -e 'mba:0=100' # COS0 100% available
+  pqos -e "mba:3=$MBA_CLOS_3" # vary the availability of COS3 from 20% to 100%
   
   hp_lp_corun "MBA"
 }
@@ -168,7 +168,7 @@ function append_compiled_csv() {
   # Append result for solo run
   hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_na_${HPCORE_RANGE}_na"
   local hp_score=$(get_score "$hpworkload_string")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, N/A, N/A, N/A, N/A" >> $CSV_FILENAME
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, N/A, N/A, N/A, N/A, N/A" >> $CSV_FILENAME
   
   hpworkload_string="/root/nutanix_data/${HPWORKLOAD}_${LPWORKLOAD}_${HPCORE_RANGE}_${LPCORE_RANGE}"
   lpworkload_string="/root/nutanix_data/${LPWORKLOAD}_${HPWORKLOAD}_${LPCORE_RANGE}_${HPCORE_RANGE}"
@@ -176,17 +176,17 @@ function append_compiled_csv() {
   # Append result for HP,LP corun without QoS
   hp_score=$(get_score "${hpworkload_string}_na")
   lp_score=$(get_score "${lpworkload_string}_na")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, N/A" >> $CSV_FILENAME
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, N/A, N/A" >> $CSV_FILENAME
   
   # Append result for HP,LP corun with MBA
   hp_score=$(get_score "${hpworkload_string}_MBA")
   lp_score=$(get_score "${lpworkload_string}_MBA")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, MBA" >> $CSV_FILENAME
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, MBA, $MBA_CLOS_3" >> $CSV_FILENAME
 
   # Append result for HP,LP corun with HWDRC
   hp_score=$(get_score "${hpworkload_string}_HWDRC")
   lp_score=$(get_score "${lpworkload_string}_HWDRC")
-  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, HWDRC" >> $CSV_FILENAME
+  echo "$HPWORKLOAD, $HPCORE_RANGE, $hp_score, $LPWORKLOAD, $LPCORE_RANGE, $lp_score, HWDRC, $HWDRC_CAS" >> $CSV_FILENAME
 }
 
 function get_score() {
