@@ -205,7 +205,7 @@ function run_fio_vm()
   vm_ip=$2
   echo "Run fio in $vm_name: $vm_ip"   
   # echo "Copying to ${ip}"
-  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
+  scp -oStrictHostKeyChecking=no /usr/local/bin/fio root@${vm_ip}:/usr/local/bin/
   scp -oStrictHostKeyChecking=no run_fio.sh root@${vm_ip}:/root
 
   for iteration in 1
