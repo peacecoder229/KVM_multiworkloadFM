@@ -9,7 +9,8 @@ LPWORKLOAD=${2}-lp
 CSV_FILENAME=$3 # stores the results from different HPWORKLOAD, LPWORKLOAD combo
 
 # pqos monitoring on/off
-MONITORING=0 # 1:on; 0:off
+#MONITORING=0 # 1:on; 0:off
+MONITORING=1 # 1:on; 0:off
 
 # hwdrc and mba parameters
 HWDRC_CAS=$4 # 1 to 255
@@ -229,4 +230,15 @@ function main() {
   append_compiled_csv
 }
 
-main $@
+
+function just_test() {
+  setup_env
+  init_core_variables
+
+  hp_lp_corun
+  hp_lp_corun_mba
+
+  append_compiled_csv
+}
+#main $@
+just_test $@

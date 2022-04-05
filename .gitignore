@@ -1,4 +1,7 @@
 virt-install-cmds.sh
 remove-cd-virt-install-cmds.sh
 *.log
+*MBA_mon
+*na_mon
+*.pdf
 __pycache__/
