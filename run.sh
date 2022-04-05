@@ -8,9 +8,9 @@ workload_per_vm=""
 mlc_STRING=
 fio_STRING=
 rn50_STRING=
-stressapp_STRING=stressapp_memcache_HWDRC
+stressapp_STRING=
 redis_STRING=
-memcache_STRING=memcache_stressapp_HWDRC
+memcache_STRING=
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -225,7 +225,7 @@ function run_memcache_vm()
   
   for iteration in 1
   do
-    result_file=${redis_STRING}_rep_${iteration}_ncores
+    result_file=${memcache_STRING}_rep_${iteration}_ncores
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/run_memcache.sh $result_file" &
   done
 }
