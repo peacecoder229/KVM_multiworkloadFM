@@ -1,0 +1,26 @@
+Solo Run (mlc only) 
+-----------------------------
+Latency(ns), Bandwidth(MB/s)
+154.89, 200803.1
+-----------------------------
+HP and LP Co-Run (mlc and stressapp) 
+-----------------------------
+mlc:
+Latency(ns), Bandwidth(MB/s)
+304.40, 98202.6
+stressapp:
+-----------------------------
+HP and LP Co-Run (mlc and stressapp) with static MBA.
+-----------------------------
+mlc:
+Latency(ns), Bandwidth(MB/s)
+164.09, 179208.8
+stressapp:
+-----------------------------
+HP and LP Co-Run (mlc and stressapp) with HWDRC.
+-----------------------------
+mlc:
+Latency(ns), Bandwidth(MB/s)
+222.88, 33280.5
+stressapp:
+-----------------------------

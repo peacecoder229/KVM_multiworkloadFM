@@ -65,7 +65,7 @@ g_ATTRIBUTES_MCLOS3=0x83ff010f
 #MEM_CLOS_EVENT= 0x80 MCLOS_RPQ_OCCUPANCY_EVENT
 #MEM_CLOS_TIME_WINDOW=0x06->3ms ewma time window
 #MEMCLOS_SET_POINT=0x01
-g_CONFIG0=0x01050610
+g_CONFIG0=$((0x01050600 + $1))
 
 #Here the OS_MAILBOX is per_socket, so we need to pick a core from the socket you want, one core msr settings will be enough to represent the socket setup
 echo "init DRC to default settings for Scoket0"

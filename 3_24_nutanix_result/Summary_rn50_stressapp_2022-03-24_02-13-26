@@ -1,0 +1,26 @@
+Solo Run (rn50 only) 
+-----------------------------
+img/sec
+205.436104
+-----------------------------
+HP and LP Co-Run (rn50 and stressapp) 
+-----------------------------
+rn50:
+img/sec
+150.501706
+stressapp:
+-----------------------------
+HP and LP Co-Run (rn50 and stressapp) with static MBA.
+-----------------------------
+rn50:
+img/sec
+179.858970
+stressapp:
+-----------------------------
+HP and LP Co-Run (rn50 and stressapp) with HWDRC.
+-----------------------------
+rn50:
+img/sec
+62.022959
+stressapp:
+-----------------------------

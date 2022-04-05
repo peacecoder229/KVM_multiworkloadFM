@@ -1,0 +1,26 @@
+Solo Run (memcache only) 
+-----------------------------
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 2, 16, 0.767,5.279,1.80,4.65,2.58, 2.59506e+06, off, memcache_text
+-----------------------------
+HP and LP Co-Run (memcache and stressapp) 
+-----------------------------
+memcache:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 2, 16, 1.055,6.847,3.10,6.38,4.41, 1.82633e+06, off, memcache_text
+stressapp:
+-----------------------------
+HP and LP Co-Run (memcache and stressapp) with static MBA.
+-----------------------------
+memcache:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 2, 16, 0.8390000000000001,5.791,2.17,5.21,3.19, 2.46913e+06, off, memcache_text
+stressapp:
+-----------------------------
+HP and LP Co-Run (memcache and stressapp) with HWDRC.
+-----------------------------
+memcache:
+physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol
+0-11, 12, 2, 16, 1.719,18.047,4.65,13.56,6.83, 1.20732e+06, off, memcache_text
+stressapp:
+-----------------------------
