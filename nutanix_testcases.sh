@@ -90,6 +90,20 @@ function sst_config() {
 
 }
 
+function start_frequency_monitoring() {
+   hpworkload_file=$1
+   lpworkload_file=$2
+
+   turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c $HPVM_CORES --interval 1 --out ${hpworkload_file}_stat.txt & 
+   turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c $LPVM_CORES --interval 1 --out ${lpworkload_file}_stat.txt & 
+}
+
+function stop_frequency_monitoring() {
+   
+   killall -9 turbostat
+
+}
+
 function start_pqos_monitoring() {
   hpworkload_file=$1
   if (( $MONITORING == 1))
