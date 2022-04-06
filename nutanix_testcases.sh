@@ -67,7 +67,7 @@ function destroy_vms() {
   virsh list --all --name|xargs -i virsh undefine {}
 }
 
-function start_monitoring() {
+function start_pqos_monitoring() {
   hpworkload_file=$1
   if (( $MONITORING == 1))
   then
@@ -76,7 +76,7 @@ function start_monitoring() {
   fi
 }
 
-function stop_monitoring() {
+function stop_pqos_monitoring() {
   if (( $MONITORING == 1))
   then
     kill -SIGINT $mon_pid
@@ -92,14 +92,14 @@ function hp_solo_run() {
   restart_vms
   
   # monitor, if enabled
-  start_monitoring "$hpworkload_file"
+  start_pqos_monitoring "$hpworkload_file"
 
   # run the experiment
   echo "Starting benchmark now ...."
   ./run.sh -T vm -S run -O $hpworkload_file
    
   #clean up
-  stop_monitoring # stop monitor, if enabled
+  stop_pqos_monitoring # stop monitor, if enabled
   destroy_vms
   sed -i 's/"5G" :1/"5G" :0/g' vm_cloud-init.py
   rm -rf /home/vmimages2/*
