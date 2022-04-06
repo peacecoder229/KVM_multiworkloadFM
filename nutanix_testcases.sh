@@ -67,6 +67,29 @@ function destroy_vms() {
   virsh list --all --name|xargs -i virsh undefine {}
 }
 
+function sst_config() {
+  
+  # Reset 	
+  intel-speed-select -c $(($HPVM_CORES + $LPVM_CORES)) core-power config -c 0
+  intel-speed-select -c $(($HPVM_CORES + $LPVM_CORES)) core-power config -c 1
+  intel-speed-select -c $(($HPVM_CORES + $LPVM_CORES)) core-power config -c 2
+  intel-speed-select -c $(($HPVM_CORES + $LPVM_CORES)) core-power config -c 3
+  intel-speed-select -c $(($HPVM_CORES + $LPVM_CORES)) core-power config -c 4
+  intel-speed-select -c $(($HPVM_CORES + $LPVM_CORES)) core-power disable
+  
+  # Associate cores to CLOS
+  intel-speed-select -c $HPVM_CORES core-power assoc -c 0
+  intel-speed-select -c $LPVM_CORES core-power assoc -c 3
+  
+  #Enable SST
+  intel-speed-select -c $(($HPVM_CORES + $LPVM_CORES)) core-power enable --priority 1
+
+  #Set the CLOS parameters. Frequency for HP is 3000 Mhz and for LP is 1000 
+  intel-speed-select -c 0 core-power config --clos 0 --min 3000
+  intel-speed-select -c 0 core-power config --clos 3 --min 0 --max 1000  
+
+}
+
 function start_pqos_monitoring() {
   hpworkload_file=$1
   if (( $MONITORING == 1))
