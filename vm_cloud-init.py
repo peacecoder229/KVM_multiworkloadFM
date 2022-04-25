@@ -310,6 +310,7 @@ ip_sub = 123
 
 CPUS_PER_VM = []
 WORKLOAD_PER_VM = []
+CPU_AFFINITY = False
 
 def get_qat_vf():
 
@@ -923,12 +924,12 @@ def generate_commands(assign_random=False):
                     for _ in range(1, CPUS_PER_VM[count]):
                         cpu_set = cpu_set + "," + str(cpupool.pop())
                     
-                    cpuaffinity = f"--cpuset {cpu_set}"
-                    
                     # number of virtual cpus same as host's physical cpu
                     n_vcpus = CPUS_PER_VM[count] 
                     # name of the same as workload name
                     vm_name = WORKLOAD_PER_VM[count]
+                    # floating or affitinized
+                    cpuaffinity = f"--cpuset {cpu_set}" if CPU_AFFINITY else "" 
 
                     CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
@@ -1087,14 +1088,15 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-c', '--CPUS_PER_VM', type=str, help = 'Comma seperated list of physical cpus each vm is pinned to.')
     parser.add_argument('-w', '--WORKLOAD_PER_VM', type=str, help = 'Comma seperated list of the name of the workloads each VM will run.')
+    parser.add_argument('--cpu_affinity', action = 'store_true', help = 'Do not set cpu affinity to VMs.', default = False)
 
     args = parser.parse_args()
     
     CPUS_PER_VM = [int(cpu) for cpu in args.CPUS_PER_VM.split(',')]
-    
     WORKLOAD_PER_VM = [str(wl) for wl in args.WORKLOAD_PER_VM.split(',')]
-   
-    print ("List Workload Name per vm: ", WORKLOAD_PER_VM, "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)
+    CPU_AFFINITY = args.cpu_affinity
+
+    print ("List Workload Name per vm: ", WORKLOAD_PER_VM, "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM, "Number of VMs: ", Tile_Map["SOCKET0"]["5G"])
 
     #WORKLOAD_NAME = args.workload_name
     #print ("Workload Name: ", WORKLOAD_NAME , "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)

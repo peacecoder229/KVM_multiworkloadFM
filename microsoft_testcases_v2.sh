@@ -28,7 +28,8 @@ function init_vm_core_range() {
   done
 }
 
-# Each VM is named in the following format: <workload name>_<core range>
+# Initializes a comma seperated string of VM names.
+# Each VM is named in the following format: <workload name>_<core range>: mlc_1-15, mlc_16-32
 function init_vm_names() {
   local -a vm_workloads;
   for vm_wl in ${VM_WORKLOADS//,/ }; do
@@ -204,10 +205,10 @@ function main() {
 
   #hp_solo_run #TODO
   hp_lp_corun
-  hp_lp_corun_mba
-  hp_lp_corun_hwdrc
+  #hp_lp_corun_mba
+  #hp_lp_corun_hwdrc
   
-  append_compiled_csv
+  #append_compiled_csv
 }
 
 main $@

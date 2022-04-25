@@ -5,6 +5,7 @@ TestCase_s=""
 n_cpus_per_vm=""
 workload_per_vm=""
 file_suffix=""
+cpu_affinity=0
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -37,9 +38,11 @@ function get_config()
 function handle_args()
 {
  echo "handle args."
- while getopts ":T:S:C:W:O:" opt
+ while getopts "AT:S:C:W:O:" opt
  do 
    case $opt in 
+     A) cpu_affinity=1
+	;;
      T) TARGET="$OPTARG"
         TestCase_s=$(echo "${TestCase_s}_${TARGET}")
         ;;
@@ -55,7 +58,7 @@ function handle_args()
         echo "Invalid option: -$OPTARG"
         exit 1
        ;;
-    esac 
+    esac
  done
 }
 
@@ -68,16 +71,129 @@ function get_ip_from_vm_name()
   echo $ip
 }
 
-function setup_vm()
+function setup_vm() {
+  echo "Creating VMs with the following configurations: number of cpus per vm = $n_cpus_per_vm, workload per vm = $workload_per_vm."
+  if (( $cpu_affinity == 0 )); then
+    echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm"
+    python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm
+  else
+    echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm --cpu_affinity"
+    python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm --cpu_affinity
+  fi
+  
+  chmod 777 ./virt-install-cmds.sh
+  ./virt-install-cmds.sh
+  echo "Waiting 3 minutes for the VM to boot"
+  sleep 180
+  
+  virsh list --all --name|xargs -i virsh destroy {} --graceful
+  virsh list --all --name|xargs -i virsh start {}
+  virsh list
+  sleep 60
+
+  setup_workloads
+  sleep 180 # sleep for sometime to make sure the workload setup is successful
+}
+
+function setup_workloads()
 {
- echo "Creating VMs with the following configurations: number of cpus per vm = $n_cpus_per_vm, workload per vm = $workload_per_vm."
+  vm_name_list=$(virsh list --name)
+  
+  for vm_name in $vm_name_list
+  do
+    local vm_ip=$(get_ip_from_vm_name "$vm_name")
+    
+    # setup yum
+    scp -oStrictHostKeyChecking=no update_yum_repo.sh root@${vm_ip}:/root
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/update_yum_repo.sh"
+    
+    # setup individual workloads
+    case $vm_name in
+      *"mlc"*)
+	scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
+      ;;
+      *"rn50"*)
+	scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "xzcat  /root/rn50.img.xz |docker load"
+      ;;
+      *"fio"*)
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "scp yum -y install fio"
+      ;;
+      *"stressapp"*)
+	scp -oStrictHostKeyChecking=no /root/streeapp.tar root@${vm_ip}:/root/
+      ;;
+      *"redis"*)
+	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
+      ;;
+      *"memcache"*)
+	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
+      ;;
+      *"ffmpeg"*)
+	scp -r -oStrictHostKeyChecking=no /root/ffmpeg root@${vm_ip}:/root/
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker load < /root/ffmpeg/ffmpeg.tar"
+      ;;
+      *)
+        echo "The VM name should match the name of the workload in lowercase."
+      ;;
+    esac
+  done
+}
+
+function run_exp_vm_2()
+{
+  vm_name_list=$(virsh list --name)
+  
+  for vm_name in $vm_name_list
+  do
+    local vm_ip=$(get_ip_from_vm_name "$vm_name")
+    workload_script="" 
+    case $vm_name in
+      *"mlc"*)
+	workload_script="run_mlc.sh"
+      ;;
+      *"rn50"*)
+	workload_script="run_rn50.sh"
+      ;;
+      *"fio"*)
+	workload_script="run_fio.sh"
+      ;;
+      *"stressapp"*)
+	workload_script="run_stressapp.sh"
+      ;;
+      *"redis"*)
+	workload_script="run_redis.sh"
+      ;;
+      *"memcache"*)
+	workload_script="run_memcache.sh"
+      ;;
+      *"ffmpeg"*)
+	workload_script="run_ffmpeg.sh"
+      ;;
+      *)
+        echo "The VM name should match the name of the workload in lowercase."
+      ;;
+    esac
+    
+    echo "Run $workload_script in $vm_name: $vm_ip"   
+  
+    for iteration in 1
+    do
+      result_file=${vm_name}_${file_suffix}_${iteration}
+      echo "Result file is $result_file"
+      
+      scp -oStrictHostKeyChecking=no ${workload_script} root@${vm_ip}:/root/
+      ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/$workload_script $result_file" &
+    done # iteration
+  done # VMs
  
- python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm
- chmod 777 ./virt-install-cmds.sh
- ./virt-install-cmds.sh
- 
- echo "Waiting 2 minutes for the VM to boot"
- sleep 120
+ # waiting for the jobs to finish before we copy results back
+ for job in `jobs -p`
+ do
+   echo "Waiting for $job to finish ...."
+   wait $job
+ done
 }
 
 function run_exp_vm()
@@ -217,7 +333,7 @@ function run_memcache_vm()
 {
   vm_name=$1
   vm_ip=$2
-  echo "Run memcache in $vm_name: $vm_ip"   
+  echo "Run memcache in $vm_name: $vm_ip"
   # echo "Copying to ${ip}"
   scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
   scp -oStrictHostKeyChecking=no run_memcache.sh root@${vm_ip}:/root
@@ -286,7 +402,7 @@ function run_exp()
   done
  elif [ "vm" = "${TARGET}" ]
  then
-  run_exp_vm
+  run_exp_vm_2
   copy_result_from_vms
  fi
 }

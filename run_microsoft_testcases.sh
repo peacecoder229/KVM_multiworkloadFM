@@ -1,6 +1,6 @@
 summary_file_name="/root/nutanix_data/Summary_$(date +%Y-%m-%d_%H-%M-%S)"
 
-for workloads in '"rn50,mlc"'; do
+for workloads in '"mlc,redis"'; do
   cores='"5,3"'
   config="ms_vm_config.sh"
 
@@ -12,10 +12,10 @@ for workloads in '"rn50,mlc"'; do
   echo 'HWDRC_CAS_VAL=16' >> $config
   echo 'LLC_COS_WL="4,7"' >> $config
 
-  workloads=$(echo ${workloads/,/-})
+  workloads=$(echo ${workloads/,/-}) # replace comma by dash
   cores=$(echo ${cores/,/-})
   result_dir="/root/nutanix_data/ms_resdir_${workloads}_${cores}"
   
-  #./microsoft_testcases_v2.sh $summary_dir $config
+  ./microsoft_testcases_v2.sh $result_dir $config
   # cat $summary_dir/summary >> summary_file_name="/root/nutanix_data/Summary_$(date +%Y-%m-%d_%H-%M-%S)"
 done
