@@ -1095,7 +1095,8 @@ if __name__ == '__main__':
     CPUS_PER_VM = [int(cpu) for cpu in args.CPUS_PER_VM.split(',')]
     WORKLOAD_PER_VM = [str(wl) for wl in args.WORKLOAD_PER_VM.split(',')]
     CPU_AFFINITY = args.cpu_affinity
-
+    Tile_Map["SOCKET0"]["5G"] = len(CPUS_PER_VM)
+    
     print ("List Workload Name per vm: ", WORKLOAD_PER_VM, "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM, "Number of VMs: ", Tile_Map["SOCKET0"]["5G"])
 
     #WORKLOAD_NAME = args.workload_name

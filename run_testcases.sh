@@ -2,7 +2,7 @@
 RESULT_DIR=$1
 CONFIG=$2
 
-# Initializes NO_VMS, VM_CORES, VM_WORKLOADS, and HWDRC and MBA related parameters
+# Initializes VM_CORES, VM_WORKLOADS, and HWDRC and MBA related parameters
 source $CONFIG
 
 declare -a VM_CORE_RANGE # list of core ranges
@@ -11,6 +11,7 @@ VM_NAMES="" # Comma separated names of the VMs
 # pqos monitoring on/off
 MONITORING=1 # 1:on; 0:off
 
+# Initializes the VM_CORE_RANGE array, for example ["2-4", "5-6"]
 function init_vm_core_range() {
   local total_core=$(lscpu | grep node0 | cut -f2 -d:)
   local hi_core=$(echo $total_core | cut -f2 -d-)
@@ -103,10 +104,8 @@ function hp_solo_run() {
 }
 
 function hp_lp_corun() {
-  echo "hp lp corun: Number of VMs: $NO_VMS"
-  
-  sed -i "s|\"5G\" :0|\"5G\" :$NO_VMS|g" vm_cloud-init.py
-  
+  echo "hp lp corun: $VM_CORES, $VM_NAMES"
+
   ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
   restart_vms
 
@@ -115,7 +114,7 @@ function hp_lp_corun() {
     qos_mode=$1 # MBA or HWDRC
   fi
   result_file_suffix="co_${qos_mode}"
- 
+
   # monitor, if enabled
   if (( $MONITORING == 1)); then
     mon_file=$( echo ${VM_NAMES/,/_} )
@@ -123,13 +122,12 @@ function hp_lp_corun() {
     echo ${mon_file}
     start_monitoring "${mon_file}"
   fi
-  
-  ./run.sh -T vm -S run -O $result_file_suffix
+
+  ./run.sh -T vm -S run -O $result_file_suffix -D $RESULT_DIR 
 
   # Reset and clean up
   stop_monitoring # stop monitor, if enabled
   destroy_vms
-  sed -i "s|\"5G\" :$NO_VMS|\"5G\" :0|g" vm_cloud-init.py
   rm -rf /home/vmimages2/*
 }
 
@@ -170,14 +168,14 @@ function enable_cos_llc() {
 function hp_lp_corun_hwdrc() {
   echo "Running hp lp workloads in corun HWDRC mode."
   pqos -R
-	
+
   # enable HWDRC
   cd $PWD/hwdrc_postsi/scripts
   ./hwdrc_icx_2S_xcc_init_to_default_pqos_CAS.sh $HWDRC_CAS_VAL
   cd -
   
   # Associate each COS with the cores where each VM is running. Comment out for now. 
-  # enable_cos_llc
+  enable_cos_llc
 
   hp_lp_corun "HWDRC" #HWDRC_CAS (1 to 255)
   

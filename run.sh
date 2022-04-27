@@ -38,7 +38,7 @@ function get_config()
 function handle_args()
 {
  echo "handle args."
- while getopts "AT:S:C:W:O:" opt
+ while getopts "AT:S:C:W:O:D:" opt
  do 
    case $opt in 
      A) cpu_affinity=1
@@ -53,6 +53,8 @@ function handle_args()
      W) workload_per_vm="$OPTARG"
 	;;
      O) file_suffix="$OPTARG"
+	;;
+     D) res_dir="$OPTARG"
 	;;
      \?)
         echo "Invalid option: -$OPTARG"
@@ -350,7 +352,7 @@ function run_memcache_vm()
 function copy_result_from_vms()
 {
   # Copy the result data to `nutanix_data` directory, create if does not exist.
-  mkdir -p /root/nutanix_data
+  mkdir -p  $res_dir #/root/nutanix_data
 
   vm_name_list=$(virsh list --name)
   
@@ -362,7 +364,7 @@ function copy_result_from_vms()
    do
      result_file=${vm_name}_${file_suffix}_${iteration}
      echo "Copy result: $result_file"
-     scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${result_file} /root/nutanix_data/
+     scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${result_file} $res_dir
     done
   done
 }
