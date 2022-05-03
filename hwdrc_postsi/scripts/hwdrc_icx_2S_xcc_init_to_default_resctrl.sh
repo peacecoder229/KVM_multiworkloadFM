@@ -1,5 +1,5 @@
 source hwdrc_osmailbox_config.inc.sh
-source resctrl_config.inc.sh  
+source resctrl_config.inc.sh
 
 #2S HT on.
 HP_CORES=0-15,64-79,32-47,96-111
@@ -20,7 +20,7 @@ init_resctrl
 #Map CLOS0-3,8-15 and CLOS4 to MCLOS 0(HP) ,CLOS 5-MCLOS 1, CLOS6- MCLOS 2, CLOS7-MCLOS3(LP)
 prepare_CLOStoMCLOS
 
-#MEM_CLOS_ATTRIBUTES 
+#MEM_CLOS_ATTRIBUTES
 #config MCLOS 0 with high priority and MCLOS 3 with lowest priority
 #MCLOS 0(HP) with MAX delay 0x1, MIN delay 0x1, priority 0x0
 #MCLOS 1, with MAX delay 0xFE, MIN delay 0x1, priority 0x5
@@ -53,4 +53,3 @@ hwdrc_reg_dump
 #map CLOS4 to HP_CORES
 #map CLOS7 to LP_CORES
 associate_cores_to_clos
-

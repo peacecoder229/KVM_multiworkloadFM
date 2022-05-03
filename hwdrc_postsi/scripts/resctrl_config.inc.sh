@@ -23,7 +23,7 @@ g_mapclostomclos=$[mclos << closid *2]
 
 }
 
-prepare_CLOStoMCLOS(){
+prepare_CLOStoMCLOS() {
 #map CLOS4 to MCLOS0 HP
 #map CLOS5 to MCLOS1 
 #map CLOS6 to MCLOS2
@@ -45,7 +45,7 @@ g_CLOSToMEMCLOS=$[g_CLOSToMEMCLOS + g_mapclostomclos]
 #printf 'CLOSToMEMCLOS=%x\n' $g_CLOSToMEMCLOS
 }
 
-associate_cores_to_clos(){
+associate_cores_to_clos() {
 
 echo "map CLOS4 to HP_CORES:"$HP_CORES
 echo "map CLOS7 to LP_CORES:"$LP_CORES
