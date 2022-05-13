@@ -6,3 +6,4 @@ remove-cd-virt-install-cmds.sh
 *.pdf
 __pycache__/
 *_mon
+output_*

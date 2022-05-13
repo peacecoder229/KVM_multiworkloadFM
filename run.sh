@@ -182,7 +182,10 @@ function run_exp_vm_2()
   
     for iteration in 1
     do
-      result_file=${vm_name}_${file_suffix}_${iteration}
+      wl_name=$(echo $vm_name | cut -d"_" -f1 )
+      start_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f1)
+      end_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f2)
+      result_file=${wl_name}_${start_core}-${end_core}_${file_suffix}_rep_${iteration}
       echo "Result file is $result_file"
       
       scp -oStrictHostKeyChecking=no ${workload_script} root@${vm_ip}:/root/
@@ -362,7 +365,11 @@ function copy_result_from_vms()
    
    for iteration in 1
    do
-     result_file=${vm_name}_${file_suffix}_${iteration}
+     wl_name=$(echo $vm_name | cut -d"_" -f1 )
+     start_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f1)
+     end_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f2)
+     result_file=${wl_name}_${start_core}-${end_core}_${file_suffix}_rep_${iteration}
+
      echo "Copy result: $result_file"
      scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${result_file} $res_dir
     done

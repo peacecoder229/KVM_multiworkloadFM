@@ -1,3 +1,4 @@
+
 RESULT_DIR=$1
 CONFIG=$2
 
@@ -5,11 +6,10 @@ CONFIG=$2
 source $CONFIG
 
 declare -a VM_CORE_RANGE # list of core ranges
-declare -a VM_WORKLOAD_LIST
 VM_NAMES="" # Comma separated names of the VMs
 
 # pqos monitoring on/off
-MONITORING=0 # 1:on; 0:off TODO: Need to fix
+MONITORING=1 # 1:on; 0:off
 
 SST_ENABLE=0 # 1:on; 0:off
 
@@ -34,15 +34,16 @@ function init_vm_core_range() {
 # Initializes a comma seperated string of VM names.
 # Each VM is named in the following format: <workload name>_<core range>: mlc_1-15, mlc_16-32
 function init_vm_names() {
+  local -a vm_workloads
   for vm_wl in ${VM_WORKLOADS//,/ }; do
-    VM_WORKLOAD_LIST+=($vm_wl)
+    vm_workloads+=($vm_wl)
   done
   
-  for i in "${!VM_WORKLOAD_LIST[@]}"; do
-    echo "${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}"
-    VM_NAMES+="${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}"
+  for i in "${!vm_workloads[@]}"; do
+    echo "${vm_workloads[i]}_${VM_CORE_RANGE[i]}"
+    VM_NAMES+="${vm_workloads[i]}_${VM_CORE_RANGE[i]}"
     
-    if [[ $i != $((${#VM_WORKLOAD_LIST[@]}-1)) ]]; then
+    if [[ $i != $((${#vm_workloads[@]}-1)) ]]; then
       VM_NAMES+=","
     fi
   done
@@ -51,7 +52,7 @@ function init_vm_names() {
 }
 
 function setup_env() {
-  #cpupower frequency-set -u 2700Mhz -d 2700Mhz
+  cpupower frequency-set -u 2700Mhz
   
   pqos -R
   
@@ -112,18 +113,19 @@ function hp_lp_corun() {
   sudo dhclient -r $ sudo dhclient
   if [ $cos_mode == "RESCTRL-MBA" ] || [ $cos_mode == "RESCTRL-HWDRC" ]; then # launch VM w/o cpu affinity
     echo "Launching VMs without cpu affinity."
-    ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+    #./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
   else
     echo "Launching VMs with cpu affinity."
-    ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
+    #./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
   fi
   restart_vms
 
-  result_file_suffix="co_${cos_mode}_sst-${SST_ENABLE}"
+  result_file_suffix="co_sst-${SST_ENABLE}_${cos_mode}"
   
   # TODO: enable SST
   if [[ $SST_ENABLE -eq 1 ]]; then
-    sst_config
+    #sst_config
+    echo ""
   fi
   
   # configure RESCTRL-MBA or RESCTRL-HWDRC
@@ -134,12 +136,10 @@ function hp_lp_corun() {
     echo "cos_mode: $cos_mode, configuring resctrl hwdrc"
     config_resctrl_hwdrc
   fi
-  
-  start_frequency_monitoring "$result_file_suffix"
 
   # start pqos monitor, if enabled
   if (( $MONITORING == 1)); then
-    mon_file=$( echo ${VM_NAMES//,/_} )
+    mon_file=$( echo ${VM_NAMES/,/_} )
     mon_file=${mon_file}_${result_file_suffix}_mon
     echo ${mon_file}
     start_monitoring "${mon_file}"
@@ -148,13 +148,9 @@ function hp_lp_corun() {
   # Run experiments in the VMs
   ./run.sh -T vm -S run -O $result_file_suffix -D $RESULT_DIR
 
-  # Reset monitoring and process data 
-  stop_frequency_monitoring
-  process_sst_data "$result_file_suffix"
-
   # Reset and clean up
   stop_monitoring # stop monitor, if enabled
-  destroy_vms
+  #destroy_vms
   rm -rf /home/vmimages2/*
 }
 
@@ -164,23 +160,19 @@ function hp_lp_corun_wo_cos() {
 
 function hp_lp_corun_mba() {
   echo "Running hp lp workloads in corun mba mode."
- 
-  pqos -R 
-
+  
   # Associate each COS MBA with the cores where each VM is running.
   i=0
   for cos in ${MBA_COS_WL//,/ }; do
     echo "pqos -a "core:$cos=${VM_CORE_RANGE[i]}""
     pqos -a "core:$cos=${VM_CORE_RANGE[i]}"
-    echo "++++++++++++++++++++++++++++++++++++++"
     i=$((i+1))
   done
   
-  # Set various COS to various memory bandwidth availability
+  # Set various COS to various memory bandwidth availability 
   for cos_val in ${MBA_COS_VAL//,/ }; do
     echo "pqos -e 'mba:$cos_val'"
     pqos -e "mba:$cos_val"
-    echo "++++++++++++++++++++++++++++++++++++++"
   done
 
   hp_lp_corun "MBA"
@@ -228,91 +220,6 @@ function disable_resctrl() {
   umount resctrl
 }
 
-# enable sst
-function sst_config() {
-  # reset to default state before applying the changes
-  sst_reset
-  
-  echo "Configuring SST ... "
-
-  # Associate cores to CLOS groups
-  i=0 
-  for sst_cos in ${SST_COS_WL//,/ }; do
-    #Example: intel-speed-select -c $HPCORE_RANGE core-power assoc -c 0
-    intel-speed-select -c ${VM_CORE_RANGE[i]} core-power assoc -c $sst_cos
-    echo "intel-speed-select -c ${VM_CORE_RANGE[i]} core-power assoc -c $sst_cos"
-    i=$((i+1))
-  done
-
-  #Enable SST
-  intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) core-power enable --priority 1
-
-  #Set the CLOS parameters. Frequency for HP is 3000 Mhz and for LP is 1000
-  #intel-speed-select -c 0 core-power config --clos 0 --min 3000 # max is 3100
-  
-  for sst_cos_freq in ${SST_COS_FREQ//,/ }; do
-    sst_cos=$(echo $sst_cos_freq | cut -d: -f1)
-    min_freq=$(echo $sst_cos_freq | cut -d: -f2 | cut -d- -f1)
-    max_freq=$(echo $sst_cos_freq | cut -d: -f2 | cut -d- -f2)
-    
-    # Example: intel-speed-select -c 0 core-power config --clos 3 --min 0 --max 500
-    if [[ $max_freq == 0 ]]; then
-      intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq
-    else
-      intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq
-    fi
-  done
-}
-
-# disable sst
-function sst_reset() {
-  echo "Reseting SST config ....."
-  
-  #wrmsr -a 0x774 0xff00
-  #wrmsr -a 0x620 0x0818
-
-  # Reset 	
-  intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power config -c 0 &> /dev/null
-  intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power config -c 1 &> /dev/null
-  intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power config -c 2 &> /dev/null
-  intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power config -c 3 &> /dev/null
-
-  intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power disable &> /dev/null
-}
-
-function start_frequency_monitoring() {
-  result_file_suffix=$1
-  
-  i=0
-  for vm_wl in ${VM_WORKLOADS//,/ }; do
-    turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c ${VM_CORE_RANGE[i]} --interval 1 --out $RESULT_DIR/${vm_wl}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt &
-    
-    echo "turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c ${VM_CORE_RANGE[i]} --interval 1 --out $RESULT_DIR/${vm_wl}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt &"
-    
-    i=$((i+1))
-  done
-}
-
-function stop_frequency_monitoring() {
-  killall -9 turbostat # stop capturing
-}
-
-function process_sst_data() {
-  result_file_suffix=$1
-
-  echo "Processing sst data ...."
-  #Start processing data; <filename> <number of instances> <starting offset>
-  i=0
-  for vm_core in ${VM_CORES//,/ }; do
-    offset=$(echo ${VM_CORE_RANGE[i]} | cut -d- -f1)
-    ./turbostat_process.sh $RESULT_DIR/${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt $vm_core $offset >> $RESULT_DIR/${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat-avg.txt
-    
-    echo "./turbostat_process.sh $RESULT_DIR/${VM_WORKLOADS[i]}_${vm_core_range}_${result_file_suffix}_turbostat.txt $vm_core $offset >> $RESULT_DIR/${VM_WORKLOADS[i]}_${vm_core_range}_${result_file_suffix}_turbostat-avg.txt"
-  
-    i=$((i+1))
-  done
-}
-
 function config_resctrl_mba() {
    echo "Configuring RESCTRL MBA."
 
@@ -344,6 +251,7 @@ function config_resctrl_mba() {
 
 function config_resctrl_hwdrc() {
   vm_name_list=$(virsh list --name)
+  clos=("C04" "C07")
   local -a clos_list
   for clos in ${HWDRC_COS_WL}; do
     if [[ $clos -ge 10 ]]; then
@@ -373,33 +281,29 @@ function config_resctrl_hwdrc() {
 function append_compiled_csv() {
  echo "TODO: Need to compile result"
  local cos_list=$1 #comma seperated list
- local file_suffix=$2 #TODO 
-
+ 
+ i=0
  for cos in ${cos_list//,/ }; do
    row=""
-   i=0
    for vm_wl in ${VM_WORKLOADS//,/ }; do
      # <workload>_<core_range>_<co/solo>_<cos>_<iteration>
-     file_suffix=${vm_wl}_${VM_CORE_RANGE[i]}_co_${cos}_sst-${SST_ENABLE} 
-     outfile="$RESULT_DIR/${file_suffix}_rep_1"
-     turbostat_file="$RESULT_DIR/${file_suffix}_turbostat-avg.txt"
-     echo "Getting score from $outfile and cpu freq from $turbostat_file"
-
-     score=$(get_score "${outfile}")
-     freq=$(get_cpu_freq "${turbostat_file}")
+     file_name="$RESULT_DIR/${vm_wl}_${VM_CORE_RANGE[i]}_co_${cos}"
+     
+     score=$(get_score "${file_name}")
+     freq=$(get_cpu_freq "${file_name}")
      
      local temp="$vm_wl, ${VM_CORE_RANGE[i]}, $score, $freq"
      
      if [[ $row == "" ]]; then
        row="${temp}"
      else
-       row="${row}, ${temp}"
+       row="${row},${temp}"
      fi
+     
+     row >> $RESULT_DIR/summary.txt
 
      i=$((i+1))
    done
-   # Write to summary file
-   echo "$row, $cos, sst-$SST_ENABLE" >> $RESULT_DIR/summary.txt
  done
 }
 
@@ -410,10 +314,10 @@ function get_score() {
 
   case $workload in
     *"mlc"*)
-      echo "$(cat ${filename} | tail -1 | cut -d','  -f2)"
+      echo "$(cat ${filename}_rep_1 | tail -1 | cut -d','  -f2)"
     ;;
     *"rn50"*)
-      echo "$(cat ${filename} | tail -1)"
+      echo "$(cat ${filename}_rep_1 | tail -1)"
     ;;
     *"fio"*)
       echo "N/A"
@@ -422,10 +326,10 @@ function get_score() {
       echo "N/A"
     ;;
     *"redis"* | *"memcache"*)
-      echo "$(cat ${filename} | cut -d',' -f10 | tail -1)"
+      echo "$(cat ${filename}_rep_1 | cut -d',' -f10 | tail -1)"
     ;;
     *"ffmpeg"*)
-      echo "$(cat ${filename} | cut -d':' -f2)"
+      echo "$(cat ${filename}_rep_1 | cut -d':' -f2)"
     ;;
     *)
       echo "N/A"
@@ -433,31 +337,19 @@ function get_score() {
   esac
 }
 
-function get_cpu_freq() {
-  avg_stat_file=$1
-  echo "$(cat $avg_stat_file | tail -1 | awk '{print $3}')"
-}
-
 function main() {
   setup_env
   init_vm_core_range
   init_vm_names
 
-  #hp_solo_run #TODO: Don't think we need it.
+  #hp_solo_run #TODO
+  hp_lp_corun_wo_cos
   #hp_lp_corun_mba
   #hp_lp_corun_hwdrc
   #hp_lp_corun_resctrl_mba
   #hp_lp_corun_resctrl_hwdrc  
   
-  # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
-  
-  #hp_lp_corun_wo_cos
-  SST_ENABLE=1 # 1:on; 0:off
-  hp_lp_corun_wo_cos
-  append_compiled_csv "na"
-  
-  #hp_lp_corun_mba
-  #hp_lp_corun_hwdrc
+  append_compiled_csv "N/A,mba"
 }
 
 main $@
