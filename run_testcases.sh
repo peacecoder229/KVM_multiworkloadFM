@@ -53,6 +53,8 @@ function init_vm_names() {
 function setup_env() {
   #cpupower frequency-set -u 2700Mhz -d 2700Mhz
   
+  sst_reset
+  
   pqos -R
   
   rm -rf /root/.ssh/known_hosts
@@ -112,10 +114,10 @@ function hp_lp_corun() {
   sudo dhclient -r $ sudo dhclient
   if [ $cos_mode == "RESCTRL-MBA" ] || [ $cos_mode == "RESCTRL-HWDRC" ]; then # launch VM w/o cpu affinity
     echo "Launching VMs without cpu affinity."
-    ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+    ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
   else
     echo "Launching VMs with cpu affinity."
-    ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
+    ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
   fi
   restart_vms
 
@@ -172,7 +174,6 @@ function hp_lp_corun_mba() {
   for cos in ${MBA_COS_WL//,/ }; do
     echo "pqos -a "core:$cos=${VM_CORE_RANGE[i]}""
     pqos -a "core:$cos=${VM_CORE_RANGE[i]}"
-    echo "++++++++++++++++++++++++++++++++++++++"
     i=$((i+1))
   done
   
@@ -180,7 +181,6 @@ function hp_lp_corun_mba() {
   for cos_val in ${MBA_COS_VAL//,/ }; do
     echo "pqos -e 'mba:$cos_val'"
     pqos -e "mba:$cos_val"
-    echo "++++++++++++++++++++++++++++++++++++++"
   done
 
   hp_lp_corun "MBA"
@@ -199,9 +199,15 @@ function hp_lp_corun_hwdrc() {
   ./hwdrc_icx_2S_xcc_init_to_default_pqos_CAS.sh $HWDRC_CAS_VAL
   cd -
   
-  # Associate each COS with the cores where each VM is running. Comment out for now. 
-  enable_cos_llc
-
+ # Associate each COS LLC with the cores where each VM is running.
+  i=0
+  for cos in ${HWDRC_COS_WL//,/ }; do
+    echo "pqos -a "llc:$cos=${VM_CORE_RANGE[i]}""
+    pqos -a "llc:$cos=${VM_CORE_RANGE[i]}"
+    i=$((i+1))
+  done
+ 
+  # run the experiment
   hp_lp_corun "HWDRC" #HWDRC_CAS (1 to 255)
   
   # disable HWDRC
@@ -214,15 +220,6 @@ function hp_lp_corun_resctrl_hwdrc() {
   hp_lp_corun "RESCTRL-HWDRC"
 }
 
-# Associate each COS LLC with the cores where each VM is running.
-function enable_cos_llc() {
-  i=0
-  for cos in ${HWDRC_COS_WL//,/ }; do
-    echo "pqos -a "llc:$cos=${VM_CORE_RANGE[i]}""
-    pqos -a "llc:$cos_val=${VM_CORE_RANGE[i]}"
-    i=$((i+1))
-  done
-}
 
 function disable_resctrl() {
   umount resctrl
@@ -258,8 +255,10 @@ function sst_config() {
     # Example: intel-speed-select -c 0 core-power config --clos 3 --min 0 --max 500
     if [[ $max_freq == 0 ]]; then
       intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq
+      echo "intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq"
     else
       intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq
+      echo "intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq"
     fi
   done
 }
@@ -453,11 +452,12 @@ function main() {
   
   #hp_lp_corun_wo_cos
   SST_ENABLE=1 # 1:on; 0:off
-  hp_lp_corun_wo_cos
-  append_compiled_csv "na"
+  #hp_lp_corun_wo_cos
+  #hp_lp_corun_wo_cos
+  hp_lp_corun_hwdrc
+  append_compiled_csv "HWDRC"
   
   #hp_lp_corun_mba
-  #hp_lp_corun_hwdrc
 }
 
 main $@

@@ -16,9 +16,9 @@ source hwdrc_osmailbox_config.inc.sh
 #SPR E0 56C
 #NUMA node0 CPU(s):   0-55,112-167
 #NUMA node1 CPU(s):   56-111,168-223
-HP_CORES=0-27
+HP_CORES=$2
 #112-139,56-83,168-195
-LP_CORES=28-55
+LP_CORES=$3
 #,140-167,84-111,196-223
 
 # for nginx test
@@ -86,6 +86,7 @@ hwdrc_reg_dump
 #pqos -e llc:7=0x7fff
 #pqos -e llc:4=0x7fff
 
-
+# don't do the following here, do it in the run_testcases.sh instead.
 #pqos -a llc:7=$LP_CORES
 #pqos -a llc:4=$HP_CORES
+

@@ -1,6 +1,6 @@
 result_file=$1
 
-mlc --loaded_latency -R -t300 -d0 -k1-$[$(getconf _NPROCESSORS_ONLN)-1] > ${result_file}_temp
+mlc --loaded_latency -R -t200 -d0 -k1-$[$(getconf _NPROCESSORS_ONLN)-1] > ${result_file}_temp
 
 lat=$(cat ${result_file}_temp | grep 00000 | awk '{print $2}')
 bw=$(cat ${result_file}_temp | grep 00000 | awk '{print $3}')
