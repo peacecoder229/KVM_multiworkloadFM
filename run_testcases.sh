@@ -39,7 +39,7 @@ function init_vm_names() {
   done
   
   for i in "${!VM_WORKLOAD_LIST[@]}"; do
-    echo "${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}"
+   echo "${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}"
     VM_NAMES+="${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}"
     
     if [[ $i != $((${#VM_WORKLOAD_LIST[@]}-1)) ]]; then
@@ -156,7 +156,7 @@ function hp_lp_corun() {
 
   # Reset and clean up
   stop_monitoring # stop monitor, if enabled
-  destroy_vms
+  #destroy_vms
   rm -rf /home/vmimages2/*
 }
 
@@ -426,6 +426,9 @@ function get_score() {
     *"ffmpeg"*)
       echo "$(cat ${filename} | cut -d':' -f2)"
     ;;
+    *"ffmpegbl"*)
+      echo "$(cat ${filename})"
+    ;;
     *)
       echo "N/A"
     ;;
@@ -450,12 +453,13 @@ function main() {
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
   
-  #hp_lp_corun_wo_cos
+  hp_lp_corun_wo_cos
+  
   SST_ENABLE=1 # 1:on; 0:off
   #hp_lp_corun_wo_cos
   #hp_lp_corun_wo_cos
-  hp_lp_corun_hwdrc
-  append_compiled_csv "HWDRC"
+  #hp_lp_corun_hwdrc
+  #append_compiled_csv "HWDRC"
   
   #hp_lp_corun_mba
 }

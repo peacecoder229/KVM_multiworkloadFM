@@ -132,9 +132,32 @@ function setup_workloads()
 	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
-      *"ffmpeg"*)
+      *"ffmpegdocker"*)
 	scp -r -oStrictHostKeyChecking=no /root/ffmpeg root@${vm_ip}:/root/
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker load < /root/ffmpeg/ffmpeg.tar"
+      ;;
+       *"ffmpegbm"*)
+         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm" 
+         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm"
+         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum-config-manager --enable powertools"
+         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf -y install ffmpeg"
+	 scp -r -oStrictHostKeyChecking=no /home/uhd1.webm root@${vm_ip}:/root/
+      ;;
+     
+      *"rnnt"*)
+	# Increase the volume of VM disk
+	virsh shutdown $vm_name; sleep 10
+	qcow_file=$(virsh domblklist $vm_name | grep vda | awk '{print $2}')
+	echo "qemu-img resize $qcow_file +150G"
+	qemu-img resize $qcow_file +150G
+ 	virsh start $vm_name; sleep 60
+	
+	# copy rnnt
+	scp -r -oStrictHostKeyChecking=no /home/rnnt root@${vm_ip}:/root/ &
+        
+	# create docker
+	docker pull dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16
+	docker run -itd --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 bash
       ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."
@@ -143,7 +166,7 @@ function setup_workloads()
   done
 }
 
-function run_exp_vm_2()
+function run_exp_vm()
 {
   vm_name_list=$(virsh list --name)
   
@@ -170,8 +193,11 @@ function run_exp_vm_2()
       *"memcache"*)
 	workload_script="run_memcache.sh"
       ;;
-      *"ffmpeg"*)
-	workload_script="run_ffmpeg.sh"
+      *"ffmpegbm"*)
+	workload_script="run_ffmpeg_baremetal.sh"
+      ;;
+      *"rnnt"*)
+	workload_script="run_rnnt.sh"
       ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."
@@ -189,7 +215,7 @@ function run_exp_vm_2()
       echo "Result file is $result_file"
       
       scp -oStrictHostKeyChecking=no ${workload_script} root@${vm_ip}:/root/
-      ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/$workload_script $result_file" &
+      ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/$workload_script $result_file" &
     done # iteration
   done # VMs
  
@@ -199,157 +225,6 @@ function run_exp_vm_2()
    echo "Waiting for $job to finish ...."
    wait $job
  done
-}
-
-function run_exp_vm()
-{
-  vm_name_list=$(virsh list --name)
-  
-  for vm_name in $vm_name_list
-  do
-    local vm_ip=$(get_ip_from_vm_name "$vm_name")
-    
-    # setup yum
-    scp -oStrictHostKeyChecking=no update_yum_repo.sh root@${vm_ip}:/root
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/update_yum_repo.sh" &
-
-    case $vm_name in
-      *"mlc"*)
-        run_mlc_vm "$vm_name" "$vm_ip"
-      ;;
-      *"rn50"*)
-        run_rn50_vm "$vm_name" "$vm_ip"
-      ;;
-      *"fio"*)
-        run_fio_vm "$vm_name" "$vm_ip"
-      ;;
-      *"stressapp"*)
-        run_stressapp_vm "$vm_name" "$vm_ip"
-      ;;
-      *"redis"*)
-        run_redis_vm "$vm_name" "$vm_ip"
-      ;;
-      *"memcache"*)
-        run_memcache_vm "$vm_name" "$vm_ip"
-      ;;
-    *)
-      echo "The VM name should match the name of the workload in lowercase."
-      ;;
-    esac
-  done
- 
- # waiting for the jobs to finish before we copy results back
- for job in `jobs -p`
- do
-   #echo "Waiting for $job to finish ...."
-   wait $job
- done
-}
-
-function run_mlc_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
-{
-  vm_name=$1
-  vm_ip=$2
-  echo "Run mlc in $vm_name: $vm_ip"   
-  # echo "Copying to ${ip}"
-  scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
-  #scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${ip}:/root/
-  scp -oStrictHostKeyChecking=no run_mlc.sh root@${vm_ip}:/root
-  
-  for iteration in 1
-  do
-    result_file=${vm_name}_${file_suffix}_${iteration}
-    
-    echo "Result file is $result_file"
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_mlc.sh $result_file" &
-  done
-}
-
-function run_rn50_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
-{
-  vm_name=$1
-  vm_ip=$2
-  echo "Run rn50 in $vm_name: $vm_ip"   
-  echo "Copying to ${vm_ip}"
-  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
-  scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
-  scp -oStrictHostKeyChecking=no run_rn50.sh root@${vm_ip}:/root
-  
-  for iteration in 1
-  do
-    result_file=${vm_name}_${file_suffix}_${iteration}
-    echo "Result file is $result_file"
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_rn50.sh $result_file" &
-  done 
-}
-
-function run_stressapp_vm() # [TODO Rohan]: Have one function and take the name of benchmark. Just call it run VM
-{
-  vm_name=$1
-  vm_ip=$2
-  echo "Run rn50 in $vm_name: $vm_ip"   
-  echo "Copying to ${vm_ip}"
-  scp -oStrictHostKeyChecking=no /usr/local/bin/mlc root@${vm_ip}:/usr/local/bin/
-  scp -oStrictHostKeyChecking=no /root/streeapp.tar root@${vm_ip}:/root/
-  scp -oStrictHostKeyChecking=no run_stressapp.sh root@${vm_ip}:/root
-  
-  for iteration in 1
-  do
-    result_file="dummy"
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_stressapp.sh $result_file" &
-  done
-}
-
-function run_fio_vm()
-{
-  vm_name=$1
-  vm_ip=$2
-  echo "Run fio in $vm_name: $vm_ip"   
-  # echo "Copying to ${ip}"
-  scp -oStrictHostKeyChecking=no run_fio.sh root@${vm_ip}:/root
-
-  for iteration in 1
-  do
-    result_file=${vm_name}_${file_suffix}_${iteration}
-    echo "Result file is $result_file"
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_fio.sh $result_file" &
-  done 
-}
-
-function run_redis_vm()
-{
-  vm_name=$1
-  vm_ip=$2
-  echo "Run redis in $vm_name: $vm_ip"   
-  # echo "Copying to ${ip}"
-  scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
-  scp -oStrictHostKeyChecking=no run_redis.sh root@${vm_ip}:/root
-  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
-
-  for iteration in 1
-  do
-    result_file=${vm_name}_${file_suffix}_${iteration}
-    echo "Result file is $result_file"
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_redis.sh $result_file" &
-  done
-}
-
-function run_memcache_vm()
-{
-  vm_name=$1
-  vm_ip=$2
-  echo "Run memcache in $vm_name: $vm_ip"
-  # echo "Copying to ${ip}"
-  scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
-  scp -oStrictHostKeyChecking=no run_memcache.sh root@${vm_ip}:/root
-  ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
-
-  for iteration in 1
-  do
-    result_file=${vm_name}_${file_suffix}_${iteration}
-    echo "Result file is $result_file"
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/run_memcache.sh $result_file" &
-  done
 }
 
 function copy_result_from_vms()
@@ -411,7 +286,7 @@ function run_exp()
   done
  elif [ "vm" = "${TARGET}" ]
  then
-  run_exp_vm_2
+  run_exp_vm
   copy_result_from_vms
  fi
 }

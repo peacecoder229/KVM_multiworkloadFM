@@ -1053,7 +1053,6 @@ def run_test(test_commands, test_commands_remove_cd):
     file2.close()
     print("END here ..... -> {}".format(get_linenumber()))
 
-
 def find(key, dictionary):
     for k, v in dictionary.items():
         if k == key:
