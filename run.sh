@@ -148,16 +148,17 @@ function setup_workloads()
 	# Increase the volume of VM disk
 	virsh shutdown $vm_name; sleep 10
 	qcow_file=$(virsh domblklist $vm_name | grep vda | awk '{print $2}')
-	echo "qemu-img resize $qcow_file +150G"
-	qemu-img resize $qcow_file +150G
+	echo "qemu-img resize $qcow_file +200G"
+	qemu-img resize $qcow_file +200G
  	virsh start $vm_name; sleep 60
 	
-	# copy rnnt
-	scp -r -oStrictHostKeyChecking=no /home/rnnt root@${vm_ip}:/root/ &
-        
 	# create docker
-	docker pull dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16
-	docker run -itd --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 bash
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker pull dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16"
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker run -itd --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 bash"
+	
+	# copy rnnt
+	scp -r -oStrictHostKeyChecking=no /home/rnnt root@${vm_ip}:/home/dataset/pytorch/
+	scp -r -oStrictHostKeyChecking=no run_rnnt_exec.sh root@${vm_ip}:/home/dataset/pytorch/
       ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."

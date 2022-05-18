@@ -266,7 +266,7 @@ Tile_Resource = {
     },
     "5G": {
         "VCPU": 20,
-        "MEMORY": 40,
+        "MEMORY": 80,
         "IMG": "cpu_inference_golden_vmimage.qcow2"
     }
     

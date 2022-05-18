@@ -119,7 +119,8 @@ function hp_lp_corun() {
     echo "Launching VMs with cpu affinity."
     ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
   fi
-  restart_vms
+  #restart_vms
+  sleep 60
 
   result_file_suffix="co_${cos_mode}_sst-${SST_ENABLE}"
   

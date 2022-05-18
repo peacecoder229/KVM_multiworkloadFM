@@ -1,4 +1,4 @@
-for workloads in "ffmpegbm"; do
+for workloads in "rnnt"; do
   cores="16"
   config="ms_vm_config.sh"
   

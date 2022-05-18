@@ -1,36 +1,22 @@
 #!/bin/bash
 
-numactl -C 0-3 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_0_cores_0-3.log &
+result_file=$1
+total_cores=$(getconf _NPROCESSORS_ONLN)
+docker exec pytorch_spr_2022_ww16 /bin/bash -c "/home/dataset/pytorch/run_rnnt_exec.sh $total_cores"
 
-numactl -C 4-7 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_1_cores_4-7.log &
+cd /home/dataset/pytorch
 
-numactl -C 8-11 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_2_cores_8-11.log &
+# process data after run
+start=0
+total_avg=0.0
+for log in *.log; do
+  avg=$(grep "Throughput:" $log | awk '{print $2}')
+  
+  total_avg=$(awk "BEGIN{ print $avg + $total_avg}")
 
-numactl -C 12-15 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_3_cores_12-15.log &
+  start=$((start+4))
+done
 
-numactl -C 16-19 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_4_cores_16-19.log &
+cd -
 
-numactl -C 20-23 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_5_cores_20-23.log &
-
-numactl -C 24-27 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_6_cores_24-27.log &
-
-numactl -C 28-31 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_7_cores_28-31.log &
-
-numactl -C 32-35 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_8_cores_32-35.log &
-
-numactl -C 36-39 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_9_cores_36-39.log &
-
-numactl -C 40-43 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_10_cores_40-43.log &
-
-
-numactl -C 44-47 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_11_cores_44-47.log &
-
-
-numactl -C 48-51 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_12_cores_48-51.log &
-
-
-numactl -C 52-55 -m 0 /root/anaconda3/envs/pytorch/bin/python3 -u /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/inference.py --batch_size 1 --ckpt /home/dataset/pytorch/rnnt/results/rnnt.pt --dataset_dir /home/dataset/pytorch/rnnt/dataset/LibriSpeech --ipex --jit --model_toml /root/workspace/benchmark/pytorch_model/models/language_modeling/pytorch/rnnt/inference/cpu/configs/rnnt.toml --val_manifest /home/dataset/pytorch/rnnt/dataset/LibriSpeech/librispeech-dev-clean-wav.json --warm_up 10 2>&1 | tee /home/dl_boost/log/pytorch/instance_logs/rnn_t/rnn_t_log_inference_latency_avx_fp32_bs_1_real_20220513141835_1_20220513141836_instance_13_cores_52-55.log &
-
-
-
-
+echo "$total_avg" > /root/$result_file
