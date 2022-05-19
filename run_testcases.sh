@@ -9,7 +9,7 @@ declare -a VM_WORKLOAD_LIST
 VM_NAMES="" # Comma separated names of the VMs
 
 # pqos monitoring on/off
-MONITORING=0 # 1:on; 0:off TODO: Need to fix
+MONITORING=1 # 1:on; 0:off TODO: Need to fix
 
 SST_ENABLE=0 # 1:on; 0:off
 
@@ -51,8 +51,11 @@ function init_vm_names() {
 }
 
 function setup_env() {
-  #cpupower frequency-set -u 2700Mhz -d 2700Mhz
-  
+  if (($SST_ENABLE == 0)); then
+    cpupower frequency-set -u 2300Mhz -d 2300Mhz
+    echo "cpupower frequency-set -u 2300Mhz -d 2300Mhz"
+  fi
+
   sst_reset
   
   pqos -R
@@ -209,7 +212,7 @@ function hp_lp_corun_hwdrc() {
   done
  
   # run the experiment
-  hp_lp_corun "HWDRC" #HWDRC_CAS (1 to 255)
+  hp_lp_corun "HWDRC-$HWDRC_CAS_VAL" #HWDRC_CAS (1 to 255)
   
   # disable HWDRC
   cd $PWD/hwdrc_postsi/scripts
@@ -454,7 +457,8 @@ function main() {
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
   
-  hp_lp_corun_wo_cos
+  #hp_lp_corun_wo_cos
+  hp_lp_corun_hwdrc
   
   SST_ENABLE=1 # 1:on; 0:off
   #hp_lp_corun_wo_cos
