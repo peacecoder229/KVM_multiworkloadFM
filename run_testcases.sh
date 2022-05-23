@@ -79,6 +79,7 @@ function destroy_vms() {
   virsh list
   virsh list --all --name|xargs -i virsh destroy {} --graceful
   virsh list --all --name|xargs -i virsh undefine {}
+  sleep 60
 }
 
 function start_monitoring() {
@@ -93,52 +94,26 @@ function start_monitoring() {
     fi
   done 
   echo "$core_ranges" 
+  
   # monitor local memory bandwidth on the core ranges 
-  exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:$core_ranges" ${mon_file} &
+  exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:$core_ranges" $RESULT_DIR/${mon_file} &
   mon_pid=$!
 }
 
 function stop_monitoring() {
-  if (( $MONITORING == 1))
-  then
+  if (( $MONITORING == 1)); then
     kill -SIGINT $mon_pid
   fi
-}
-
-function hp_solo_run() {
-  echo "TODO: hp_solo_run"
 }
 
 function hp_lp_corun() {
   local cos_mode=$1 # na, MBA, HWDRC, RESCTRL-MBA, or RESCTRL-HWDRC
   echo "Running hp lp corun in $cos_mode mode."
   
-  # set up the VMs
-  sudo dhclient -r $ sudo dhclient
-  if [ $cos_mode == "RESCTRL-MBA" ] || [ $cos_mode == "RESCTRL-HWDRC" ]; then # launch VM w/o cpu affinity
-    echo "Launching VMs without cpu affinity."
-    ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
-  else
-    echo "Launching VMs with cpu affinity."
-    ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
-  fi
-  #restart_vms
-  sleep 60
-
   result_file_suffix="co_${cos_mode}_sst-${SST_ENABLE}"
   
-  # TODO: enable SST
   if [[ $SST_ENABLE -eq 1 ]]; then
     sst_config
-  fi
-  
-  # configure RESCTRL-MBA or RESCTRL-HWDRC
-  if [ "$cos_mode" = "RESCTRL-MBA" ]; then
-    echo "cos_mode: $cos_mode, configuring resctrl mba"
-    config_resctrl_mba
-  elif [ "$cos_mode" = "RESCTRL-HWDRC" ]; then
-    echo "cos_mode: $cos_mode, configuring resctrl hwdrc"
-    config_resctrl_hwdrc
   fi
   
   start_frequency_monitoring "$result_file_suffix"
@@ -160,11 +135,37 @@ function hp_lp_corun() {
 
   # Reset and clean up
   stop_monitoring # stop monitor, if enabled
-  #destroy_vms
+  destroy_vms
   rm -rf /home/vmimages2/*
 }
 
+function hp_solo_run() {
+  echo "hp_solo_run (only run the HP(first in the list) workload)"
+
+  hp_wl=$(echo $VM_NAMES | cut -d"," -f1)
+  hp_wl_core=$(echo $VM_CORES | cut -d"," -f1)
+  
+  # Launch the VMs 
+  echo "Launching VMs with cpu affinity."
+  sudo dhclient -r $ sudo dhclient
+  echo "./run.sh -A -T vm -S setup -C $hp_wl -W $hp_wl_core"
+  ./run.sh -A -T vm -S setup -C $hp_wl_core -W $hp_wl
+  restart_vms
+  
+  # Run experiments
+  hp_lp_corun "solo_na"
+}
+
 function hp_lp_corun_wo_cos() {
+  echo "Running hp lp workloads in corun without CoS."
+  
+  # Launch the VMs 
+  echo "Launching VMs with cpu affinity."
+  sudo dhclient -r $ sudo dhclient
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  restart_vms
+
+  # Run experiments
   hp_lp_corun "na"
 }
 
@@ -173,6 +174,10 @@ function hp_lp_corun_mba() {
  
   pqos -R 
 
+  echo "Launching VMs with cpu affinity."
+  sudo dhclient -r $ sudo dhclient
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  
   # Associate each COS MBA with the cores where each VM is running.
   i=0
   for cos in ${MBA_COS_WL//,/ }; do
@@ -191,6 +196,15 @@ function hp_lp_corun_mba() {
 }
 
 function hp_lp_corun_resctrl_mba() {
+  echo "Running hp lp workloads in corun resctrl-mba mode."
+  
+  echo "Launching VMs without cpu affinity."
+  sudo dhclient -r $ sudo dhclient
+  ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  
+  echo "Configuring resctrl mba ...."
+  config_resctrl_mba
+  
   hp_lp_corun "RESCTRL-MBA"
 }
 
@@ -198,12 +212,18 @@ function hp_lp_corun_hwdrc() {
   echo "Running hp lp workloads in corun HWDRC mode."
   pqos -R
 
-  # enable HWDRC
+  echo "Launching VMs with cpu affinity."
+  sudo dhclient -r $ sudo dhclient
+  echo "./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES"
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  restart_vms
+  
+  # Enable HWDRC
   cd $PWD/hwdrc_postsi/scripts
   ./hwdrc_icx_2S_xcc_init_to_default_pqos_CAS.sh $HWDRC_CAS_VAL
   cd -
   
- # Associate each COS LLC with the cores where each VM is running.
+  # Associate each COS LLC with the cores where each VM is running.
   i=0
   for cos in ${HWDRC_COS_WL//,/ }; do
     echo "pqos -a "llc:$cos=${VM_CORE_RANGE[i]}""
@@ -211,7 +231,7 @@ function hp_lp_corun_hwdrc() {
     i=$((i+1))
   done
  
-  # run the experiment
+  # Run the experiment
   hp_lp_corun "HWDRC-$HWDRC_CAS_VAL" #HWDRC_CAS (1 to 255)
   
   # disable HWDRC
@@ -221,6 +241,16 @@ function hp_lp_corun_hwdrc() {
 }
 
 function hp_lp_corun_resctrl_hwdrc() {
+  echo "Running hp lp workloads in corun resctrl hwdrc mode."
+
+  echo "Launching VMs with cpu affinity."
+  sudo dhclient -r $ sudo dhclient
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  
+  echo "Configuring resctrl hwdrc...."
+  config_resctrl_hwdrc
+  
+  # Run the experiment
   hp_lp_corun "RESCTRL-HWDRC"
 }
 
@@ -456,7 +486,8 @@ function main() {
   #hp_lp_corun_resctrl_hwdrc  
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
-  
+   
+  #hp_solo_run
   #hp_lp_corun_wo_cos
   hp_lp_corun_hwdrc
   

@@ -226,7 +226,7 @@ else
 	# The following line gets executed. Change the param in this line. 
 	echo "Line 227: ./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
 	#./amd_memcached_core_scale.sh 393216 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
-	./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
+	./amd_memcached_core_scale.sh 393216 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
 fi
 
 #echo "./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} &"

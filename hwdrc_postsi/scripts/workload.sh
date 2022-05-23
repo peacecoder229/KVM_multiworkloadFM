@@ -45,12 +45,12 @@ elif [ $# -eq 1 ]; then
   #HP_CORES=0-11,48-59
   #LP_CORES=12-23,60-71
   # 56C
-  HP_CORES=0-27,112-139
-  LP_CORES=28-55,140-167
+  #HP_CORES=0-27,112-139
+  #LP_CORES=28-55,140-167
 
   #48C
-  #HP_CORES=0-23,96-119
-  #LP_CORES=24-47,120-143
+  HP_CORES=0-23,96-119
+  LP_CORES=24-47,120-143
 
   elif [ $1 == "S1" ];then 
   echo "workload on Socket 1"
@@ -96,7 +96,7 @@ function benchmark()
 {
         core=$1
         tag=$2
-        score=$(mlc --loaded_latency -R -t${TIME} -T -k${core} -d0 | grep 00000 | awk '{print $3}')
+        score=$(./mlc --loaded_latency -R -t${TIME} -T -k${core} -d0 | grep 00000 | awk '{print $3}')
 
         #printf ",%s=%.1f=\n" $tag $score
         printf ",%s,%.1f," $tag $score

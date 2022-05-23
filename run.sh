@@ -91,14 +91,15 @@ function setup_vm() {
   virsh list --all --name|xargs -i virsh destroy {} --graceful
   virsh list --all --name|xargs -i virsh start {}
   virsh list
-  sleep 60
+  sleep 120
 
   setup_workloads
-  sleep 180 # sleep for sometime to make sure the workload setup is successful
+  sleep 60 # sleep for sometime to make sure the workload setup is successful
 }
 
 function setup_workloads()
 {
+  echo "Setting up workloads ....."
   vm_name_list=$(virsh list --name)
   
   for vm_name in $vm_name_list
@@ -112,46 +113,64 @@ function setup_workloads()
     # setup individual workloads
     case $vm_name in
       *"mlc"*)
+  	echo "Setting up mlc ....."
 	scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
       ;;
+      
       *"rn50"*)
+	echo "Setting up rn50 ....."
 	scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "xzcat  /root/rn50.img.xz |docker load"
       ;;
+      
       *"fio"*)
+	echo "Setting up fio ....."
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "scp yum -y install fio"
       ;;
+      
       *"stressapp"*)
+	echo "Setting up stressup ....."
 	scp -oStrictHostKeyChecking=no /root/streeapp.tar root@${vm_ip}:/root/
       ;;
+      
       *"redis"*)
+	echo "Setting up redis ....."
 	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
+      
       *"memcache"*)
+	echo "Setting up memcache ....."
 	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
+      
       *"ffmpegdocker"*)
+	echo "Setting up ffmpegdocker ....."
 	scp -r -oStrictHostKeyChecking=no /root/ffmpeg root@${vm_ip}:/root/
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker load < /root/ffmpeg/ffmpeg.tar"
       ;;
-       *"ffmpegbm"*)
-         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm" 
-         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm"
-         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum-config-manager --enable powertools"
-         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf -y install ffmpeg"
-	 scp -r -oStrictHostKeyChecking=no /home/uhd1.webm root@${vm_ip}:/root/
+      
+      *"ffmpegbm"*)
+	echo "Setting up ffmpegbm ....."
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm" 
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm"
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum-config-manager --enable powertools"
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf -y install ffmpeg"
+	scp -r -oStrictHostKeyChecking=no /home/uhd1.webm root@${vm_ip}:/root/
       ;;
      
       *"rnnt"*)
+	echo "Setting up rnnt ....."
+	echo "Starting setup for RNNT"
+	
 	# Increase the volume of VM disk
 	virsh shutdown $vm_name; sleep 10
 	qcow_file=$(virsh domblklist $vm_name | grep vda | awk '{print $2}')
 	echo "qemu-img resize $qcow_file +200G"
 	qemu-img resize $qcow_file +200G
  	virsh start $vm_name; sleep 60
-	
+
 	# create docker
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker pull dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16"
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker run -itd --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 bash"
@@ -160,6 +179,7 @@ function setup_workloads()
 	scp -r -oStrictHostKeyChecking=no /home/rnnt root@${vm_ip}:/home/dataset/pytorch/
 	scp -r -oStrictHostKeyChecking=no run_rnnt_exec.sh root@${vm_ip}:/home/dataset/pytorch/
       ;;
+      
       *)
         echo "The VM name should match the name of the workload in lowercase."
       ;;

@@ -16,9 +16,9 @@ source hwdrc_osmailbox_config.inc.sh
 #SPR E0 56C
 #NUMA node0 CPU(s):   0-55,112-167
 #NUMA node1 CPU(s):   56-111,168-223
-HP_CORES=$2
+#HP_CORES=$2
 #112-139,56-83,168-195
-LP_CORES=$3
+#LP_CORES=$3
 #,140-167,84-111,196-223
 
 # for nginx test
@@ -77,7 +77,7 @@ echo "init DRC to default settings for Scoket1"
 #D0
 #core_id=33
 #SPR D0, 56C
-core_id=57
+core_id=48
 hwdrc_settings_update
 hwdrc_reg_dump
 
@@ -87,6 +87,6 @@ hwdrc_reg_dump
 #pqos -e llc:4=0x7fff
 
 # don't do the following here, do it in the run_testcases.sh instead.
-#pqos -a llc:7=$LP_CORES
-#pqos -a llc:4=$HP_CORES
+#pqos -a llc:7=0-35
+#pqos -a llc:4=36-47
 
