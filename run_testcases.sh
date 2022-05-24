@@ -57,7 +57,9 @@ function setup_env() {
   fi
 
   sst_reset
-  
+
+  hwdrc_reset
+
   pqos -R
   
   rm -rf /root/.ssh/known_hosts
@@ -104,6 +106,13 @@ function stop_monitoring() {
   if (( $MONITORING == 1)); then
     kill -SIGINT $mon_pid
   fi
+}
+
+function hwdrc_reset() {
+  # disable HWDRC
+  cd $PWD/hwdrc_postsi/scripts
+  ./hwdrc_icx_2S_xcc_disable.sh
+  cd -
 }
 
 function hp_lp_corun() {
@@ -487,9 +496,9 @@ function main() {
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
    
-  #hp_solo_run
+  hp_solo_run
   #hp_lp_corun_wo_cos
-  hp_lp_corun_hwdrc
+  #hp_lp_corun_hwdrc
   
   SST_ENABLE=1 # 1:on; 0:off
   #hp_lp_corun_wo_cos
