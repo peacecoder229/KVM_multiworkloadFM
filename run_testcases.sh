@@ -58,6 +58,11 @@ function setup_env() {
 
   sst_reset
   
+  # disable HWDRC
+  cd $PWD/hwdrc_postsi/scripts
+  ./hwdrc_icx_2S_xcc_disable.sh
+  cd -
+ 
   pqos -R
   
   rm -rf /root/.ssh/known_hosts
@@ -135,7 +140,7 @@ function hp_lp_corun() {
 
   # Reset and clean up
   stop_monitoring # stop monitor, if enabled
-  destroy_vms
+  #destroy_vms
   rm -rf /home/vmimages2/*
 }
 
@@ -483,16 +488,15 @@ function main() {
   #hp_lp_corun_mba
   #hp_lp_corun_hwdrc
   #hp_lp_corun_resctrl_mba
-  #hp_lp_corun_resctrl_hwdrc  
+  #hp_lp_corun_resctrl_hwdrc
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
    
   #hp_solo_run
-  #hp_lp_corun_wo_cos
-  hp_lp_corun_hwdrc
+  hp_lp_corun_wo_cos
+  #hp_lp_corun_hwdrc
   
   SST_ENABLE=1 # 1:on; 0:off
-  #hp_lp_corun_wo_cos
   #hp_lp_corun_wo_cos
   #hp_lp_corun_hwdrc
   #append_compiled_csv "HWDRC"
