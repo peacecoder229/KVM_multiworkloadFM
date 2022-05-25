@@ -236,6 +236,7 @@ function run_exp_vm()
       echo "Result file is $result_file"
       
       scp -oStrictHostKeyChecking=no ${workload_script} root@${vm_ip}:/root/
+      ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash chmod +x /root/$workload_script"
       ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/$workload_script $result_file" &
     done # iteration
   done # VMs

@@ -159,7 +159,7 @@ function hp_solo_run() {
   sudo dhclient -r $ sudo dhclient
   echo "./run.sh -A -T vm -S setup -C $hp_wl -W $hp_wl_core"
   ./run.sh -A -T vm -S setup -C $hp_wl_core -W $hp_wl
-  restart_vms
+  #restart_vms
   
   # Run experiments
   hp_lp_corun "solo_na"
@@ -172,7 +172,7 @@ function hp_lp_corun_wo_cos() {
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
   ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
-  restart_vms
+  #restart_vms
 
   # Run experiments
   hp_lp_corun "na"
@@ -225,7 +225,7 @@ function hp_lp_corun_hwdrc() {
   sudo dhclient -r $ sudo dhclient
   echo "./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES"
   ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
-  restart_vms
+  #restart_vms
   
   # Enable HWDRC
   cd $PWD/hwdrc_postsi/scripts
@@ -496,11 +496,11 @@ function main() {
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
    
-  hp_solo_run
+  #hp_solo_run
   #hp_lp_corun_wo_cos
-  #hp_lp_corun_hwdrc
+  hp_lp_corun_hwdrc
   
-  SST_ENABLE=1 # 1:on; 0:off
+  SST_ENABLE=0 # 1:on; 0:off
   #hp_lp_corun_wo_cos
   #hp_lp_corun_wo_cos
   #hp_lp_corun_hwdrc
