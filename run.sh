@@ -180,6 +180,13 @@ function setup_workloads()
 	scp -r -oStrictHostKeyChecking=no run_rnnt_exec.sh root@${vm_ip}:/home/dataset/pytorch/
       ;;
       
+      *"speccpu"*)
+        echo "Install speccpu in VM."
+	scp -r -oStrictHostKeyChecking=no /home/spec17 root@${vm_ip}:/root/
+	scp -r -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
+	scp -r -oStrictHostKeyChecking=no speccpu_script/ root@${vm_ip}:/root/
+      ;;
+
       *)
         echo "The VM name should match the name of the workload in lowercase."
       ;;
@@ -219,6 +226,9 @@ function run_exp_vm()
       ;;
       *"rnnt"*)
 	workload_script="run_rnnt.sh"
+      ;;
+      *"speccpu"*)
+        workload_script="run_speccpu.sh"
       ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."

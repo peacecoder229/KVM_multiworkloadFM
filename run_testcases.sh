@@ -497,7 +497,7 @@ function main() {
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
    
   #hp_solo_run
-  #hp_lp_corun_wo_cos
+  hp_lp_corun_wo_cos
   hp_lp_corun_hwdrc
   
   SST_ENABLE=0 # 1:on; 0:off
