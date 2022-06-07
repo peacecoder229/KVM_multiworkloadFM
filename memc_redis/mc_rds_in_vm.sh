@@ -128,17 +128,19 @@ then
 		./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype} &
 	else
 
+		echo "Line 131 ....."
 		./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${ms}-${me} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype} &
 	fi
 
 else
 	 export hypt="off"
 
-	echo "./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${ms}-${me} $rundir/core_scale ${stc1}-${edc1} ${port} "4" ${dsize} ${servtype} &"
+	echo "Line 137: ./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${ms}-${me} $rundir/core_scale ${stc1}-${edc1} ${port} "4" ${dsize} ${servtype} &"
 	if [ "${protocol}" == "redis" ]
 	then
 		./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype} &
 	else
+		echo "Line 141 ...."
 		./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${ms}-${me} $rundir/core_scale ${stc1}-${edc1} ${port} "4" ${dsize} ${servtype} &
 	fi
 fi
@@ -220,18 +222,19 @@ do
 if [ "$hypt" == "on" ]
 then
 
+	echo "Line 223: ...."
 	./amd_memcached_core_scale.sh 524288 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} ${dsize} &
 
 else
 	# The following line gets executed. Change the param in this line. 
-	echo "Line 227: ./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
+	# 393216 = 10 min, 1048576 = 30 min
+	echo "Line 227: ./amd_memcached_core_scale.sh 393216(no. of requests) 127.0.0.1 2:3(write:read) inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
 	#./amd_memcached_core_scale.sh 393216 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
-	./amd_memcached_core_scale.sh 393216 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
+	./amd_memcached_core_scale.sh 393216 127.0.0.1 2:3 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
 fi
 
 #echo "./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} &"
 #./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} &
-
 
 #mapping of ports.. port(sweep)->curport-(amd_mem)>servport( client_memt)->memtier_client_server_modules
 
@@ -295,6 +298,3 @@ sleep 1
 #rm -f ip127.0.0.1prt900*
 
 done
-
-
-

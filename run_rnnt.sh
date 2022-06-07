@@ -2,7 +2,11 @@
 
 result_file=$1
 total_cores=$(getconf _NPROCESSORS_ONLN)
+
 docker exec pytorch_spr_2022_ww16 /bin/bash -c "/home/dataset/pytorch/run_rnnt_exec.sh $total_cores"
+
+#docker run -it --rm --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 /bin/bash /home/dataset/pytorch/run_rnnt_exec.sh $total_cores
+
 
 cd /home/dataset/pytorch
 

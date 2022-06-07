@@ -7,4 +7,4 @@ phi=$(( servcore-1 ))
 cd /root/memc_redis
 
 # Change the number of Line:227 to change the number of requests
-./mc_rds_in_vm.sh 0-${phi} /root/$result_file 1 90 "redis" $servcore
+./mc_rds_in_vm.sh 0-${phi} /root/$result_file 1 125 "redis" $servcore

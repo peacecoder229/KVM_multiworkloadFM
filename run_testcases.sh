@@ -57,7 +57,7 @@ function setup_env() {
   fi
 
   sst_reset
-
+  
   hwdrc_reset
 
   pqos -R
@@ -469,7 +469,7 @@ function get_score() {
     *"ffmpeg"*)
       echo "$(cat ${filename} | cut -d':' -f2)"
     ;;
-    *"ffmpegbl"*)
+    *"ffmpegbm"*)
       echo "$(cat ${filename})"
     ;;
     *)
@@ -488,11 +488,11 @@ function main() {
   init_vm_core_range
   init_vm_names
 
-  #hp_solo_run #TODO: Don't think we need it.
+  #hp_solo_run
   #hp_lp_corun_mba
   #hp_lp_corun_hwdrc
   #hp_lp_corun_resctrl_mba
-  #hp_lp_corun_resctrl_hwdrc  
+  #hp_lp_corun_resctrl_hwdrc
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
    
@@ -501,7 +501,6 @@ function main() {
   hp_lp_corun_hwdrc
   
   SST_ENABLE=0 # 1:on; 0:off
-  #hp_lp_corun_wo_cos
   #hp_lp_corun_wo_cos
   #hp_lp_corun_hwdrc
   #append_compiled_csv "HWDRC"
