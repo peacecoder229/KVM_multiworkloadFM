@@ -498,7 +498,7 @@ function main() {
    
   #hp_solo_run
   hp_lp_corun_wo_cos
-  hp_lp_corun_hwdrc
+  #hp_lp_corun_hwdrc
   
   SST_ENABLE=0 # 1:on; 0:off
   #hp_lp_corun_wo_cos

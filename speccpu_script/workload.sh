@@ -28,11 +28,7 @@ copies=$2
 speed_cfg='ic19.1u1-lin-core-avx512-speed-20200306_revA.cfg'
 rate_cfg='ic19.1u1-lin-core-avx512-rate-20200306_revA.cfg'
 
-if [[ ${workload#*_}  == "s" ]]; then
-    config=${speed_cfg}
-else
-    config=${rate_cfg}
-fi
+
 
 # source spec17 environment if needed
 #hash runcpu || source shrc 
@@ -42,15 +38,35 @@ source shrc
 ulimit -s unlimited
 sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
 
-runcpu \
-    -c ${config} \
-    --nobuild \
-    --noreportable \
-    --define cores=${copies} \
-    --threads=${copies} \
-    --define numcopies=${copies} \
-    --iterations 1 \
-    ${workload} |  tee -a workload.log
+for (( copy=0; copy < copies; copy++)); do
+  if [[ ${workload#*_}  == "s" ]]; then
+    config=${speed_cfg}
+    spec_cmd="numactl --localalloc -C ${copy} runcpu -c ${config} --nobuild --noreportable --define cores=1 --threads=1 --iterations 1 ${workload}"
+  else
+    config=${rate_cfg}
+    cp -f config/${config} config/${copy}_${config}
+    sed -i "s/\$SPECCOPYNUM/$copy/" config/${copy}_${config}
+    spec_cmd="runcpu -c ${copy}_${config} --nobuild --noreportable --iterations 1 --threads=1 --define cores=1 ${workload}"
+  fi
+
+  # run the speccpu command
+  echo "Running: $spec_cmd"
+  $spec_cmd | tee /root/workload_${copy}.log &
+done
+
+#runcpu \
+#    -c ${config} \
+#    --nobuild \
+#    --noreportable \
+#    --define cores=${copies} \
+#    --threads=${copies} \
+#    --define numcopies=${copies} \
+#    --iterations 1 \
+#    ${workload} |  tee -a workload.log
+
+for job in `jobs -p`; do
+  wait $job
+done
 
 sleep 1
 

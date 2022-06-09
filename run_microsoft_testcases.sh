@@ -1,11 +1,12 @@
 # The workloads should have the following names: mlc, rn50, fio, stressapp, redis, memcache, ffmpegbm, rnnt
 
-#cas_values=(115 135 155 175 195 215 235)
+#cas_values=(16 115 135 155 175 195 215 235)
+#cas_values=(235 215 195 175 155 135)
 cas_values=(16)
 
 for cas_value in ${cas_values[@]}; do
-for workloads in "redis,rnnt"; do
-  cores="12,36"
+for workloads in "gcc,mlc"; do
+  cores="36,12"
   config="ms_vm_config.sh"
   
   echo "VM_CORES=$cores" > $config
