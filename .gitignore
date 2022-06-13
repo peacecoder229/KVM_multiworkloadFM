@@ -7,4 +7,4 @@ remove-cd-virt-install-cmds.sh
 __pycache__/
 *_mon
 output_*
-ms_vm_config.sh
+*config.sh

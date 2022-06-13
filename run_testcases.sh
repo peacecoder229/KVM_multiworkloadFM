@@ -11,8 +11,6 @@ VM_NAMES="" # Comma separated names of the VMs
 # pqos monitoring on/off
 MONITORING=1 # 1:on; 0:off TODO: Need to fix
 
-SST_ENABLE=0 # 1:on; 0:off
-
 # Initializes the VM_CORE_RANGE array, for example ["2-4", "5-6"]
 function init_vm_core_range() {
   local total_core=$(lscpu | grep node0 | cut -f2 -d:)
@@ -286,7 +284,9 @@ function sst_config() {
 
   #Enable SST
   intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) core-power enable --priority 1
-
+  #Enable TF (if turned on)
+  intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) turbo-freq enable --priority 1
+  
   #Set the CLOS parameters. Frequency for HP is 3000 Mhz and for LP is 1000
   #intel-speed-select -c 0 core-power config --clos 0 --min 3000 # max is 3100
   
@@ -300,8 +300,13 @@ function sst_config() {
       intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq
       echo "intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq"
     else
-      intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq
-      echo "intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq"
+      if [[ $min_freq == 0 ]]; then
+        intel-speed-select -c 0 core-power config --clos $sst_cos --max $max_freq
+        echo "intel-speed-select -c 0 core-power config --clos $sst_cos --max $max_freq"
+      else
+        intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq
+        echo "intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq"
+      fi
     fi
   done
 }
@@ -310,8 +315,8 @@ function sst_config() {
 function sst_reset() {
   echo "Reseting SST config ....."
   
-  #wrmsr -a 0x774 0xff00
-  #wrmsr -a 0x620 0x0818
+  wrmsr -a 0x774 0xff00
+  wrmsr -a 0x620 0x0818
 
   # Reset 	
   intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power config -c 0 &> /dev/null
@@ -320,6 +325,7 @@ function sst_reset() {
   intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power config -c 3 &> /dev/null
 
   intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) core-power disable &> /dev/null
+  intel-speed-select -c $(lscpu | grep node0 | cut -f2 -d:) turbo-freq disable &> /dev/null
 }
 
 function start_frequency_monitoring() {
@@ -496,16 +502,15 @@ function main() {
   
   # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
    
-  #hp_solo_run
-  hp_lp_corun_wo_cos
-  #hp_lp_corun_hwdrc
+  if [[ $SST_ENABLE -eq 1 || $NO_QOS -eq 1 ]]; then
+    hp_lp_corun_wo_cos
+  fi
+   
+  if [[ $HWDRC_ENABLE -eq 1 ]]; then
+    hp_lp_corun_hwdrc
+  fi
   
-  SST_ENABLE=0 # 1:on; 0:off
-  #hp_lp_corun_wo_cos
-  #hp_lp_corun_hwdrc
   #append_compiled_csv "HWDRC"
-  
-  #hp_lp_corun_mba
 }
 
 main $@

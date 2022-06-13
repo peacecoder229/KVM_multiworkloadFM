@@ -183,6 +183,7 @@ function setup_workloads()
       *"speccpu"*)
         echo "Install speccpu in VM."
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y libnsl"
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl"
 	scp -r -oStrictHostKeyChecking=no /home/spec17 root@${vm_ip}:/root/
 	scp -r -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
 	scp -r -oStrictHostKeyChecking=no speccpu_script/ root@${vm_ip}:/root/

@@ -3,14 +3,16 @@ result_file=$1
 n_copies=$(getconf _NPROCESSORS_ONLN)
 workload="502.gcc_r"
 
-cd /root/spec17/cpu2017
+start=`date +%s`
 
+cd /root/spec17/cpu2017
 cp /root/speccpu_script/workload.sh ./
 cp /root/speccpu_script/shrc ./
-
 ./workload.sh $workload $n_copies
-
 cd -
+
+end=`date +%s`
+runtime=$((end-start))
 
 # process result
 total=0.0
@@ -22,6 +24,6 @@ for (( copy=0; copy < n_copies; copy++)); do
 done
 
 avg_elapsed_time=$(awk "BEGIN { print $total/$n_copies }")
-echo "Average_Elapsed_time(s): $avg_elapsed_time" 
-echo "Average_Elapsed_time(s)" > $result_file
-echo $avg_elapsed_time >> $result_file
+echo "Average_Elapsed_time(s): $avg_elapsed_time,$runtime" 
+echo "Average_Elapsed_time(s), Runtime" > $result_file
+echo "$avg_elapsed_time,$runtime" >> $result_file

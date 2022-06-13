@@ -14,6 +14,8 @@
 #rundir is absolute path to memc_rds  dir
 #ms = memtier_benchmark load core 1 and me=loadcore 2 from socket1
 #ci=start memtier_benchmark core while doing 80% read and 20% write from socket1
+
+start=`date +%s`
 hypt="off"
 dsize=8192 #2048, 4096, 8192
 rundir="/root/memc_redis"
@@ -49,7 +51,7 @@ pkill -9 memcached
 pkill -9 redis-server
 
 
-echo "physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus, Protocol" >> $res_file
+echo "physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, Runtime, HTstatus, Protocol" >> $res_file
 
 
 # Need to update start of physical core i and start of HT cores j 
@@ -228,9 +230,9 @@ then
 else
 	# The following line gets executed. Change the param in this line. 
 	# 393216 = 10 min, 1048576 = 30 min
-	echo "Line 227: ./amd_memcached_core_scale.sh 393216(no. of requests) 127.0.0.1 2:3(write:read) inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
+	echo "./amd_memcached_core_scale.sh 393216(no. of requests) 127.0.0.1 2:3(write:read) inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
 	#./amd_memcached_core_scale.sh 393216 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
-	./amd_memcached_core_scale.sh 393216 127.0.0.1 2:3 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
+	./amd_memcached_core_scale.sh 196608 127.0.0.1 2:3 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
 fi
 
 #echo "./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} &"
@@ -286,9 +288,11 @@ cd -
 sleep 1
 #echo "${core} ${ins} ${connections} ${res}  ${metric}" >> memc_scale_sum_halfc_HT_july5th_lphp.txt
 
+end=`date +%s`
+runtime=$((end-start))
 
 tot_con=$(( connections*32 ))
-echo "$lcore, ${total}, ${ins}, ${connections}, ${reshp}, ${hpthrput}, ${hypt}, ${protocol}" >> $res_file
+echo "$lcore, ${total}, ${ins}, ${connections}, ${reshp}, ${hpthrput}, ${runtime}, ${hypt}, ${protocol}" >> $res_file
 echo "cur-physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus"
 echo "mcresults:${stc1}-${edc1},${total},${ins},${tot_con},${reshp},${hpthrput},${hypt}"
 
