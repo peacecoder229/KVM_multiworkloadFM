@@ -1,10 +1,8 @@
 # The workloads should have the following names: mlc, rn50, fio, stressapp, redis, memcache, ffmpegbm, rnnt, speccpu
 
-#cas_values=(16 115 135 155 175 195 215 235)
-#cas_values=(235 215 195 175 155 135)
-cas_values=(16)
+cas_values=(16 115 135 155 175 195 215 235)
 
-#for cas_value in ${cas_values[@]}; do
+for cas_value in ${cas_values[@]}; do
 for workloads in "redis,speccpu"; do
   cores="12,36"
   config="ms_vm_config.sh"
@@ -13,8 +11,12 @@ for workloads in "redis,speccpu"; do
   echo "VM_WORKLOADS=$workloads" >> $config
   echo "MBA_COS_WL=0" >> $config
   echo 'MBA_COS_VAL="0=100,3=20"' >> $config
+  
+  echo "HWDRC_ENABLE=1"
   echo "HWDRC_CAS_VAL=$cas_value" >> $config
   echo "HWDRC_COS_WL=4,7" >> $config
+  
+  echo "SST_ENABLE=0" >> $config
   echo 'SST_COS_WL="0,3"' >> $config
   echo 'SST_COS_FREQ="0:3300-0,3:0-1800"' >> $config
   
@@ -27,4 +29,4 @@ for workloads in "redis,speccpu"; do
 
   ./run_testcases.sh $result_dir $config
 done
-#done
+done

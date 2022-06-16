@@ -9,7 +9,7 @@ echo "VM_CORES=$cores" > $config1
 echo "VM_WORKLOADS=$workloads" >> $config1
 echo "NO_QOS=1" >> $config1
 echo 'SST_ENABLE=0' >> $config1
-echo "HWDRC_ENABLE=0" >> $config3
+echo "HWDRC_ENABLE=0" >> $config1
 
 # config 2: Only SST
 echo "VM_CORES=$cores" > $config2
@@ -38,6 +38,6 @@ result_dir="/root/nutanix_data/ms_resdir_sst-tf_${workloads}_${cores}"
 mkdir -p $result_dir
 
 # Run experiments with the configs
-for config in $config1 $config2 $config3; do
+for config in $config2 $config3; do
   ./run_testcases.sh $result_dir $config
 done

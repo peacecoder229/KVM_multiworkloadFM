@@ -353,9 +353,9 @@ function process_sst_data() {
   i=0
   for vm_core in ${VM_CORES//,/ }; do
     offset=$(echo ${VM_CORE_RANGE[i]} | cut -d- -f1)
-    ./turbostat_process.sh $RESULT_DIR/${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt $vm_core $offset >> $RESULT_DIR/${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat-avg.txt
+    ./turbostat_process.sh $RESULT_DIR/${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt $vm_core $offset > $RESULT_DIR/${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat-avg.txt
     
-    echo "./turbostat_process.sh $RESULT_DIR/${VM_WORKLOADS[i]}_${vm_core_range}_${result_file_suffix}_turbostat.txt $vm_core $offset >> $RESULT_DIR/${VM_WORKLOADS[i]}_${vm_core_range}_${result_file_suffix}_turbostat-avg.txt"
+    echo "./turbostat_process.sh $RESULT_DIR/${VM_WORKLOADS[i]}_${vm_core_range}_${result_file_suffix}_turbostat.txt $vm_core $offset > $RESULT_DIR/${VM_WORKLOADS[i]}_${vm_core_range}_${result_file_suffix}_turbostat-avg.txt"
   
     i=$((i+1))
   done
@@ -493,6 +493,10 @@ function main() {
   setup_env
   init_vm_core_range
   init_vm_names
+  
+  # Start vm monitoring server in the background
+  # Fix me: some workloads does not produce output when killed, so don't use it for now
+  # python3 server.py &
 
   #hp_solo_run
   #hp_lp_corun_mba

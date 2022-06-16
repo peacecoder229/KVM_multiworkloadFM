@@ -8,3 +8,5 @@ cd /root/memc_redis
 
 time ./mc_rds_in_vm.sh 0-${phi}  /root/$result_file 1 125 "memcache_text" $servcore
 
+python3 client.py $result_file
+

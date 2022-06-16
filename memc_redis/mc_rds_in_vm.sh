@@ -28,6 +28,7 @@ ins=$3
 mccon=$4
 type=$5
 memtiercore=$6
+no_of_requests=$7
 
 if [ "$type" = "redis" ]
 then
@@ -230,9 +231,9 @@ then
 else
 	# The following line gets executed. Change the param in this line. 
 	# 393216 = 10 min, 1048576 = 30 min
-	echo "./amd_memcached_core_scale.sh 393216(no. of requests) 127.0.0.1 2:3(write:read) inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
+	echo "./amd_memcached_core_scale.sh $no_of_requests 127.0.0.1 2:3(write:read) inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
 	#./amd_memcached_core_scale.sh 393216 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
-	./amd_memcached_core_scale.sh 196608 127.0.0.1 2:3 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
+	./amd_memcached_core_scale.sh $no_of_requests 127.0.0.1 2:3 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
 fi
 
 #echo "./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} &"

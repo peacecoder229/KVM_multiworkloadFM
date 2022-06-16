@@ -23,12 +23,11 @@
 # Select workload and config
 workload=$1
 copies=$2
+no_of_iterations=$3
 
 # Config files
 speed_cfg='ic19.1u1-lin-core-avx512-speed-20200306_revA.cfg'
 rate_cfg='ic19.1u1-lin-core-avx512-rate-20200306_revA.cfg'
-
-
 
 # source spec17 environment if needed
 #hash runcpu || source shrc 
@@ -41,12 +40,12 @@ sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
 for (( copy=0; copy < copies; copy++)); do
   if [[ ${workload#*_}  == "s" ]]; then
     config=${speed_cfg}
-    spec_cmd="numactl --localalloc -C ${copy} runcpu -c ${config} --nobuild --noreportable --define cores=1 --threads=1 --iterations 1 ${workload}"
+    spec_cmd="numactl --localalloc -C ${copy} runcpu -c ${config} --nobuild --noreportable --define cores=1 --threads=1 --iterations ${no_of_iterations} ${workload}"
   else
     config=${rate_cfg}
     cp -f config/${config} config/${copy}_${config}
     sed -i "s/\$SPECCOPYNUM/$copy/" config/${copy}_${config}
-    spec_cmd="runcpu -c ${copy}_${config} --nobuild --noreportable --iterations 1 --threads=1 --define cores=1 ${workload}"
+    spec_cmd="runcpu -c ${copy}_${config} --nobuild --noreportable --iterations ${no_of_iterations} --threads=1 --define cores=1 ${workload}"
   fi
 
   # run the speccpu command

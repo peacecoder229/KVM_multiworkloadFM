@@ -9,3 +9,5 @@ echo "Latency(ns), Bandwidth(MB/s)" > $result_file
 echo "$lat, $bw" >> $result_file
 
 rm -f ${result_file}_temp
+
+python3 client.py $result_file

@@ -106,9 +106,11 @@ function setup_workloads()
   do
     local vm_ip=$(get_ip_from_vm_name "$vm_name")
     
-    # setup yum
+    # setup yum and install python3
     scp -oStrictHostKeyChecking=no update_yum_repo.sh root@${vm_ip}:/root
+    scp -oStrictHostKeyChecking=no client.py root@${vm_ip}:/root
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/update_yum_repo.sh"
+    ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
     
     # setup individual workloads
     case $vm_name in

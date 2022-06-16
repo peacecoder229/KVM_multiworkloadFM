@@ -39,3 +39,5 @@ for log in ffmpeg_*.log; do
 done
 
 echo "$total_avg" > $result_file
+
+python3 client.py $result_file
