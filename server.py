@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import socket 
-import sys
+import os
 import subprocess
 import re
 import libvirt
@@ -61,24 +61,52 @@ def kill_all_workloads():
 
     conn.close()
 
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: 
-    s.bind((HOST, PORT)) 
-    s.listen() 
-    conn, addr = s.accept() 
+def kill_turbostat(turbostat_pids, result_file):
+    #speccpu_0-35_co_na_sst-0_rep_1
+    result_file_split = result_file.split("_")
+    turbostat_file = result_file_split[0] + "_" + result_file_split[1] + "_" + result_file_split[2] + "_" + result_file_split[3] + "_" + result_file_split[4] + "_turbostat.txt"
     
-    with conn: 
-        print(f"Connected by {addr}")
-        while True: 
-            data = conn.recv(1024) 
-            if not data: 
-                break 
-            result_file = data.decode()
-            print("Got data: ", result_file) 
-            # loop over all the vm's and kill corresponding workloads
-            kill_all_workloads() 
+    subprocess.run(f"kill -9 {turbostat_pids[turbostat_file]}", shell=True)
+    print(f"Killed turbostat process: {turbostat_pids[turbostat_file]}")
 
-            '''
-            virsh_cmd = "virsh list"
-            vm_name_list = subprocess.check_output([virsh_cmd], stderr=subprocess.STDOUT)
-            print(vm_name_list)
-            '''
+
+def start_server(turbostat_pids):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: 
+        s.bind((HOST, PORT)) 
+        s.listen() 
+        
+        while True:
+            conn, addr = s.accept() 
+        
+            with conn: 
+                print(f"Connected by {addr}")
+                while True: 
+                    data = conn.recv(1024) 
+                    if not data: 
+                        break 
+                    result_file = data.decode()
+                    print("Got data: ", result_file) 
+                    # loop over all the vm's and kill corresponding workloads
+                    #kill_all_workloads() 
+                    kill_turbostat(turbostat_pids, result_file)
+   
+                    '''
+                    virsh_cmd = "virsh list"
+                    vm_name_list = subprocess.check_output([virsh_cmd], stderr=subprocess.STDOUT)
+                    print(vm_name_list)
+                    '''
+
+def main():
+    turbostat_pids = {}
+    with open('turbostat_pids.txt') as f:
+        lines = f.readlines()
+    for line in lines:
+        print(line)
+        ts_file = line.strip().split(',')[0]
+        ts_pid = line.strip().split(',')[1]
+        turbostat_pids[ts_file] = ts_pid
+
+    start_server(turbostat_pids)
+
+if __name__ == "__main__":
+    main()

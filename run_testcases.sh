@@ -11,6 +11,9 @@ VM_NAMES="" # Comma separated names of the VMs
 # pqos monitoring on/off
 MONITORING=1 # 1:on; 0:off TODO: Need to fix
 
+# turbostat monitoring process id
+declare -A turbostat_pids
+
 # Initializes the VM_CORE_RANGE array, for example ["2-4", "5-6"]
 function init_vm_core_range() {
   local total_core=$(lscpu | grep node0 | cut -f2 -d:)
@@ -144,6 +147,7 @@ function hp_lp_corun() {
   stop_monitoring # stop monitor, if enabled
   destroy_vms
   rm -rf /home/vmimages2/*
+  kill -9 server.py
 }
 
 function hp_solo_run() {
@@ -261,7 +265,6 @@ function hp_lp_corun_resctrl_hwdrc() {
   hp_lp_corun "RESCTRL-HWDRC"
 }
 
-
 function disable_resctrl() {
   umount resctrl
 }
@@ -331,12 +334,16 @@ function sst_reset() {
 function start_frequency_monitoring() {
   result_file_suffix=$1
   
+  rm -f turbostat_pids.txt
+
   i=0
   for vm_wl in ${VM_WORKLOADS//,/ }; do
-    turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c ${VM_CORE_RANGE[i]} --interval 1 --out $RESULT_DIR/${vm_wl}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt &
-    
-    echo "turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c ${VM_CORE_RANGE[i]} --interval 1 --out $RESULT_DIR/${vm_wl}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt &"
-    
+    turbostat_filename="${vm_wl}_${VM_CORE_RANGE[i]}_${result_file_suffix}_turbostat.txt"
+    echo "turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c ${VM_CORE_RANGE[i]} --interval 1 --out $RESULT_DIR/$turbostat_filename &"
+    turbostat -s Core,CPU,Avg_MHz,Busy%,Bzy_MHz,TSC_MHz,CoreTmp,PkgTmp,PkgWatt -c ${VM_CORE_RANGE[i]} --interval 1 --out $RESULT_DIR/$turbostat_filename &
+    ts_pid=$! 
+    turbostat_pids["$turbostat_filename"]=$ts_pid
+    echo "$turbostat_filename,$ts_pid" >> turbostat_pids.txt
     i=$((i+1))
   done
 }
@@ -495,8 +502,8 @@ function main() {
   init_vm_names
   
   # Start vm monitoring server in the background
-  # Fix me: some workloads does not produce output when killed, so don't use it for now
-  # python3 server.py &
+  # Note: Some workloads does not produce output when killed, so killing the corresponding turbostat process
+  python3 server.py &
 
   #hp_solo_run
   #hp_lp_corun_mba

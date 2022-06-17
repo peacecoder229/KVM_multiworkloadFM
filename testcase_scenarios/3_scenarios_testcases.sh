@@ -1,4 +1,5 @@
-workloads="redis,speccpu"
+for workloads in "redis,speccpu" "memcache,speccpu" "redis,mlc"; do 
+
 cores="12,36"
 config1="1-config.sh"
 config2="2-config.sh"
@@ -43,7 +44,6 @@ echo 'SST_ENABLE=1' >> $config4
 echo 'SST_COS_WL="0,3"' >> $config4
 echo 'SST_COS_FREQ="0:3300-0,3:0-1800"' >> $config4
 
-
 # Create result directory
 workloads=$(echo ${workloads//,/-}) # replace comma by dash
 cores=$(echo ${cores//,/-}) # replace comma by dash
@@ -51,6 +51,9 @@ result_dir="/root/nutanix_data/ms_resdir_sst-tf_${workloads}_${cores}"
 mkdir -p $result_dir
 
 # Run experiments with the configs
-for config in $config1 $config2; do
-  ./run_testcases.sh $result_dir $config
+for config in $config1 $config2 $config3 $config4; do
+  #../run_testcases.sh $result_dir $config
+  cat $config
+done
+
 done

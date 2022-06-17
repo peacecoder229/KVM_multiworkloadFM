@@ -225,7 +225,6 @@ do
 if [ "$hypt" == "on" ]
 then
 
-	echo "Line 223: ...."
 	./amd_memcached_core_scale.sh 524288 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} ${dsize} &
 
 else
