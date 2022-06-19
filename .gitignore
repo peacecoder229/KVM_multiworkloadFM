@@ -8,3 +8,4 @@ __pycache__/
 *_mon
 output_*
 *config.sh
+turbostat_pids.txt
