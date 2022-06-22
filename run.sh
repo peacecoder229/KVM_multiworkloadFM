@@ -73,7 +73,8 @@ function get_ip_from_vm_name()
   echo $ip
 }
 
-function setup_vm() {
+function setup_vm() 
+{
   echo "Creating VMs with the following configurations: number of cpus per vm = $n_cpus_per_vm, workload per vm = $workload_per_vm."
   if (( $cpu_affinity == 0 )); then
     echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm"
@@ -115,80 +116,94 @@ function setup_workloads()
     # setup individual workloads
     case $vm_name in
       *"mlc"*)
-  	echo "Setting up mlc ....."
-	scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
+  	    echo "Setting up mlc ....."
+	      scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
       ;;
       
       *"rn50"*)
-	echo "Setting up rn50 ....."
-	scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "xzcat  /root/rn50.img.xz |docker load"
+        echo "Setting up rn50 ....."
+        scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "xzcat  /root/rn50.img.xz |docker load"
       ;;
       
       *"fio"*)
-	echo "Setting up fio ....."
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "scp yum -y install fio"
+        echo "Setting up fio ....."
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "scp yum -y install fio"
       ;;
       
       *"stressapp"*)
-	echo "Setting up stressup ....."
-	scp -oStrictHostKeyChecking=no /root/streeapp.tar root@${vm_ip}:/root/
+        echo "Setting up stressup ....."
+        scp -oStrictHostKeyChecking=no /root/streeapp.tar root@${vm_ip}:/root/
       ;;
       
       *"redis"*)
-	echo "Setting up redis ....."
-	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
+        echo "Setting up redis ....."
+        scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
       
       *"memcache"*)
-	echo "Setting up memcache ....."
-	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
+        echo "Setting up memcache ....."
+        scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
       
       *"ffmpegdocker"*)
-	echo "Setting up ffmpegdocker ....."
-	scp -r -oStrictHostKeyChecking=no /root/ffmpeg root@${vm_ip}:/root/
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker load < /root/ffmpeg/ffmpeg.tar"
+        echo "Setting up ffmpegdocker ....."
+        scp -r -oStrictHostKeyChecking=no /root/ffmpeg root@${vm_ip}:/root/
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker load < /root/ffmpeg/ffmpeg.tar"
       ;;
       
       *"ffmpegbm"*)
-	echo "Setting up ffmpegbm ....."
+        echo "Setting up ffmpegbm ....."
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/free/el/rpmfusion-free-release-8.noarch.rpm" 
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum-config-manager --enable powertools"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf -y install ffmpeg"
-	scp -r -oStrictHostKeyChecking=no /home/uhd1.webm root@${vm_ip}:/root/
+        scp -r -oStrictHostKeyChecking=no /home/uhd1.webm root@${vm_ip}:/root/
       ;;
      
       *"rnnt"*)
-	echo "Setting up rnnt ....."
-	echo "Starting setup for RNNT"
-	
-	# Increase the volume of VM disk
-	virsh shutdown $vm_name; sleep 10
-	qcow_file=$(virsh domblklist $vm_name | grep vda | awk '{print $2}')
-	echo "qemu-img resize $qcow_file +200G"
-	qemu-img resize $qcow_file +200G
- 	virsh start $vm_name; sleep 60
+        echo "Setting up rnnt ....."
+        echo "Starting setup for RNNT"
+      
+        # Increase the volume of VM disk
+        virsh shutdown $vm_name; sleep 10
+        qcow_file=$(virsh domblklist $vm_name | grep vda | awk '{print $2}')
+        echo "qemu-img resize $qcow_file +200G"
+        qemu-img resize $qcow_file +200G
+        virsh start $vm_name; sleep 60
 
-	# create docker
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker pull dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16"
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker run -itd --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 bash"
-	
-	# copy rnnt
-	scp -r -oStrictHostKeyChecking=no /home/rnnt root@${vm_ip}:/home/dataset/pytorch/
-	scp -r -oStrictHostKeyChecking=no run_rnnt_exec.sh root@${vm_ip}:/home/dataset/pytorch/
+        # create docker
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker pull dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16"
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker run -itd --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 bash"
+        
+        # copy rnnt
+        scp -r -oStrictHostKeyChecking=no /home/rnnt root@${vm_ip}:/home/dataset/pytorch/
+        scp -r -oStrictHostKeyChecking=no run_rnnt_exec.sh root@${vm_ip}:/home/dataset/pytorch/
       ;;
       
       *"speccpu"*)
         echo "Install speccpu in VM."
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y libnsl"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl"
-	scp -r -oStrictHostKeyChecking=no /home/spec17 root@${vm_ip}:/root/
-	scp -r -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
-	scp -r -oStrictHostKeyChecking=no speccpu_script/ root@${vm_ip}:/root/
+        scp -r -oStrictHostKeyChecking=no /home/spec17 root@${vm_ip}:/root/
+        scp -r -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
+        scp -r -oStrictHostKeyChecking=no speccpu_script/ root@${vm_ip}:/root/
+      ;;
+      
+      *"unet"*)
+        # Increase the volume of VM disk
+        virsh shutdown $vm_name; sleep 10
+        qcow_file=$(virsh domblklist $vm_name | grep vda | awk '{print $2}')
+        echo "qemu-img resize $qcow_file +200G"
+        qemu-img resize $qcow_file +200G
+        virsh start $vm_name; sleep 60
+
+        echo "Installing unet in the VM ...."
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "mkdir -p /rocknvme1/dataset/tensorflow/log"
+        scp -r -oStrictHostKeyChecking=no /home/3d_unet_mlperf_inference root@${vm_ip}:/rocknvme1/dataset/tensorflow/
+        scp -r -oStrictHostKeyChecking=no unet_script/ root@${vm_ip}:/root/
       ;;
 
       *)
@@ -208,31 +223,34 @@ function run_exp_vm()
     workload_script="" 
     case $vm_name in
       *"mlc"*)
-	workload_script="run_mlc.sh"
+        workload_script="run_mlc.sh"
       ;;
       *"rn50"*)
-	workload_script="run_rn50.sh"
+        workload_script="run_rn50.sh"
       ;;
       *"fio"*)
-	workload_script="run_fio.sh"
+        workload_script="run_fio.sh"
       ;;
       *"stressapp"*)
-	workload_script="run_stressapp.sh"
+        workload_script="run_stressapp.sh"
       ;;
       *"redis"*)
-	workload_script="run_redis.sh"
+        workload_script="run_redis.sh"
       ;;
       *"memcache"*)
-	workload_script="run_memcache.sh"
+        workload_script="run_memcache.sh"
       ;;
       *"ffmpegbm"*)
-	workload_script="run_ffmpeg_baremetal.sh"
+        workload_script="run_ffmpeg_baremetal.sh"
       ;;
       *"rnnt"*)
-	workload_script="run_rnnt.sh"
+        workload_script="run_rnnt.sh"
       ;;
       *"speccpu"*)
         workload_script="run_speccpu.sh"
+      ;;
+      *"unet"*)
+        workload_script="run_3dunet.sh"
       ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."

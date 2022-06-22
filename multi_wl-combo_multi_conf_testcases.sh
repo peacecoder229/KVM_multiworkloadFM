@@ -1,4 +1,4 @@
-for workloads in "memcache,speccpu" "redis,mlc"; do 
+for workloads in "redis,speccpu" "memcache,speccpu" "redis,mlc" "memcache,unet" "redis,unet"; do
   cores="12,36"
   config1="1-config.sh"
   config2="2-config.sh"
@@ -54,5 +54,4 @@ for workloads in "memcache,speccpu" "redis,mlc"; do
     ./run_testcases.sh $result_dir $config
     cat $config
   done
-
 done

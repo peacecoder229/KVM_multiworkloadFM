@@ -9,3 +9,4 @@ __pycache__/
 output_*
 *config.sh
 turbostat_pids.txt
+my_run_testcases.sh
