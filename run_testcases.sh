@@ -68,6 +68,7 @@ function setup_env() {
   echo off > /sys/devices/system/cpu/smt/control
   sleep 5 
   
+  pkill -f server.py
   destroy_vms
 }
 
@@ -147,7 +148,7 @@ function hp_lp_corun() {
   stop_monitoring # stop monitor, if enabled
   destroy_vms
   rm -rf /home/vmimages2/*
-  kill -9 server.py
+  pkill -f server.py
 }
 
 function hp_solo_run() {
