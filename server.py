@@ -61,6 +61,18 @@ def kill_all_workloads():
 
     conn.close()
 
+def get_turbostat_pids():
+    turbostat_pids = {}
+    with open('turbostat_pids.txt') as f:
+        lines = f.readlines()
+    for line in lines:
+        print(line)
+        ts_file = line.strip().split(',')[0]
+        ts_pid = line.strip().split(',')[1]
+        turbostat_pids[ts_file] = ts_pid
+    
+    return turbostat_pids    
+
 def kill_turbostat(turbostat_pids, result_file):
     #speccpu_0-35_co_na_sst-0_rep_1
     result_file_split = result_file.split("_")
@@ -70,7 +82,7 @@ def kill_turbostat(turbostat_pids, result_file):
     print(f"Killed turbostat process: {turbostat_pids[turbostat_file]}")
 
 
-def start_server(turbostat_pids):
+def start_server():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s: 
         s.bind((HOST, PORT)) 
         s.listen() 
@@ -86,27 +98,23 @@ def start_server(turbostat_pids):
                         break 
                     result_file = data.decode()
                     print("Got data: ", result_file) 
+                    
                     # loop over all the vm's and kill corresponding workloads
+                    # This does not work because some workloads does not produce data when killed. So don't use it for now.
                     #kill_all_workloads() 
+                    
+                    turbostat_pids = get_turbostat_pids()
                     kill_turbostat(turbostat_pids, result_file)
-   
+                       
                     '''
+                    # Don't know why the following does not work.
                     virsh_cmd = "virsh list"
                     vm_name_list = subprocess.check_output([virsh_cmd], stderr=subprocess.STDOUT)
                     print(vm_name_list)
                     '''
 
 def main():
-    turbostat_pids = {}
-    with open('turbostat_pids.txt') as f:
-        lines = f.readlines()
-    for line in lines:
-        print(line)
-        ts_file = line.strip().split(',')[0]
-        ts_pid = line.strip().split(',')[1]
-        turbostat_pids[ts_file] = ts_pid
-
-    start_server(turbostat_pids)
+    start_server()
 
 if __name__ == "__main__":
     main()

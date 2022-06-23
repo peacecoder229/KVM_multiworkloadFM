@@ -24,6 +24,7 @@ docker run -itd --name tf-spr-ww19-$total_cores --privileged -v $modeldir:$model
 
 sleep 10
 
+
 echo "Executing 3DUNET_T"
 sleep 1
 
@@ -33,6 +34,8 @@ for ((i=1; i<=$rep; i++ )); do
   echo 'docker exec tf-spr-ww19-$total_cores /bin/bash -c "$modeldir/unet.sh $total_cores $startcore"'
 done
 echo "Execution Completed"
+
+python3 client.py $result_file
 
 cd -
 cd $modeldir/log
