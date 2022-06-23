@@ -506,19 +506,15 @@ function main() {
   # Note: Some workloads does not produce output when killed, so killing the corresponding turbostat process
   python3 server.py &
 
-  #hp_solo_run
-  #hp_lp_corun_mba
-  #hp_lp_corun_hwdrc
-  #hp_lp_corun_resctrl_mba
-  #hp_lp_corun_resctrl_hwdrc
+  #TODO: Need to add option for these: hp_solo_run, hp_lp_corun_mba, hp_lp_corun_resctrl_mba, hp_lp_corun_resctrl_hwdrc
   
-  # TODO: loop over core ranges and COSes, and construct file_suffix and pass it to hp_lp_corun and append_compiled_csv
-   
-  if [[ $SST_ENABLE -eq 1 || $NO_QOS -eq 1 ]]; then
-    hp_lp_corun_wo_cos
+  if [[ ($SST_ENABLE -eq 1 || $NO_QOS -eq 1) && $HWDRC_ENABLE -eq 0 ]]; then
+   echo "hp_lp_corun_wo_cos"
+   hp_lp_corun_wo_cos
   fi
    
   if [[ $HWDRC_ENABLE -eq 1 ]]; then
+    echo "hp_lp_corun_hwdrc"
     hp_lp_corun_hwdrc
   fi
   

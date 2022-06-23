@@ -1,7 +1,10 @@
 #!/bin/bash
 #cd /home/unit-tests/sweep_cas_mlc/rnn_t
 
+
 result_file=$1
+rep=2 # no of times the model will run. 1 = 307, 2 = 615, 3 =  
+
 total_cores=$(getconf _NPROCESSORS_ONLN)
 startcore=0
 
@@ -24,15 +27,19 @@ sleep 10
 echo "Executing 3DUNET_T"
 sleep 1
 
-docker exec tf-spr-ww19-$total_cores /bin/bash -c "$modeldir/unet.sh $total_cores $startcore"
-#docker exec tf-spr-ww19-$1 /bin/bash -c "$modeldir/unet.sh $total_cores $startcore"
-#docker exec tf-spr-ww19-$1 /bin/bash -c "$modeldir/unet.sh $total_cores $startcore"
-#docker exec tf-spr-ww19-$1 /bin/bash -c "$modeldir/unet.sh $total_cores $startcore"
-
+start=`date +%s`
+for ((i=1; i<=$rep; i++ )); do
+  docker exec tf-spr-ww19-$total_cores /bin/bash -c "$modeldir/unet.sh $total_cores $startcore"
+  echo 'docker exec tf-spr-ww19-$total_cores /bin/bash -c "$modeldir/unet.sh $total_cores $startcore"'
+done
 echo "Execution Completed"
 
 cd -
 cd $modeldir/log
+
+
+end=`date +%s`
+runtime=$((end-start))
 
 # process data after run
 start=$startcore
@@ -47,5 +54,5 @@ done
 
 cd -
 
-echo "Throughput" > $result_file
-echo "$total_avg" >> $result_file
+echo "Throughput, Runtime" > $result_file
+echo "$total_avg, $runtime" >> $result_file
