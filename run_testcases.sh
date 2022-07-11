@@ -72,6 +72,30 @@ function setup_env() {
   destroy_vms
 }
 
+
+function setup_llc_ways() {
+  declare -a LLC_COS_WAYS_LIST
+  
+  for llc_way in ${LLC_COS_WAYS//,/ }; do
+    LLC_COS_WAYS_LIST+=($llc_way)
+  done
+  # Associate each COS LLC with the cacheways
+  i=0
+  for cos in ${HWDRC_COS_WL//,/ }; do
+    echo "pqos -e "llc:$cos=${LLC_COS_WAYS_LIST[i]}""
+    pqos -e "llc:$cos=${LLC_COS_WAYS_LIST[i]}"
+    i=$((i+1))
+  done
+
+  # Associate each COS LLC with the cores where each VM is running.
+  i=0
+  for cos in ${HWDRC_COS_WL//,/ }; do
+    echo "pqos -a "llc:$cos=${VM_CORE_RANGE[i]}""
+    pqos -a "llc:$cos=${VM_CORE_RANGE[i]}"
+    i=$((i+1))
+  done
+}
+
 function restart_vms() {
   virsh list --all --name|xargs -i virsh destroy {} --graceful
   virsh list --all --name|xargs -i virsh start {}
@@ -122,7 +146,9 @@ function hp_lp_corun() {
   echo "Running hp lp corun in $cos_mode mode."
   
   result_file_suffix="co_${cos_mode}_sst-${SST_ENABLE}"
-  
+  llc_ways=$( echo ${LLC_COS_WAYS//,/-} )
+  result_file_suffix=${result_file_suffix}_llc-${llc_ways}
+
   if [[ $SST_ENABLE -eq 1 ]]; then
     sst_config
   fi
@@ -184,8 +210,6 @@ function hp_lp_corun_wo_cos() {
 function hp_lp_corun_mba() {
   echo "Running hp lp workloads in corun mba mode."
  
-  pqos -R 
-
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
   ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
@@ -222,12 +246,11 @@ function hp_lp_corun_resctrl_mba() {
 
 function hp_lp_corun_hwdrc() {
   echo "Running hp lp workloads in corun HWDRC mode."
-  pqos -R
 
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
   echo "./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES"
-  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  #./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
   #restart_vms
   
   # Enable HWDRC
@@ -501,7 +524,7 @@ function main() {
   setup_env
   init_vm_core_range
   init_vm_names
-  
+  setup_llc_ways
   # Start vm monitoring server in the background
   # Note: Some workloads does not produce output when killed, so killing the corresponding turbostat process
   python3 server.py &

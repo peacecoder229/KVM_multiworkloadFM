@@ -1,6 +1,8 @@
 # Pre-requisite: 
 Ensure that VT-X is enabled in the BIOS
-## Enable SR-IOV:
+## Install pqos tool:
+   yum install intel-cmt-cat
+## Enabling SR-IOV:
   1. First make sure vt-x and vt-d is enabled:
   (1) Add "intel_iommu=on" in GRUB_CMDLINE_LINUX of /etc/default/grub file;
   (2) Execute “grub2-mkconfig -o /boot/grub2/grub.cfg”. 

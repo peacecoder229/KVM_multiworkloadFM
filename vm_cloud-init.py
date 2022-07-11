@@ -18,7 +18,7 @@ def get_linenumber():
 
 #sriov nic devices
 #P_PORT = {"ens11f0", "ens28f0", "ens11f1", "ens28f1"}  #local network
-P_PORT = {"enp1s0"}  #local network
+P_PORT = {"ens1f0"}  #local network
 C_PORT = {"enp217s0f1", "enp37s0f1"}  #corporate ports 
 DRY_RUN=0
 def get_cpu_pool(socket):
@@ -103,7 +103,7 @@ PT_Device = {
 }
 
 # what type of networking do you want for the vm ?
-Networking={"SR-IOV":0,
+Networking={"SR-IOV":1,
             "Bridge":1,
             "PT":0,
             "None":0
@@ -397,10 +397,10 @@ def get_vports():
                     link_path = (os.readlink(path).replace("../", ""))
                     link_path = "pci_" + \
                     link_path.replace(":", "_").replace(".", "_")
-                    #print(link_path)
+                    print(link_path)
                     numa_path = "/sys/class/net/%s/device/numa_node" % (P_Name)
                     Numa_Node = open(numa_path, "r").readline().replace("\n", "")
-                    #print("Numa_Node=====",Numa_Node)
+                    print("Numa_Node=====",Numa_Node)
                     Numa_Node = "SOCKET%s" % (Numa_Node)
                     # if V_PORT.has_key(Numa_Node):
                     if Numa_Node in V_PORT:

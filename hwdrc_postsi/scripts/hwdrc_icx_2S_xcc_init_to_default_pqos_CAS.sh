@@ -38,7 +38,7 @@ source hwdrc_osmailbox_config.inc.sh
 #ret=`cpupower frequency-set -u 2700Mhz`
 #ret=`cpupower frequency-set -d 2700Mhz`
 
-pqos -R
+#pqos -R
 umount resctrl
 
 #pare g_CLOSToMEMCLOS for hwdrc_settings_update()
