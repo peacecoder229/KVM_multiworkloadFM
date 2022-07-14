@@ -116,8 +116,8 @@ function setup_workloads()
     # setup individual workloads
     case $vm_name in
       *"mlc"*)
-  	    echo "Setting up mlc ....."
-	      scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
+  	echo "Setting up mlc ....."
+	scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
       ;;
       
       *"rn50"*)

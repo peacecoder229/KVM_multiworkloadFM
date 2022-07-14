@@ -1,5 +1,5 @@
 #for workloads in "redis,speccpu" "memcache,speccpu" "redis,mlc" "memcache,unet" "redis,unet"; do
-for workloads in "redis,speccpu"; do
+for workloads in "redis,mlc"; do
   cores="12,36"
   config1="1-config.sh"
   config2="2-config.sh"
@@ -55,7 +55,7 @@ for workloads in "redis,speccpu"; do
   echo 'SST_COS_WL="0,3"' >> $config4
   echo 'SST_COS_FREQ="0:3300-0,3:0-1800"' >> $config4
   echo "LLC_COS_WAYS=0x7fff,0x7fff" >> $config4
-	
+
   # Cache ways: 15,4
   # config 5: No QoS
   echo "VM_CORES=$cores" > $config5
@@ -143,12 +143,13 @@ for workloads in "redis,speccpu"; do
   # Create result directory
   workloads=$(echo ${workloads//,/-}) # replace comma by dash
   cores=$(echo ${cores//,/-}) # replace comma by dash
-  result_dir="/root/nutanix_data/ms_resdir_sst-tf_${workloads}_${cores}"
+  result_dir="/root/nutanix_data/ms_resdir_sst-tf_cache-ways_${workloads}_${cores}"
   mkdir -p $result_dir
 
   # Run experiments with the configs
   for i in {1..12}; do
     config="$i-config.sh"
+    cat $config
     ./run_testcases.sh $result_dir $config
   done
 done

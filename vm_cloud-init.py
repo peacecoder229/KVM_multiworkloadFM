@@ -103,7 +103,7 @@ PT_Device = {
 }
 
 # what type of networking do you want for the vm ?
-Networking={"SR-IOV":1,
+Networking={"SR-IOV":0,
             "Bridge":1,
             "PT":0,
             "None":0

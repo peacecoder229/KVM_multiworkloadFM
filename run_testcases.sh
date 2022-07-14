@@ -250,8 +250,7 @@ function hp_lp_corun_hwdrc() {
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
   echo "./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES"
-  #./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
-  #restart_vms
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
   
   # Enable HWDRC
   cd $PWD/hwdrc_postsi/scripts

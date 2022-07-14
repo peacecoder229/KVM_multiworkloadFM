@@ -51,9 +51,10 @@ ci=$memtiercore
 pkill -9 memcached
 pkill -9 redis-server
 
-
-echo "physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, Runtime, HTstatus, Protocol" >> $res_file
-
+no_of_line=$(cat $res_file | wc -l)
+if (( $no_of_line == 0 )); then
+  echo "physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, Runtime, HTstatus, Protocol" > $res_file
+fi
 
 # Need to update start of physical core i and start of HT cores j 
 # if a system with different number of cores are used
@@ -293,7 +294,7 @@ runtime=$((end-start))
 
 tot_con=$(( connections*32 ))
 echo "$lcore, ${total}, ${ins}, ${connections}, ${reshp}, ${hpthrput}, ${runtime}, ${hypt}, ${protocol}" >> $res_file
-echo "cur-physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, HTstatus"
+echo "cur-physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, runtime, HTstatus"
 echo "mcresults:${stc1}-${edc1},${total},${ins},${tot_con},${reshp},${hpthrput},${hypt}"
 
 sleep 1
