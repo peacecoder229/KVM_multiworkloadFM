@@ -11,6 +11,8 @@ VM_NAMES="" # Comma separated names of the VMs
 # pqos monitoring on/off
 MONITORING=1 # 1:on; 0:off TODO: Need to fix
 
+LLC_CACHE_WAYS_ENABLE=1 # 1:enabled, 0: disabled
+
 # turbostat monitoring process id
 declare -A turbostat_pids
 
@@ -71,7 +73,6 @@ function setup_env() {
   pkill -f server.py
   destroy_vms
 }
-
 
 function setup_llc_ways() {
   declare -a LLC_COS_WAYS_LIST
@@ -146,8 +147,11 @@ function hp_lp_corun() {
   echo "Running hp lp corun in $cos_mode mode."
   
   result_file_suffix="co_${cos_mode}_sst-${SST_ENABLE}"
-  llc_ways=$( echo ${LLC_COS_WAYS//,/-} )
-  result_file_suffix=${result_file_suffix}_llc-${llc_ways}
+  
+  if [[ $LLC_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    llc_ways=$( echo ${LLC_COS_WAYS//,/-} )
+    result_file_suffix=${result_file_suffix}_llc-${llc_ways}
+  fi
 
   if [[ $SST_ENABLE -eq 1 ]]; then
     sst_config
@@ -523,7 +527,9 @@ function main() {
   setup_env
   init_vm_core_range
   init_vm_names
-  setup_llc_ways
+  if [[ $LLC_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    setup_llc_ways
+  fi
   # Start vm monitoring server in the background
   # Note: Some workloads does not produce output when killed, so killing the corresponding turbostat process
   python3 server.py &
