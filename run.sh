@@ -7,6 +7,8 @@ workload_per_vm=""
 file_suffix=""
 cpu_affinity=0
 
+BENCHMARK_DIR="/home"
+
 # Since we don't support host experiments, we don't use it.
 function get_config()
 {
@@ -117,12 +119,12 @@ function setup_workloads()
     case $vm_name in
       *"mlc"*)
   	echo "Setting up mlc ....."
-	scp -oStrictHostKeyChecking=no /root/mlc root@${vm_ip}:/usr/local/bin/
+	scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/mlc root@${vm_ip}:/usr/local/bin/
       ;;
       
       *"rn50"*)
         echo "Setting up rn50 ....."
-        scp -oStrictHostKeyChecking=no /root/rn50.img.xz root@${vm_ip}:/root/
+        scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/rn50.img.xz root@${vm_ip}:/root/
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "xzcat  /root/rn50.img.xz |docker load"
       ;;
       
@@ -133,7 +135,7 @@ function setup_workloads()
       
       *"stressapp"*)
         echo "Setting up stressup ....."
-        scp -oStrictHostKeyChecking=no /root/streeapp.tar root@${vm_ip}:/root/
+        scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/streeapp.tar root@${vm_ip}:/root/
       ;;
       
       *"redis"*)
@@ -150,7 +152,7 @@ function setup_workloads()
       
       *"ffmpegdocker"*)
         echo "Setting up ffmpegdocker ....."
-        scp -r -oStrictHostKeyChecking=no /root/ffmpeg root@${vm_ip}:/root/
+        scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/ffmpeg root@${vm_ip}:/root/
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker load < /root/ffmpeg/ffmpeg.tar"
       ;;
       
@@ -160,7 +162,7 @@ function setup_workloads()
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf install -y https://download1.rpmfusion.org/nonfree/el/rpmfusion-nonfree-release-8.noarch.rpm"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum-config-manager --enable powertools"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "dnf -y install ffmpeg"
-        scp -r -oStrictHostKeyChecking=no /home/uhd1.webm root@${vm_ip}:/root/
+        scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/uhd1.webm root@${vm_ip}:/root/
       ;;
      
       *"rnnt"*)
@@ -179,7 +181,7 @@ function setup_workloads()
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "docker run -itd --privileged --net host --shm-size 4g --name pytorch_spr_2022_ww16 -v /home/dataset/pytorch:/home/dataset/pytorch -v /home/dl_boost/log/pytorch:/home/dl_boost/log/pytorch dcsorepo.jf.intel.com/dlboost/pytorch:2022_ww16 bash"
         
         # copy rnnt
-        scp -r -oStrictHostKeyChecking=no /home/rnnt root@${vm_ip}:/home/dataset/pytorch/
+        scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/rnnt root@${vm_ip}:/home/dataset/pytorch/
         scp -r -oStrictHostKeyChecking=no run_rnnt_exec.sh root@${vm_ip}:/home/dataset/pytorch/
       ;;
       
@@ -187,7 +189,7 @@ function setup_workloads()
         echo "Install speccpu in VM."
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y libnsl"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl"
-        scp -r -oStrictHostKeyChecking=no /home/spec17 root@${vm_ip}:/root/
+        scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/spec17 root@${vm_ip}:/root/
         scp -r -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
         scp -r -oStrictHostKeyChecking=no speccpu_script/ root@${vm_ip}:/root/
       ;;
@@ -202,7 +204,7 @@ function setup_workloads()
 
         echo "Installing unet in the VM ...."
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "mkdir -p /rocknvme1/dataset/tensorflow/log"
-        scp -r -oStrictHostKeyChecking=no /home/3d_unet_mlperf_inference root@${vm_ip}:/rocknvme1/dataset/tensorflow/
+        scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/3d_unet_mlperf_inference root@${vm_ip}:/rocknvme1/dataset/tensorflow/
         scp -r -oStrictHostKeyChecking=no unet_script/ root@${vm_ip}:/root/
       ;;
 

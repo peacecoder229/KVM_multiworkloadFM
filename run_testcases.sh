@@ -55,8 +55,8 @@ function init_vm_names() {
 
 function setup_env() {
   if (($SST_ENABLE == 0)); then
-    cpupower frequency-set -u 2300Mhz -d 2300Mhz
     echo "cpupower frequency-set -u 2300Mhz -d 2300Mhz"
+    cpupower frequency-set -u 2300Mhz -d 2300Mhz
   fi
 
   sst_reset
@@ -306,16 +306,19 @@ function sst_config() {
   # Associate cores to CLOS groups
   i=0 
   for sst_cos in ${SST_COS_WL//,/ }; do
-    #Example: intel-speed-select -c $HPCORE_RANGE core-power assoc -c 0
-    intel-speed-select -c ${VM_CORE_RANGE[i]} core-power assoc -c $sst_cos
+    #Usage: intel-speed-select -c $CORE_RANGE core-power assoc -c $CLOS
+    intel-speed-select -c ${VM_CORE_RANGE[i]} core-power assoc -c $sst_cos &> /dev/null
     echo "intel-speed-select -c ${VM_CORE_RANGE[i]} core-power assoc -c $sst_cos"
     i=$((i+1))
   done
 
-  #Enable SST
-  intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) core-power enable --priority 1
-  #Enable TF (if turned on)
-  intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) turbo-freq enable --priority 1
+  #Enable SST-CP
+  echo "intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) core-power enable --priority 1" 
+  intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) core-power enable --priority 1 &> /dev/null
+  
+  #Enable SST-TF (if turned on)
+  echo "intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) turbo-freq enable --priority 1"
+  intel-speed-select -c $(lscpu |grep node0 | cut -f2 -d:) turbo-freq enable --priority 1 &> /dev/null
   
   #Set the CLOS parameters. Frequency for HP is 3000 Mhz and for LP is 1000
   #intel-speed-select -c 0 core-power config --clos 0 --min 3000 # max is 3100
@@ -327,14 +330,14 @@ function sst_config() {
     
     # Example: intel-speed-select -c 0 core-power config --clos 3 --min 0 --max 500
     if [[ $max_freq == 0 ]]; then
-      intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq
+      intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq &> /dev/null
       echo "intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq"
     else
       if [[ $min_freq == 0 ]]; then
-        intel-speed-select -c 0 core-power config --clos $sst_cos --max $max_freq
+        intel-speed-select -c 0 core-power config --clos $sst_cos --max $max_freq &> /dev/null
         echo "intel-speed-select -c 0 core-power config --clos $sst_cos --max $max_freq"
       else
-        intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq
+        intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq &> /dev/null
         echo "intel-speed-select -c 0 core-power config --clos $sst_cos --min $min_freq --max $max_freq"
       fi
     fi

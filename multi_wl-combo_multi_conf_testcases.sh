@@ -147,7 +147,7 @@ for workloads in "redis,mlc"; do
   mkdir -p $result_dir
 
   # Run experiments with the configs
-  for i in {9..12}; do
+  for i in {1..12}; do
     config="$i-config.sh"
     cat $config
     ./run_testcases.sh $result_dir $config
