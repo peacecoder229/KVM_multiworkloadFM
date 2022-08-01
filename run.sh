@@ -208,6 +208,14 @@ function setup_workloads()
         scp -r -oStrictHostKeyChecking=no unet_script/ root@${vm_ip}:/root/
       ;;
 
+      *"dpdk"*)
+        echo "Setup the VM for dpdk ...."
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum groupinstall -y 'Development Tools'"
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "pip3 install meson ninja pyelftools"
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl-devel"
+        
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "git clone https://github.com/DPDK/dpdk"
+      ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."
       ;;
