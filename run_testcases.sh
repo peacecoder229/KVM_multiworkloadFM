@@ -11,8 +11,6 @@ VM_NAMES="" # Comma separated names of the VMs
 # pqos monitoring on/off
 MONITORING=1 # 1:on; 0:off TODO: Need to fix
 
-LLC_CACHE_WAYS_ENABLE=1 # 1:enabled, 0: disabled
-
 # turbostat monitoring process id
 declare -A turbostat_pids
 
@@ -549,6 +547,11 @@ function main() {
     hp_lp_corun_hwdrc
   fi
   
+  if [[ $MBA_ENABLE -eq 1 ]]; then
+    echo "hp_lp_corun_mba"
+    hp_lp_corun_mba
+  fi
+ 
   #append_compiled_csv "HWDRC"
 }
 

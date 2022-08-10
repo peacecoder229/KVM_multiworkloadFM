@@ -69,7 +69,8 @@ function handle_args()
 function get_ip_from_vm_name()
 {
   local vm_name=$1
-  local mac=$(virsh domiflist $vm_name | awk '{ print $5 }' | tail -2 | head -1)
+  #local mac=$(virsh domiflist $vm_name | awk '{ print $5 }' | tail -2 | head -1)
+  local mac=$(virsh domiflist $vm_name |  awk '{ print $5 }' | head -3 | tail -1)
   #echo $mac
   local ip=$(arp -a | grep $mac | awk '{ print $2 }' | sed 's/[()]//g')
   echo $ip

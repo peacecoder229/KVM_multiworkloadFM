@@ -105,6 +105,7 @@ PT_Device = {
 # what type of networking do you want for the vm ?
 Networking={"SR-IOV":0,
             "Bridge":1,
+            "OVS-Bridge:1"
             "PT":0,
             "None":0
             }
@@ -842,6 +843,8 @@ def generate_commands(assign_random=False):
                     network_cmd= "--network bridge=virbr0 --host-device={}".format(port_to_use)
                 elif(Networking["SR-IOV"] ==0 and Networking["Bridge"]==1):
                     network_cmd = "--network bridge=virbr0"
+                elif(Networking["Bridge"]==1 and Networking["OVS-Bridge"]==1):
+                    network_cmd = "--network bridge=virbr0 --network bridge=ovs-br0,model=virtio,virtualport_type=openvswitch"
                 elif(Networking["PT"] ==1 and Networking["Bridge"]==1):
                     network_cmd = "--network bridge=virbr0 {}".format(nic_dev)
                 elif(Networking["PT"] ==1 and Networking["Bridge"]==0):
