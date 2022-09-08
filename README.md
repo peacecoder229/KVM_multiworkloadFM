@@ -43,5 +43,3 @@ The filenames will be generated from run_nutanix_testcases.sh.
 
 #To generate plots of  BW of cores 0-17 & 18-35 i.e.    mbl[mb/s]_0-17 and  mbl[mb/s]_18-35 following cmdline optioons could be used.
 ./pqos_plot.py --filelist="memcache-hp_rn50-lp_18-35_0-17_na_mon,memcache-hp_rn50-lp_18-35_0-17_MBA_mon" --variablepos='{"0" : "wl1" , "1" : "wl2" , "4" : "qos" }' --variablesep="_" --metriclist="mbl[mb/s]_0-17,mbl[mb/s]_18-35" --mettag="wkld-type-QoS:" --outputfile="memcache_rn50_corun_memBW"
-
- 
