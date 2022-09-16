@@ -97,15 +97,16 @@ def download_qcow(image,path="%s/vmimages" % (path_prefix)):
 
 #pass through devices (NIC, GPU, NVME),
 PT_Device = {
-    "GPU":  ["pci_0000_49_00_0"],
-    "NIC":  ["pci_0000_38_00_0","pci_0000_38_00_1"],
-    "NVME": [ "pci_0000_04_00_0"]
+    "GPU":  [],
+    "NIC":  [],
+    #"NVME": [ "pci_0000_49_00_0" ], # On GDC3200-28T090T 
+    "NVME": []
 }
 
 # what type of networking do you want for the vm ?
 Networking={"SR-IOV":1,
             "Bridge":1,
-            "OVS-Bridge":1,
+            "OVS-Bridge":0,
             "PT":0,
             "None":0
             }
@@ -936,15 +937,22 @@ def generate_commands(assign_random=False):
                     vm_name = WORKLOAD_PER_VM[count]
                     # floating or affitinized
                     cpuaffinity = f"--cpuset {cpu_set}" if CPU_AFFINITY else "" 
+                    
+                    # attach NVME pass through devices
+                    num_nvme = len( PT_Device["NVME"])
+                    print("number of nvme = ", num_nvme)
+                    for i in range (1,(num_nvme+1)):
+                        storage_pt=storage_pt + " --host-device={}".format(PT_Device["NVME"].pop())
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
                     test_cmd = CMD_FORMAT % (vm_name.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), n_vcpus,  # t_resource["VCPU"],
                                              path_prefix, vm_storage, iso_name, 
                                              path_prefix, vm_storage,
-                                             iso_name, network_cmd,cpuaffinity)
+                                             iso_name, network_cmd,
+                                             storage_pt, cpuaffinity)
                     print(test_cmd)
                     CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (

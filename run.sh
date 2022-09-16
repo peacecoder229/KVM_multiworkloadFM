@@ -134,6 +134,13 @@ function setup_workloads()
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "scp yum -y install fio"
       ;;
       
+      *"spdk_fio"*)
+        echo "Setting up SPDK and fio ....."
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum groupinstall -y 'Development Tools'"
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "git clone https://github.com/spdk/spdk"
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/spdk/scripts/pkgdep.sh"
+      ;;
+     
       *"stressapp"*)
         echo "Setting up stressup ....."
         scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/streeapp.tar root@${vm_ip}:/root/
