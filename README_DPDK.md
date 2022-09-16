@@ -1,22 +1,26 @@
-# Create two VMs with DPDK cloned and its prerequisites installed:
+## Create two VMs with DPDK cloned and its prerequisites installed:
 - Setup SRIOV (link to the SRIOV document.) or OVS-Bridge (link to OVS_README.md).
-- Spawn two VMs one with 5 cores and another with 4 cores: 
-```./run.sh -A -T vm -S setup -C 5,4 -W dpdk,dpdk
-```
+- Spawn two VMs one with 5 cores and another with 4 cores: ```./run.sh -A -T vm -S setup -C 5,4 -W dpdk,dpdk```
   
-- For l2fwd, create the VMs with the number of interfaces equals to the number of cores you want to run l2fwd on. Open virt-install-cmds.sh and add the pci address (otained from setting up SRIOV) of the VFs (--host-device=<pci address of VF>) in the virt install command. For example,
+- To run **l2fwd**, create the VMs with the number of interfaces equals to the number of cores you want to run l2fwd on. Open `virt-install-cmds.sh` and add the pci address (otained from setting up SRIOV) of the VFs (--host-device=<pci address of VF>) in the virt install command. For example,
 
 ```
-virt-install --import -n dpdk-01 -r 81920 --vcpus=5 --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/home/vmimages2/5g-01.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/home/vmimages2/5g-01.iso,device=cdrom --network bridge=virbr0 --host-device=pci_0000_27_02_1 --host-device=pci_0000_27_01_0 --host-device=pci_0000_27_01_1  --host-device=pci_0000_27_01_2 --host-device=pci_0000_27_01_3 --cpuset 47,46,45,44,43 --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics
+virt-install --import -n dpdk-01 -r 81920 --vcpus=5 --os-type=linux \
+  --os-variant=centos7.0 --accelerate \ 
+  --disk path=/home/vmimages2/5g-01.qcow2,format=raw,bus=virtio,cache=writeback \
+  --disk path=/home/vmimages2/5g-01.iso,device=cdrom \
+  --network bridge=virbr0 --host-device=pci_0000_27_02_1 \
+  --host-device=pci_0000_27_01_0 --host-device=pci_0000_27_01_1  --host-device=pci_0000_27_01_2 --host-device=pci_0000_27_01_3 \
+  --cpuset 47,46,45,44,43 --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics
 ```
 
 Then execute the command: ```./virt-install-cmds.sh```
 
-  - For l3fwd, create the VMs with an interface with number of queues equals to the number of cores you want to run l3fwd on. Add the following line in the xml file:
+  - To run **l3fwd**, create the VMs with an interface with number of queues equals to the number of cores you want to run l3fwd on. Add the following line in the xml file:
   ``` <driver name='vhost' queues='4'/> ```
   Inside the VM check if the corresponding nic has 4 queues: ``` ethtool -l <interface> ```
 
-# Setup DPDK on both the VMs:
+## Setup DPDK on both the VMs:
 1. Build DPDK:
   ```
   cd /root/dpdk
@@ -39,30 +43,32 @@ Then execute the command: ```./virt-install-cmds.sh```
   grep -i huge /proc/meminfo 
   ```
 
-# Run L2 forwarder and testpmd traffic on dpdk-01 and dpdk-02 VMs respectively:
-## VM dpdk-01
+## Run L2 forwarder and testpmd traffic on dpdk-01 and dpdk-02 VMs respectively:
+### VM dpdk-01
 ```
 cd /root/dpdk/build/examples/
-./dpdk-l2fwd -l 1-4 -- -p f 
-
+./dpdk-l2fwd -l 1-4 -- -p f
 ```
-## VM dpdk-02
+### VM dpdk-02
 1. ``` cd /root/dpdk/build/app ```
 2. Run the testpmd app in interactive mode: ``` ./dpdk-testpmd -- --eth-peer 0,<MAC address of the receiver> -i ```
 3. Start transmission in the testpmd prompt:
-   ``` 
-      start tx_first
-      show fwd stats all # to see the forwarding status of all the ports 
-   ```
+``` 
+start tx_first
+show fwd stats all # to see the forwarding status of all the ports 
+```
 
-# Run L3-forwarder on dpdk-01 VM and trex on dpdk-02:
-## VM dpdk-01
+## Run L3-forwarder on dpdk-01 VM and trex on dpdk-02:
+### VM dpdk-01
 1. ``` cd /root/dpdk/build/examples ```
 2. Disable all the options in rte_eth_conf (make them zero) of l3fwd/main.c (TODO: Enable the offload features in the NIC)
-3. Run l3fwd on CPU1 and CPU2, each using tx/rx queue 0 and 1 respectively: ``` ./dpdk-l3fwd -l 1,2 -- -p 0x1 -P --config="(0,0,1),(0,1,2)" --parse-ptype --eth-dest=0,< MAC Address of dpdk-02s DPDK port> ``` 
-Clarify: --config="port,queue,core"
+3. Run l3fwd on CPU1 and CPU2, each using tx/rx queue 0 and 1 respectively (--config (port,queue,lcore)): 
+  ```
+  ./dpdk-l3fwd -l 1,2 -- -p 0x1 -P --config="(0,0,1),(0,1,2)" --parse-ptype --eth-dest=0,< MAC Address of dpdk-02s DPDK port>
+  
+  ``` 
 
-## VM dpdk-02
+### VM dpdk-02
 1. Build, install TRex:
 ```
 git clone https://github.com/cisco-system-traffic-generator/trex-core /opt/
