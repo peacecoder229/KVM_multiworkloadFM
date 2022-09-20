@@ -6,33 +6,34 @@ cd fio/
 make
 ```
 
-2. Clone and install prequisites for SPDK:
+2. Clone, install prequisites for SPDK, and build it:
 ```
 git clone https://github.com/spdk/spdk
-./scripts/pkgdep.sh # to install the dependencies
-```
-
-3. Build SPDK
-```
 cd spdk/
 git submodule update --init
+./scripts/pkgdep.sh # to install the dependencies
 ./configure --with-fio=/root/fio
 make
 python3 dpdk/usertools/dpdk-hugepages.py -p 2M --setup 2048M # Setup huge page
 ```
 
-4. Unbind the nvme drive from the kernel:
-- Need to reset first (?) `./scripts/setup.sh reset`. Bind the nvme device with the kernel nvme driver. 
+3. Unbind the NVME drive from the kernel:
+- If you are using the NVME drive for the first time, need to format the NVME drive, for example:
+```
+nvme reset /dev/nvme0n1
+nvme format /dev/nvme0n1
+```
 - Bind the nvme drive to vfio-pci: `./scripts/setup.sh`
 - The drive should not show up in `lsblk`. If it shows up it means the drive is active and binding with the vfio-pci drive was not successful.
+- After you are done with FIO+SPDK experiment, you can bind the nvme device back to the kernel driver using the following command: `./scripts/setup.sh reset`
 
-5. To make sure nvme device got bound with the PMD, run the perf test.
+4. To make sure nvme device got bound with the PMD, run the perf test.
 ```
 /root/spdk/build/examples/perf -q 32 -s 1024 -w randwrite -t 60 -c 0xF -o 4096 -r 'trtype:PCIe traddr:0000:49:00.0'
 
 ```
 
-6. Run FIO with SPDK
+5. Run FIO with SPDK
 - Create a SPDK config file (e.g. fio_config) like the following:
 ```
 [global]
@@ -56,12 +57,71 @@ numjobs=1
 
 - Run FIO with the config file:
 ```
-LD_PRELOAD=$SPDK_PATH/build/fio/spdk_nvme $FIO_PATH/fio fio_config
+LD_PRELOAD=/root/spdk/build/fio/spdk_nvme /root/fio/fio fio_config
 ```
 
 ## Running FIO with SPDK in VM
-1. Spawn a VM with 5 cores and specify `spdk_fio`  
+1. Open `vm_cloud-init.py` and add the pci addresses of your NVME devices in PT_Device["NVME"]. An example is given below:
+```
+#pass through devices (NIC, GPU, NVME),
+PT_Device = {
+    "GPU":  [],
+    "NIC":  [],
+    "NVME": [ "pci_0000_49_00_0" ], # Add the PCI addresses of the NVME devices here (seperated by comma)
+    #"NVME": []
+}
+```
+2. Spawn a VM with 5 cores and specify `spdk_fio`  
 ```
 ./run.sh -A -T vm -S setup -C 5 -W spdk_fio
 ```
-2. Now follow the steps from (3)-(6) in `Running FIO with SPDK in host`.
+2. Now follow the steps from (2)-(5) in `Running FIO with SPDK in host`.
+
+## Experiment Result
+### GDC3200-28T090T
+1. Running FIO with SPDK for 60 seconds
+- In VM:
+```
+READ: bw=86.4MiB/s (90.6MB/s), 86.4MiB/s-86.4MiB/s (90.6MB/s-90.6MB/s), io=5182MiB (5434MB), run=60005-60005msec
+WRITE: bw=86.3MiB/s (90.5MB/s), 86.3MiB/s-86.3MiB/s (90.5MB/s-90.5MB/s), io=5176MiB (5428MB),run=60005-60005msec
+```
+- In Host:
+```
+READ: bw=1784MiB/s (1871MB/s), 1784MiB/s-1784MiB/s (1871MB/s-1871MB/s), io=105GiB (112GB), run=60001-60001msec
+WRITE: bw=1784MiB/s (1871MB/s), 1784MiB/s-1784MiB/s (1871MB/s-1871MB/s), io=105GiB (112GB), run=60001-60001msec
+```
+
+2. Running the Perf test for 60 seconds:
+- In VM:
+```
+# /root/spdk/build/examples/perf -q 32 -s 1024 -w randwrite -t 60 -c 0x1 -o 4096 -r 'trtype:PCIe traddr:0000:06:00.0'
+TELEMETRY: No legacy callbacks, legacy socket not created
+Initializing NVMe Controllers
+Attached to NVMe Controller at 0000:06:00.0 [8086:0a54]
+Associating PCIE (0000:06:00.0) NSID 1 with lcore 0
+Initialization complete. Launching workers.
+========================================================
+                                                                           Latency(us)
+Device Information                     :       IOPS      MiB/s    Average        min        max
+PCIE (0000:06:00.0) NSID 1 from core  0:  652439.48    2548.59      49.03       5.12    1617.14
+========================================================
+Total                                  :  652439.48    2548.59      49.03       5.12    1617.14
+
+```
+
+- In Host:
+```
+# ./build/examples/perf -q 32 -s 1024 -w randwrite -t 60 -c 0x1 -o 4096 -r 'trtype:PCIe traddr:0000:49:00.0'
+TELEMETRY: No legacy callbacks, legacy socket not created
+Initializing NVMe Controllers
+Attached to NVMe Controller at 0000:49:00.0 [8086:0a54]
+Associating PCIE (0000:49:00.0) NSID 1 with lcore 0
+Initialization complete. Launching workers.
+========================================================
+                                                                           Latency(us)
+Device Information                     :       IOPS      MiB/s    Average        min        max
+PCIE (0000:49:00.0) NSID 1 from core  0:  651427.92    2544.64      49.11       5.16    1798.65
+========================================================
+Total                                  :  651427.92    2544.64      49.11       5.16    1798.65
+```
+
