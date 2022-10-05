@@ -136,9 +136,8 @@ function setup_workloads()
       
       *"spdk_fio"*)
         echo "Setting up SPDK and fio ....."
-        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum groupinstall -y 'Development Tools'"
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "git clone https://github.com/spdk/spdk"
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/spdk/scripts/pkgdep.sh"
+        scp -r -oStrictHostKeyChecking=no spdk_exp_dir root@${vm_ip}:/root
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/spdk_exp_dir/setup_spdk.sh"
       ;;
      
       *"stressapp"*)
@@ -218,6 +217,7 @@ function setup_workloads()
 
       *"dpdk"*)
         echo "Setup the VM for dpdk ...."
+        scp -r -oStrictHostKeyChecking=no dpdk_exp_dir root@${vm_ip}:/root
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum groupinstall -y 'Development Tools'"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "pip3 install meson ninja pyelftools"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl-devel"

@@ -14,11 +14,30 @@ virt-install --import -n dpdk-01 -r 81920 --vcpus=5 --os-type=linux \
   --cpuset 47,46,45,44,43 --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics
 ```
 
-Then execute the command: ```./virt-install-cmds.sh```
-
-  - To run **l3fwd**, create the VMs with an interface with number of queues equals to the number of cores you want to run l3fwd on. Add the following line in the xml file:
-  ``` <driver name='vhost' queues='4'/> ```
-  Inside the VM check if the corresponding nic has 4 queues: ``` ethtool -l <interface> ```
+  - Then execute the command: ```./virt-install-cmds.sh```
+  
+- To run **l3fwd**, create the VMs with an interface with number of queues equals to the number of cores you want to run l3fwd on. 
+  - Dump the xml file. ``` virsh dumpxml <vm-name> > <vm-name>.xml
+  - Add the following line in the xml file:
+  ``` <driver name='vhost' queues='30'/> ```
+  So, the corresponding interface's section will look something like the following:
+  ```
+     <interface type='bridge'>
+      <mac address='52:54:00:5a:d0:b7'/>
+      <source bridge='ovs-br0'/>
+      <virtualport type='openvswitch'>
+        <parameters interfaceid='bd878b91-9212-473d-9729-98b327ff7659'/>
+      </virtualport>
+      <target dev='vnet13'/>
+      <model type='virtio'/>
+      <driver name='vhost' queues='30'/>
+      <alias name='net1'/>
+      <address type='pci' domain='0x0000' bus='0x02' slot='0x00' function='0x0'/>
+    </interface>
+  ```
+   
+  - Destroy the current VM ```virsh destroy <vm-name> --graceful``` and recreate the VM using the XML file: ``` virsh create <vm-name>.xml ```
+  - Inside the VM check if the corresponding nic has 4 queues: ``` ethtool -l <interface> ```
 
 ## Setup DPDK on both the VMs:
 1. Build DPDK:
@@ -27,7 +46,7 @@ Then execute the command: ```./virt-install-cmds.sh```
   meson build -Dexamples=l2fwd,l3fwd
   ninja -C build
   ```
-2. Bind the SRIOV or OVS-Bridge associated interface to the DPDK driver:
+2. Bind the SRIOV or OVS-Bridge associated interface to the DPDK driver. Note: Before binding note down the MAC address of the interfaces.
   ```
   cd usertools/
   python3 dpdk-devbind.py -s
@@ -65,7 +84,6 @@ show fwd stats all # to see the forwarding status of all the ports
 3. Run l3fwd on CPU1 and CPU2, each using tx/rx queue 0 and 1 respectively (--config (port,queue,lcore)): 
   ```
   ./dpdk-l3fwd -l 1,2 -- -p 0x1 -P --config="(0,0,1),(0,1,2)" --parse-ptype --eth-dest=0,< MAC Address of dpdk-02s DPDK port>
-  
   ``` 
 
 ### VM dpdk-02
@@ -82,7 +100,7 @@ cd /opt/trex-core/linux_dpdk
   - port_limit: 2 # required: should be equal to the number of interfaces
   version: 2 # reauired: should be 2
   # PCI address of the interface bind to dpdk driver
-  interfaces: ['03:00.0', 'dummy'] # required: MAC address of the interfaces
+  interfaces: ['03:00.0', 'dummy'] # required: PCI address of the DPDK-bound interfaces
   c: 1 # optional: Number of threads (cores) TRex will use per interface pair
   port_info:
         - ip: 1.1.1.1
@@ -96,7 +114,7 @@ cd /opt/trex-core/linux_dpdk
          - socket: 0# The NUMA node from which memory will be allocated for use by the interface pair.
            threads: [3]
   ```
-  - Start TRex: ``` cd /opt/trex-core/scripts && ./t-rex-64 -i --cfg <path to trex_cfg.yaml> ```
+  - Start TRex: ```cd /opt/trex-core/scripts && ./t-rex-64 -i --cfg <path to trex_cfg.yaml> ```
     If the config file is copied to /etc/trex_cfg.yaml, then don't have to specify in the command.
 
 3. Generate traffic:

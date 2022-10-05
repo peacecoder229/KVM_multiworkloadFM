@@ -23,14 +23,14 @@ python3 dpdk/usertools/dpdk-hugepages.py -p 2M --setup 2048M # Setup huge page
 nvme reset /dev/nvme0n1
 nvme format /dev/nvme0n1
 ```
-- Bind the nvme drive to vfio-pci: `./scripts/setup.sh`
+- Specify the drives you want to use for the experiment in PCI_ALLOWED environemnt variable: `PCI_ALLOWED="0000:49:00.0 0000:4b:00.0"` 
+- The following command will only bind the nvme drives specified in the PCI_ALLOWED variable to vfio-pci: `./scripts/setup.sh`
 - The drive should not show up in `lsblk`. If it shows up it means the drive is active and binding with the vfio-pci drive was not successful.
 - After you are done with FIO+SPDK experiment, you can bind the nvme device back to the kernel driver using the following command: `./scripts/setup.sh reset`
 
 4. To make sure nvme device got bound with the PMD, run the perf test.
 ```
 /root/spdk/build/examples/perf -q 32 -s 1024 -w randwrite -t 60 -c 0xF -o 4096 -r 'trtype:PCIe traddr:0000:49:00.0'
-
 ```
 
 5. Run FIO with SPDK

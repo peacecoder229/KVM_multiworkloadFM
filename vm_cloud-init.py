@@ -99,14 +99,14 @@ def download_qcow(image,path="%s/vmimages" % (path_prefix)):
 PT_Device = {
     "GPU":  [],
     "NIC":  [],
-    #"NVME": [ "pci_0000_49_00_0" ], # On GDC3200-28T090T 
-    "NVME": []
+    "NVME": [ "pci_0000_49_00_0", "pci_0000_4a_00_0"], # On GDC3200-28T090T 
+    #"NVME": []
 }
 
 # what type of networking do you want for the vm ?
-Networking={"SR-IOV":1,
+Networking={"SR-IOV":0,
             "Bridge":1,
-            "OVS-Bridge":0,
+            "OVS-Bridge":1,
             "PT":0,
             "None":0
             }
@@ -268,7 +268,7 @@ Tile_Resource = {
     },
     "5G": {
         "VCPU": 20,
-        "MEMORY": 80,
+        "MEMORY": 40,
         "IMG": "cpu_inference_golden_vmimage.qcow2"
     }
     
@@ -288,8 +288,6 @@ EXEC_TASKS = {
     "SPEC": 1,
     "5G" :1
 }
-
-
 
 # CMD_FORMAT = "virt-install -n tile%02d-%s -r 24576 --vcpus=8 --os-type=linux --os-variant=rhel6 --accelerate " \
 #             "--disk path=/opt/vmimages2/dbserver01.img,format=raw,bus=virtio,cache=writeback --import  " \
@@ -941,8 +939,12 @@ def generate_commands(assign_random=False):
                     # attach NVME pass through devices
                     num_nvme = len( PT_Device["NVME"])
                     print("number of nvme = ", num_nvme)
-                    for i in range (1,(num_nvme+1)):
-                        storage_pt=storage_pt + " --host-device={}".format(PT_Device["NVME"].pop())
+                    #for i in range (1,(num_nvme+1)):
+                    
+                    storage_pt = ""
+                    if (num_nvme > 0):
+                        nvme = PT_Device["NVME"].pop()
+                        storage_pt = storage_pt + " --host-device={}".format(nvme)
 
                     CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
