@@ -1,0 +1,17 @@
+# This file is pushed to the machine where TRex daemon server is running
+- port_limit: 2
+  version: 2
+  interfaces: ['da:00.0', 'dummy']
+  # c: 6
+  c: 2
+  port_info:
+        - ip: 1.1.1.1
+          default_gw: 2.2.2.2
+        - ip: 2.2.2.2
+          default_gw: 1.1.1.1
+  platform:
+        master_thread_id: 29
+        latency_thread_id: 30
+        dual_if:
+         - socket: 1
+           threads: [31,32,33,34,35,36,37,38]

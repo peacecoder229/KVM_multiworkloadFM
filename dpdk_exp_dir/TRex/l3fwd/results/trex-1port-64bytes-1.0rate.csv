@@ -1,0 +1,2 @@
+port,Tx line rate,Rx line rate,Tx Frames,Rx Frames,Frames Delta,Loss %,Tx (pps),Rx (pps),Tx L1 Rate (bps),Rx L1 Rate (bps)
+0,0.07458791475,0.07460109499999999,26897644,26829925,67719,0.2517655449674328,423794.96875,423869.875,298351659.0,298404380.0

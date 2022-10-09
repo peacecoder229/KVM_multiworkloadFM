@@ -1,0 +1,19 @@
+# This file is pushed to the machine where TRex daemon server is running
+- port_limit: 2
+  version: 2
+  # Same NIC
+  interfaces: ['01:00.0', '01:00.1']
+  # Different NICs
+  #interfaces: ['da:00.0', '86:00.0']
+  c: 4
+
+  port_info:
+        - src_mac:  00:00:01:01:00:01
+        - src_mac:  00:00:01:01:00:00
+
+  platform:
+        master_thread_id: 2
+        latency_thread_id: 3
+        dual_if:
+         - socket: 0
+           threads: [4,5,6,7,8,9,10,11,12]

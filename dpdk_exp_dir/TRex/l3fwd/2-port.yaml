@@ -1,0 +1,23 @@
+# This file is pushed to the machine where TRex daemon server is running
+- port_limit: 2
+  version: 2
+  # Same NIC
+  # interfaces: ['da:00.0', 'da:00.1']
+  # Different NICs
+  interfaces: ['da:00.0', '86:00.0']
+  c: 8
+  # Different prefix required if need to run other DPDK app on the same machine
+  # prefix: instance1
+  # Memory limit for running other DPDK app on the same machine
+  # limit_memory: 1024
+  port_info:
+        - ip: 1.1.1.1
+          default_gw: 2.2.2.2
+        - ip: 2.2.2.2
+          default_gw: 1.1.1.1
+  platform:
+        master_thread_id: 29
+        latency_thread_id: 30
+        dual_if:
+         - socket: 1
+           threads: [31,32,33,34,35,36,37,38]

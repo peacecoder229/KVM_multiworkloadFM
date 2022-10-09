@@ -1,0 +1,27 @@
+# This file is pushed to the machine where TRex daemon server is running
+- port_limit: 4
+  version: 2
+  # Different NICs
+  interfaces: ['da:00.0', '86:00.0', 'da:00.1', '86:00.1']
+  c: 10
+  port_info:
+      - ip: 1.1.1.1
+        default_gw: 2.2.2.2
+      - ip: 2.2.2.2
+        default_gw: 1.1.1.1
+  
+      - ip: 3.3.3.3
+        default_gw: 4.4.4.4
+      - ip: 4.4.4.4
+        default_gw: 3.3.3.3
+
+  platform:
+      # For some reason all core id needs to be < 64
+      master_thread_id: 25
+      latency_thread_id: 26
+      dual_if:
+        - socket: 1
+          threads: [27,28,29,30,31,32,33,34,35,36]
+
+        - socket: 1
+          threads: [37,38,39,40,41,42,43,44,45,46]

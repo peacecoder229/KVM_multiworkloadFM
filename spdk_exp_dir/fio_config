@@ -1,0 +1,20 @@
+[global]
+ioengine=spdk
+thread=4
+group_reporting=1
+direct=1
+verify=0
+time_based=1
+ramp_time=0
+runtime=60
+iodepth=256 #128 # 4 is giving low BW
+#rw=randrw
+rw=read
+size=131072 #4096 low BW #131072
+bs=4k # 
+
+filename=trtype=PCIe traddr=0000.49.00.0 ns=1
+#filename=trtype=PCIe traddr=0000.4a.00.0 ns=1
+
+[test]
+numjobs=4
