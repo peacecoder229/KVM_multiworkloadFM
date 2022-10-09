@@ -12,7 +12,7 @@ rw=read #randrw
 bs=131072 #65536 #256k=262144 #128k=131072 #64k=65536(1.8) #32k=32768(1.7), 16k=16384, 4k=
 #size=500G
 
-filename=trtype=PCIe traddr=0000.49.00.0
+filename=trtype=PCIe traddr=0000.49.00.0 ns=1
 #filename=trtype=PCIe traddr=0000.4a.00.0 ns=1
 
 [test]
