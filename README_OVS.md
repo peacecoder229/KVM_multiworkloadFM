@@ -11,6 +11,8 @@
    - Create directory: ```mkdir -p /usr/local/etc/openvswitch```
    - Create the OVS configuration database: ```ovsdb-tool create /usr/local/etc/openvswitch/conf.db vswitchd/vswitch.ovsschema```
    - Create directory: ```mkdir -p /usr/local/var/run/openvswitch```
+   - Create directory: ```mkdir /usr/local/var/log/```
+   - Create directory: ```mkdir /usr/local/var/log/openvswitch/```
    - Configure the created database: ```ovsdb-server --remote=punix:/usr/local/var/run/openvswitch/db.sock --remote=db:Open_vSwitch,Open_vSwitch,manager_options --pidfile --detach --log-file```
    - Initialize the database: ```ovs-vsctl --no-wait init```
    - Start OVS daemon: ```ovs-vswitchd --pidfile --detach --log-file```
