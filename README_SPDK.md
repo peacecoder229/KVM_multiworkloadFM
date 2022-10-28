@@ -4,6 +4,7 @@
 git clone https://github.com/axboe/fio 
 cd fio/
 make
+cd ..
 ```
 
 2. Clone, install prequisites for SPDK, and build it:

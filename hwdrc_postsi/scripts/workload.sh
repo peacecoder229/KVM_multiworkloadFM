@@ -96,7 +96,7 @@ function benchmark()
 {
         core=$1
         tag=$2
-        score=$(./mlc --loaded_latency -R -t${TIME} -T -k${core} -d0 | grep 00000 | awk '{print $3}')
+        score=$(mlc --loaded_latency -R -t${TIME} -T -k${core} -d0 | grep 00000 | awk '{print $3}')
 
         #printf ",%s=%.1f=\n" $tag $score
         printf ",%s,%.1f," $tag $score
