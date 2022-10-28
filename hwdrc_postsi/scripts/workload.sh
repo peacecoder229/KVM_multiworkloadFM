@@ -49,8 +49,8 @@ elif [ $# -eq 1 ]; then
   #LP_CORES=28-55,140-167
 
   #48C
-  HP_CORES=0-23,96-119
-  LP_CORES=24-47,120-143
+  HP_CORES=0-23 #,96-119
+  LP_CORES=24-47 #,120-143
 
   elif [ $1 == "S1" ];then 
   echo "workload on Socket 1"

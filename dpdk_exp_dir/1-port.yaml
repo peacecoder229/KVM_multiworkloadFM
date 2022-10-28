@@ -1,7 +1,7 @@
 # This file is pushed to the machine where TRex daemon server is running
 - port_limit: 2
   version: 2
-  interfaces: ['02:00.0', 'dummy']
+  interfaces: ['a8:00.3', 'dummy']
   # c: 6
   c: 8
   port_info:

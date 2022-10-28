@@ -528,6 +528,7 @@ function main() {
   setup_env
   init_vm_core_range
   init_vm_names
+  
   if [[ $LLC_CACHE_WAYS_ENABLE -eq 1 ]]; then
     setup_llc_ways
   fi

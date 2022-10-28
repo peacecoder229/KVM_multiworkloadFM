@@ -1,5 +1,5 @@
 
-dest_eth="3c:fd:fe:a5:4a:20"
+dest_eth="3c:fd:fe:a5:4a:20" # mac address of 74T's ens1f0
 
 port=0
 queue=0
