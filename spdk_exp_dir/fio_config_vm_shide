@@ -6,16 +6,14 @@ verify=0
 time_based=1
 ramp_time=3
 cpus_allowed=1
-runtime=10
-iodepth=4 #32 #128 # 4 
+runtime=900
+iodepth=64 #32 #128 # 4 
 rw=read #randrw
-bs=131072 #65536 #256k=262144 #128k=131072 #64k=65536(1.8) #32k=32768(1.7), 16k=16384, 4k=
+bs=262144 #131072 #65536 #256k=262144 #128k=131072 #64k=65536(1.8) #32k=32768(1.7), 16k=16384, 4k=
 #size=500G
 
 # To use multiple nvme drive add the following line for each nvme drive: filename=trtype=PCIe traddr=<pci address of the nvme drive> ns=1
 filename=trtype=PCIe traddr=0000.06.00.0 ns=1
-#filename=trtype=PCIe traddr=0000.4a.00.0 ns=1
-
 
 [test]
-numjobs=4
+numjobs=1

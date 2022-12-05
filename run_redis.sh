@@ -8,12 +8,14 @@ phi=$(( servcore-1 ))
 # 1 iteration: 393216 = 836s, 1048576 = ???s
 no_of_iteration=1
 no_of_requests=393216
+#no_of_requests=786432
 
 cd /root/memc_redis
 for (( i=1; i<=$no_of_iteration; i++)); do
   ./mc_rds_in_vm.sh 0-${phi} /root/$result_file 1 125 "redis" $servcore $no_of_requests
 done
 cd -
+
 lcore=$(tail -1 $result_file | cut -d, -f1)
 total=$(tail -1 $result_file | cut -d, -f2)
 instances=$(tail -1 $result_file | cut -d, -f3)

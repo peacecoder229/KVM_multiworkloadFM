@@ -1,5 +1,5 @@
-workloads="redis,speccpu"
-cores="12,36"
+workloads="spdk_fio,spdk_fio,nginx,redis,mlc"
+cores="2,2,16,22,6"
 config1="1-config.sh"
 config2="2-config.sh"
 config3="3-config.sh"

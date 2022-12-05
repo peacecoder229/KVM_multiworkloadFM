@@ -5,14 +5,14 @@ group_reporting=1
 verify=0
 time_based=1
 ramp_time=3
-cpus_allowed=4-7
+cpus_allowed=2
 runtime=60
-iodepth=4
+iodepth=64
 rw=read
-bs=131072
+bs=262144 #131072
 
 filename=trtype=PCIe traddr=0000.4a.00.0 ns=1
 #output="/home/muktadir/spdk_result/4a.txt"
 
 [test]
-numjobs=4
+numjobs=1

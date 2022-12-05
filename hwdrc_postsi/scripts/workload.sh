@@ -61,9 +61,8 @@ elif [ $# -eq 1 ]; then
   #HP_CORES=24-35,72-83
   #LP_CORES=36-47,84-95
   #D0 56C
-  HP_CORES=56-83,168-195
-  LP_CORES=84-111,196-223
-
+  HP_CORES=50-70 #,96-119
+  LP_CORES=71-90 #,120-143
   else
   invalind_params
   fi

@@ -9,7 +9,7 @@ declare -a VM_WORKLOAD_LIST
 VM_NAMES="" # Comma separated names of the VMs
 
 # pqos monitoring on/off
-MONITORING=1 # 1:on; 0:off TODO: Need to fix
+MONITORING=0 # 1:on; 0:off TODO: Need to fix
 
 # turbostat monitoring process id
 declare -A turbostat_pids
@@ -155,7 +155,7 @@ function hp_lp_corun() {
     sst_config
   fi
   
-  start_frequency_monitoring "$result_file_suffix"
+  #start_frequency_monitoring "$result_file_suffix"
 
   # start pqos monitor, if enabled
   if (( $MONITORING == 1)); then
@@ -169,8 +169,8 @@ function hp_lp_corun() {
   ./run.sh -T vm -S run -O $result_file_suffix -D $RESULT_DIR
 
   # Reset monitoring and process data 
-  stop_frequency_monitoring
-  process_sst_data "$result_file_suffix"
+  #stop_frequency_monitoring
+  #process_sst_data "$result_file_suffix"
 
   # Reset and clean up
   stop_monitoring # stop monitor, if enabled

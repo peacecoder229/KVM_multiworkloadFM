@@ -106,7 +106,7 @@ PT_Device = {
 # what type of networking do you want for the vm ?
 Networking={"SR-IOV":0,
             "Bridge":1,
-            "OVS-Bridge":1,
+            "OVS-Bridge":0,
             "PT":0,
             "None":0
             }
@@ -268,7 +268,7 @@ Tile_Resource = {
     },
     "5G": {
         "VCPU": 20,
-        "MEMORY": 40,
+        "MEMORY": 8,
         "IMG": "cpu_inference_golden_vmimage.qcow2"
     }
     

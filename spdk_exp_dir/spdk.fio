@@ -1,0 +1,4 @@
+[global]
+[test]
+numjobs=1
+filename=${SPDK_FILE_NAME}

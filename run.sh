@@ -114,12 +114,12 @@ function setup_workloads()
     scp -oStrictHostKeyChecking=no update_yum_repo.sh root@${vm_ip}:/root
     scp -oStrictHostKeyChecking=no client.py root@${vm_ip}:/root
     ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/update_yum_repo.sh"
-    ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
     
     # setup individual workloads
     case $vm_name in
       *"mlc"*)
   	echo "Setting up mlc ....."
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
 	scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/mlc root@${vm_ip}:/usr/local/bin/
       ;;
       
@@ -127,11 +127,6 @@ function setup_workloads()
         echo "Setting up rn50 ....."
         scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/rn50.img.xz root@${vm_ip}:/root/
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "xzcat  /root/rn50.img.xz |docker load"
-      ;;
-      
-      *"fio"*)
-        echo "Setting up fio ....."
-        ssh -oStrictHostKeyChecking=no root@${vm_ip} "scp yum -y install fio"
       ;;
       
       *"spdk_fio"*)
@@ -147,12 +142,23 @@ function setup_workloads()
       
       *"redis"*)
         echo "Setting up redis ....."
-        scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+        
+	# Increase the memory of VM
+        echo "Increasing memory of VM $vm_name ..."
+	virsh shutdown $vm_name; sleep 1m
+	virsh setmaxmem $vm_name 100G --config
+	virsh setmem $vm_name 100G --config 
+	virsh start $vm_name; sleep 1m
+        echo "Done increasing memory of VM $vm_name."
+	
+	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
       
       *"memcache"*)
         echo "Setting up memcache ....."
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
         scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
@@ -194,6 +200,7 @@ function setup_workloads()
       
       *"speccpu"*)
         echo "Install speccpu in VM."
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y libnsl"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl"
         scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/spec17 root@${vm_ip}:/root/
@@ -218,12 +225,21 @@ function setup_workloads()
       *"dpdk"*)
         echo "Setup the VM for dpdk ...."
         scp -r -oStrictHostKeyChecking=no dpdk_exp_dir root@${vm_ip}:/root
+    	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum groupinstall -y 'Development Tools'"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "pip3 install meson ninja pyelftools"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl-devel"
         
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "git clone https://github.com/DPDK/dpdk"
       ;;
+      
+      *"nginx"*)
+        echo "Setup the VM for nginx ...."
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
+        scp -r -oStrictHostKeyChecking=no nginx_exp_dir/ root@${vm_ip}:/root/
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "cd /root/nginx_exp_dir; ./install-nginx-wrk.sh"
+      ;;
+
       *)
         echo "The VM name should match the name of the workload in lowercase."
       ;;
@@ -246,9 +262,6 @@ function run_exp_vm()
       *"rn50"*)
         workload_script="run_rn50.sh"
       ;;
-      *"fio"*)
-        workload_script="run_fio.sh"
-      ;;
       *"stressapp"*)
         workload_script="run_stressapp.sh"
       ;;
@@ -269,6 +282,12 @@ function run_exp_vm()
       ;;
       *"unet"*)
         workload_script="run_3dunet.sh"
+      ;;
+      *"spdk_fio"*)
+        workload_script="run_spdk_fio.sh"
+      ;;
+      *"nginx"*)
+        workload_script="run_nginx.sh"
       ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."
