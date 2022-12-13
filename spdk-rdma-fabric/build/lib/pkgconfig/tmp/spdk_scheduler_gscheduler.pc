@@ -1,0 +1,7 @@
+Description: SPDK scheduler_gscheduler library
+Name: spdk_scheduler_gscheduler
+Version: 2.0
+Libs: -L/usr/local/lib  -lspdk_scheduler_gscheduler
+Requires: spdk_event spdk_log 
+Libs.private: 
+Cflags: -I/usr/local/include

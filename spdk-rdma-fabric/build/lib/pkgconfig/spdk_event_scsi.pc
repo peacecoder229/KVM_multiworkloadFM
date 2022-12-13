@@ -1,0 +1,7 @@
+Description: SPDK event_scsi library
+Name: spdk_event_scsi
+Version: 4.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_event_scsi
+Requires: spdk_init spdk_scsi spdk_event_bdev 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

@@ -1,0 +1,7 @@
+Description: SPDK nvme library
+Name: spdk_nvme
+Version: 9.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_nvme
+Requires: spdk_log spdk_sock spdk_util spdk_trace spdk_vfio_user spdk_rdma spdk_dma 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

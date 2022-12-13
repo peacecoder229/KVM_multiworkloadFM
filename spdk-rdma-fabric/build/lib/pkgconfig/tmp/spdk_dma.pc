@@ -1,0 +1,7 @@
+Description: SPDK dma library
+Name: spdk_dma
+Version: 2.0
+Libs: -L/usr/local/lib  -lspdk_dma
+Requires: spdk_log 
+Libs.private: 
+Cflags: -I/usr/local/include

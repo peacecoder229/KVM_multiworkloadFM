@@ -1,0 +1,1369 @@
+Build started at 2022-11-21T15:13:51.841341
+Main binary: /usr/bin/python3
+Build Options: '-Dc_args= -fPIC -Wno-error ' -Dc_link_args= -Denable_docs=false -Dtests=false -Denable_kmods=false -Dcpu_instruction_set=native -Denable_drivers=bus,bus/pci,bus/vdev,mempool/ring -Ddisable_libs=acl,bbdev,bitratestats,bpf,cfgfile,distributor,efd,eventdev,fib,flow_classify,gpudev,graph,gro,gso,ip_frag,ipsec,jobstats,kni,latencystats,lpm,member,metrics,node,pcapng,pdump,pipeline,port,rawdev,regexdev,rib,sched,stack,table -Dprefix=/root/rohan_exp/spdk/dpdk/build -Dlibdir=lib
+Python system: Linux
+The Meson build system
+Version: 0.61.5
+Source dir: /root/rohan_exp/spdk/dpdk
+Build dir: /root/rohan_exp/spdk/dpdk/build-tmp
+Build type: native build
+Program cat found: YES (/usr/bin/cat)
+Running command: /usr/bin/cat /root/rohan_exp/spdk/dpdk/VERSION
+--- stdout ---
+22.07.0
+
+--- stderr ---
+
+
+Project name: DPDK
+Project version: 22.07.0
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc sanitycheckc.c -o sanitycheckc.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/sanitycheckc.exe
+C compiler for the host machine: cc (gcc 8.5.0 "cc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-17)")
+C linker for the host machine: cc ld.bfd 2.36.1-3
+Sanity testing C compiler: cc
+Is cross compiler: False.
+Sanity check compiler command line: cc sanitycheckc.c -o sanitycheckc.exe -D_FILE_OFFSET_BITS=64
+Sanity check compile stdout:
+
+-----
+Sanity check compile stderr:
+
+-----
+Running test binary command: /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/sanitycheckc.exe
+C compiler for the build machine: cc (gcc 8.5.0 "cc (GCC) 8.5.0 20210514 (Red Hat 8.5.0-17)")
+C linker for the build machine: cc ld.bfd 2.36.1-3
+Build machine cpu family: x86_64
+Build machine cpu: x86_64
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Target machine cpu family: x86_64
+Target machine cpu: x86_64
+[Errno 21] Is a directory: '/root/rohan_exp/spdk/dpdk/buildtools/pkg-config'
+Unusable script '/root/rohan_exp/spdk/dpdk/buildtools/pkg-config'
+Program pkg-config found: YES (/usr/bin/pkg-config)
+Program check-symbols.sh found: YES (/root/rohan_exp/spdk/dpdk/buildtools/check-symbols.sh)
+Program options-ibverbs-static.sh found: YES (/root/rohan_exp/spdk/dpdk/buildtools/options-ibverbs-static.sh)
+Program objdump found: YES (/usr/bin/objdump)
+Program python3 found: YES (/usr/bin/python3)
+Running command: /usr/bin/python3 -c import importlib.util; import sys; exit(importlib.util.find_spec("elftools") is None)
+--- stdout ---
+
+--- stderr ---
+
+
+Program cat found: YES (/usr/bin/cat)
+Running command: /usr/bin/cat /root/rohan_exp/spdk/dpdk/ABI_VERSION
+--- stdout ---
+22.2
+
+--- stderr ---
+
+
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpohyjl0j3
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpohyjl0j3/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpohyjl0j3/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 
+
+Code:
+ #include<stdio.h>
+        
+        int main(void) {
+            printf("%ld\n", (long)(sizeof(void *)));
+            return 0;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Program stdout:
+
+8
+
+Program stderr:
+
+
+Checking for size of "void *" : 8
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpd_2czsr4
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpd_2czsr4/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpd_2czsr4/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 
+
+Code:
+ #include<stdio.h>
+        
+        int main(void) {
+            printf("%ld\n", (long)(sizeof(void *)));
+            return 0;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Program stdout:
+
+8
+
+Program stderr:
+
+
+Checking for size of "void *" : 8
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp0px6b743
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp0px6b743/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp0px6b743/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wl,--start-group -lm -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(void) { return 0; }
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Library m found: YES
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmphb8m5awr
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmphb8m5awr/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmphb8m5awr/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wl,--start-group -lnuma -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(void) { return 0; }
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Library numa found: YES
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmprrdmwfx8
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmprrdmwfx8/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 
+
+Code:
+ 
+        #ifdef __has_include
+         #if !__has_include("numaif.h")
+          #error "Header 'numaif.h' could not be found"
+         #endif
+        #else
+         #include <numaif.h>
+        #endif
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Has header "numaif.h" : YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp_k3w5orm
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp_k3w5orm/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp_k3w5orm/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wl,--start-group -llibfdt -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(void) { return 0; }
+
+Compiler stdout:
+ 
+Compiler stderr:
+ /usr/bin/ld: cannot find -llibfdt
+collect2: error: ld returned 1 exit status
+
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpuwlrfuiy
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpuwlrfuiy/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpuwlrfuiy/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 
+
+Code:
+ #include<stdio.h>
+        
+        int main(void) {
+            printf("%ld\n", (long)(sizeof(void *)));
+            return 0;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Program stdout:
+
+8
+
+Program stderr:
+
+
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpv85jjz9z
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpv85jjz9z/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpv85jjz9z/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 --print-search-dirs 
+
+Code:
+ 
+Compiler stdout:
+ install: /usr/lib/gcc/x86_64-redhat-linux/8/
+programs: =/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/8/:/usr/libexec/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/bin/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/bin/
+libraries: =/usr/lib/gcc/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/lib/x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../x86_64-redhat-linux/8/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../lib64/:/lib/x86_64-redhat-linux/8/:/lib/../lib64/:/usr/lib/x86_64-redhat-linux/8/:/usr/lib/../lib64/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../../x86_64-redhat-linux/lib/:/usr/lib/gcc/x86_64-redhat-linux/8/../../../:/lib/:/usr/lib/
+
+Compiler stderr:
+ 
+Library libfdt found: NO
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpr4x7ifh3
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpr4x7ifh3/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpr4x7ifh3/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wl,--start-group -llibexecinfo -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(void) { return 0; }
+
+Compiler stdout:
+ 
+Compiler stderr:
+ /usr/bin/ld: cannot find -llibexecinfo
+collect2: error: ld returned 1 exit status
+
+Library libexecinfo found: NO
+Pkg-config binary for 1 is not cached.
+Pkg-config binary missing from cross or native file, or env var undefined.
+Trying a default Pkg-config fallback at pkg-config
+Found pkg-config: /usr/bin/pkg-config (1.4.2)
+Determining dependency 'libarchive' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+Called `/usr/bin/pkg-config --modversion libarchive` -> 1
+
+Run-time dependency libarchive found: NO (tried pkgconfig)
+Pkg-config binary for 1 is cached.
+Determining dependency 'libbsd' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+Called `/usr/bin/pkg-config --modversion libbsd` -> 1
+
+Run-time dependency libbsd found: NO (tried pkgconfig)
+Pkg-config binary for 1 is cached.
+Determining dependency 'jansson' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+Called `/usr/bin/pkg-config --modversion jansson` -> 1
+
+Run-time dependency jansson found: NO (tried pkgconfig)
+Pkg-config binary for 1 is cached.
+Determining dependency 'libpcap' with pkg-config executable '/usr/bin/pkg-config'
+env[PKG_CONFIG_PATH]: 
+Called `/usr/bin/pkg-config --modversion libpcap` -> 1
+
+Run-time dependency libpcap found: NO (tried pkgconfig)
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp218y9rp0
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp218y9rp0/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp218y9rp0/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wl,--start-group -lpcap -Wl,--end-group -Wl,--allow-shlib-undefined 
+
+Code:
+ int main(void) { return 0; }
+
+Compiler stdout:
+ 
+Compiler stderr:
+ /usr/bin/ld: cannot find -lpcap
+collect2: error: ld returned 1 exit status
+
+Library pcap found: NO
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpa809hyu_
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpa809hyu_/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpa809hyu_/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wcast-qual 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wcast-qual: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp2aas1g6w
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp2aas1g6w/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp2aas1g6w/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wdeprecated 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wdeprecated: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpgg3o9tv3
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpgg3o9tv3/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpgg3o9tv3/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wformat 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wformat: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpqnlj50zh
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpqnlj50zh/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpqnlj50zh/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wformat-nonliteral 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ cc1: warning: -Wformat-nonliteral ignored without -Wformat [-Wformat-nonliteral]
+
+Compiler for C supports arguments -Wformat-nonliteral: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpnm_1wd5n
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpnm_1wd5n/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpnm_1wd5n/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wformat-security 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ cc1: warning: -Wformat-security ignored without -Wformat [-Wformat-security]
+
+Compiler for C supports arguments -Wformat-security: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp8om97pq0
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp8om97pq0/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp8om97pq0/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wmissing-declarations 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wmissing-declarations: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpifp60yag
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpifp60yag/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpifp60yag/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wmissing-prototypes 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wmissing-prototypes: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpgll8145i
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpgll8145i/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpgll8145i/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wnested-externs 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wnested-externs: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpwlf17cjs
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpwlf17cjs/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpwlf17cjs/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wold-style-definition 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wold-style-definition: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp_tdbdyfh
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp_tdbdyfh/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp_tdbdyfh/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wpointer-arith 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wpointer-arith: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpkkb0oev3
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpkkb0oev3/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpkkb0oev3/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wsign-compare 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wsign-compare: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp7xpgk4gn
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp7xpgk4gn/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp7xpgk4gn/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wstrict-prototypes 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wstrict-prototypes: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpd48r6m02
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpd48r6m02/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpd48r6m02/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wundef 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wundef: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp6_97za1k
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp6_97za1k/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp6_97za1k/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wwrite-strings 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wwrite-strings: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmph_9_rm6m
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmph_9_rm6m/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmph_9_rm6m/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Waddress-of-packed-member -Wno-address-of-packed-member 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ cc: error: unrecognized command line option '-Waddress-of-packed-member'
+
+Compiler for C supports arguments -Wno-address-of-packed-member: NO 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpx24fztnk
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpx24fztnk/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpx24fztnk/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wpacked-not-aligned -Wno-packed-not-aligned 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wno-packed-not-aligned: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpqxnyb5us
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpqxnyb5us/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpqxnyb5us/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wmissing-field-initializers -Wno-missing-field-initializers 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wno-missing-field-initializers: YES 
+Running command: /usr/bin/python3 /root/rohan_exp/spdk/dpdk/buildtools/binutils-avx512-check.py /usr/bin/objdump cc
+--- stdout ---
+
+--- stderr ---
+
+
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp1hfse2ei
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp1hfse2ei/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp1hfse2ei/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mavx512f 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mavx512f: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp2yul8sza
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp2yul8sza/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp2yul8sza/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mavx512f 
+
+Code:
+ #include <immintrin.h>
+    void test(__m512i zmm){
+        __m256i ymm = _mm512_extracti64x4_epi64(zmm, 0);}
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking if "AVX512 checking" compiles: YES 
+Running compile:
+Working directory:  /tmp/tmpfgi3ro_e
+Command line:  cc /tmp/tmpfgi3ro_e/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __SSE4_2__
+        # define __SSE4_2__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__SSE4_2__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__SSE4_2__" : 1 
+Running compile:
+Working directory:  /tmp/tmp_kj3_qzf
+Command line:  cc /tmp/tmp_kj3_qzf/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AES__
+        # define __AES__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AES__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AES__" : 1 
+Running compile:
+Working directory:  /tmp/tmpeyqh88w1
+Command line:  cc /tmp/tmpeyqh88w1/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AVX__
+        # define __AVX__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AVX__" : 1 
+Running compile:
+Working directory:  /tmp/tmp_8vt67_8
+Command line:  cc /tmp/tmp_8vt67_8/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AVX2__
+        # define __AVX2__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX2__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AVX2__" : 1 
+Running compile:
+Working directory:  /tmp/tmprmf4rbqn
+Command line:  cc /tmp/tmprmf4rbqn/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AVX512BW__
+        # define __AVX512BW__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512BW__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AVX512BW__" : 1 
+Running compile:
+Working directory:  /tmp/tmpwi_4fm_u
+Command line:  cc /tmp/tmpwi_4fm_u/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AVX512CD__
+        # define __AVX512CD__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512CD__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AVX512CD__" : 1 
+Running compile:
+Working directory:  /tmp/tmpv2rv9rij
+Command line:  cc /tmp/tmpv2rv9rij/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AVX512DQ__
+        # define __AVX512DQ__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512DQ__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AVX512DQ__" : 1 
+Running compile:
+Working directory:  /tmp/tmpobxlegl5
+Command line:  cc /tmp/tmpobxlegl5/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AVX512F__
+        # define __AVX512F__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512F__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AVX512F__" : 1 
+Running compile:
+Working directory:  /tmp/tmpm39zyrji
+Command line:  cc /tmp/tmpm39zyrji/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __AVX512VL__
+        # define __AVX512VL__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512VL__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__AVX512VL__" : 1 
+Running compile:
+Working directory:  /tmp/tmpa54bp942
+Command line:  cc /tmp/tmpa54bp942/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __PCLMUL__
+        # define __PCLMUL__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__PCLMUL__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__PCLMUL__" : 1 
+Running compile:
+Working directory:  /tmp/tmpwdzz87xg
+Command line:  cc /tmp/tmpwdzz87xg/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __RDRND__
+        # define __RDRND__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__RDRND__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__RDRND__" : 1 
+Running compile:
+Working directory:  /tmp/tmp53yza5o4
+Command line:  cc /tmp/tmp53yza5o4/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __RDSEED__
+        # define __RDSEED__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__RDSEED__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__RDSEED__" : 1 
+Running compile:
+Working directory:  /tmp/tmp8_snzoif
+Command line:  cc /tmp/tmp8_snzoif/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 -march=native 
+
+Code:
+ 
+        
+        #ifndef __VPCLMULQDQ__
+        # define __VPCLMULQDQ__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__VPCLMULQDQ__
+Compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Compiler stderr:
+ 
+Fetching value of define "__VPCLMULQDQ__" : 1 
+Running command: /usr/bin/python3 /root/rohan_exp/spdk/dpdk/buildtools/list-dir-globs.py acl,bbdev,bitratestats,bpf,cfgfile,distributor,efd,eventdev,fib,flow_classify,gpudev,graph,gro,gso,ip_frag,ipsec,jobstats,kni,latencystats,lpm,member,metrics,node,pcapng,pdump,pipeline,port,rawdev,regexdev,rib,sched,stack,table
+--- stdout ---
+acl
+bbdev
+bitratestats
+bpf
+cfgfile
+distributor
+efd
+eventdev
+fib
+flow_classify
+gpudev
+graph
+gro
+gso
+ip_frag
+ipsec
+jobstats
+kni
+latencystats
+lpm
+member
+metrics
+node
+pcapng
+pdump
+pipeline
+port
+rawdev
+regexdev
+rib
+sched
+stack
+table
+
+--- stderr ---
+
+
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmphl9iqy9c
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmphl9iqy9c/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmphl9iqy9c/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wformat-truncation -Wno-format-truncation 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wno-format-truncation: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpa6ox3x8e
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpa6ox3x8e/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpa6ox3x8e/output.exe -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 
+
+Code:
+ #include <unistd.h>
+#include <limits.h>
+
+        #if defined __stub_getentropy || defined __stub___getentropy
+        fail fail fail this function is not going to work
+        #endif
+        
+int main(void) {
+            void *a = (void*) &getentropy;
+            long long b = (long long) a;
+            return (int) b;
+        }
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Checking for function "getentropy" : YES 
+Using cached compile:
+Cached command line:   
+
+Code:
+ 
+        
+        #ifndef __PCLMUL__
+        # define __PCLMUL__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__PCLMUL__
+Cached compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Cached compiler stderr:
+ 
+Fetching value of define "__PCLMUL__" : 1 (cached)
+Using cached compile:
+Cached command line:   
+
+Code:
+ 
+        
+        #ifndef __AVX512F__
+        # define __AVX512F__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512F__
+Cached compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Cached compiler stderr:
+ 
+Fetching value of define "__AVX512F__" : 1 (cached)
+Using cached compile:
+Cached command line:   
+
+Code:
+ 
+        
+        #ifndef __AVX512BW__
+        # define __AVX512BW__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512BW__
+Cached compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Cached compiler stderr:
+ 
+Fetching value of define "__AVX512BW__" : 1 (cached)
+Using cached compile:
+Cached command line:   
+
+Code:
+ 
+        
+        #ifndef __AVX512DQ__
+        # define __AVX512DQ__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512DQ__
+Cached compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Cached compiler stderr:
+ 
+Fetching value of define "__AVX512DQ__" : 1 (cached)
+Using cached compile:
+Cached command line:   
+
+Code:
+ 
+        
+        #ifndef __AVX512VL__
+        # define __AVX512VL__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__AVX512VL__
+Cached compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Cached compiler stderr:
+ 
+Fetching value of define "__AVX512VL__" : 1 (cached)
+Using cached compile:
+Cached command line:   
+
+Code:
+ 
+        
+        #ifndef __VPCLMULQDQ__
+        # define __VPCLMULQDQ__
+        #endif
+        "MESON_GET_DEFINE_DELIMITER"
+__VPCLMULQDQ__
+Cached compiler stdout:
+         "MESON_GET_DEFINE_DELIMITER"
+1
+
+Cached compiler stderr:
+ 
+Fetching value of define "__VPCLMULQDQ__" : 1 (cached)
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpvz9ov98o
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpvz9ov98o/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpvz9ov98o/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mpclmul 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mpclmul: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmprdwf7k8x
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmprdwf7k8x/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmprdwf7k8x/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -maes 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -maes: YES 
+Using cached compile:
+Cached command line:   
+
+Code:
+ extern int i;
+int i;
+
+Cached compiler stdout:
+ 
+Cached compiler stderr:
+ 
+Compiler for C supports arguments -mavx512f: YES (cached)
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpz37yo13c
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpz37yo13c/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpz37yo13c/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mavx512bw 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mavx512bw: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp0ghkcmq8
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp0ghkcmq8/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp0ghkcmq8/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mavx512dq 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mavx512dq: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpm37adlf4
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpm37adlf4/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpm37adlf4/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mavx512vl 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mavx512vl: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpb_9zy032
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpb_9zy032/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpb_9zy032/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mvpclmulqdq 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mvpclmulqdq: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp3ew42a3r
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp3ew42a3r/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp3ew42a3r/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mavx2 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mavx2: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp3zfghawt
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp3zfghawt/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmp3zfghawt/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -mavx 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -mavx: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpl6pbb3nk
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpl6pbb3nk/testfile.c -o /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpl6pbb3nk/output.obj -c -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -O0 -Wcast-qual -Wno-cast-qual 
+
+Code:
+ extern int i;
+int i;
+
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Compiler for C supports arguments -Wno-cast-qual: YES 
+Running compile:
+Working directory:  /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpg8tp6io4
+Command line:  cc /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/tmpg8tp6io4/testfile.c -E -P -fPIC -Wno-error -D_FILE_OFFSET_BITS=64 -P -O0 
+
+Code:
+ 
+        #ifdef __has_include
+         #if !__has_include("linux/userfaultfd.h")
+          #error "Header 'linux/userfaultfd.h' could not be found"
+         #endif
+        #else
+         #include <linux/userfaultfd.h>
+        #endif
+Compiler stdout:
+ 
+Compiler stderr:
+ 
+Has header "linux/userfaultfd.h" : YES 
+Running command: /usr/bin/python3 /root/rohan_exp/spdk/dpdk/buildtools/list-dir-globs.py ,
+--- stdout ---
+
+--- stderr ---
+
+
+Running command: /usr/bin/python3 /root/rohan_exp/spdk/dpdk/buildtools/list-dir-globs.py ,bus,bus/pci,bus/vdev,mempool/ring
+--- stdout ---
+bus
+bus/pci
+bus/vdev
+mempool/ring
+
+--- stderr ---
+
+
+Using cached compile:
+Cached command line:   
+
+Code:
+ extern int i;
+int i;
+
+Cached compiler stdout:
+ 
+Cached compiler stderr:
+ 
+Compiler for C supports arguments -Wno-format-truncation: YES (cached)
+Program doxygen found: NO
+Program sphinx-build found: NO
+Configuring rte_build_config.h using configuration
+Running command: /usr/bin/python3 set-static-linker-flags.py
+--- stdout ---
+Processing /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/libdpdk-libs.pc
+Processing /root/rohan_exp/spdk/dpdk/build-tmp/meson-private/libdpdk.pc
+Processing /root/rohan_exp/spdk/dpdk/build-tmp/meson-uninstalled/libdpdk-libs-uninstalled.pc
+Processing /root/rohan_exp/spdk/dpdk/build-tmp/meson-uninstalled/libdpdk-uninstalled.pc
+
+--- stderr ---
+
+
+Message: 
+=================
+Libraries Enabled
+=================
+
+libs:
+	kvargs, telemetry, eal, ring, rcu, mempool, mbuf, net, 
+	meter, ethdev, pci, cmdline, hash, timer, compressdev, cryptodev, 
+	power, dmadev, reorder, security, vhost, 
+
+Message: 
+===============
+Drivers Enabled
+===============
+
+common:
+	
+bus:
+	pci, vdev, 
+mempool:
+	ring, 
+dma:
+	
+net:
+	
+raw:
+	
+crypto:
+	
+compress:
+	
+regex:
+	
+vdpa:
+	
+event:
+	
+baseband:
+	
+gpu:
+	
+
+Message: 
+=================
+Content Skipped
+=================
+
+libs:
+	metrics:	explicitly disabled via build config
+	acl:	explicitly disabled via build config
+	bbdev:	explicitly disabled via build config
+	bitratestats:	explicitly disabled via build config
+	bpf:	explicitly disabled via build config
+	cfgfile:	explicitly disabled via build config
+	distributor:	explicitly disabled via build config
+	efd:	explicitly disabled via build config
+	eventdev:	explicitly disabled via build config
+	gpudev:	explicitly disabled via build config
+	gro:	explicitly disabled via build config
+	gso:	explicitly disabled via build config
+	ip_frag:	explicitly disabled via build config
+	jobstats:	explicitly disabled via build config
+	kni:	explicitly disabled via build config
+	latencystats:	explicitly disabled via build config
+	lpm:	explicitly disabled via build config
+	member:	explicitly disabled via build config
+	pcapng:	explicitly disabled via build config
+	rawdev:	explicitly disabled via build config
+	regexdev:	explicitly disabled via build config
+	rib:	explicitly disabled via build config
+	sched:	explicitly disabled via build config
+	stack:	explicitly disabled via build config
+	ipsec:	explicitly disabled via build config
+	fib:	explicitly disabled via build config
+	port:	explicitly disabled via build config
+	pdump:	explicitly disabled via build config
+	table:	explicitly disabled via build config
+	pipeline:	explicitly disabled via build config
+	flow_classify:	explicitly disabled via build config
+	graph:	explicitly disabled via build config
+	node:	explicitly disabled via build config
+	
+drivers:
+	common/cpt:	not in enabled drivers build config
+	common/dpaax:	not in enabled drivers build config
+	common/iavf:	not in enabled drivers build config
+	common/mvep:	not in enabled drivers build config
+	common/octeontx:	not in enabled drivers build config
+	bus/auxiliary:	not in enabled drivers build config
+	bus/dpaa:	not in enabled drivers build config
+	bus/fslmc:	not in enabled drivers build config
+	bus/ifpga:	not in enabled drivers build config
+	bus/vmbus:	not in enabled drivers build config
+	common/cnxk:	not in enabled drivers build config
+	common/mlx5:	not in enabled drivers build config
+	common/qat:	not in enabled drivers build config
+	common/sfc_efx:	not in enabled drivers build config
+	mempool/bucket:	not in enabled drivers build config
+	mempool/cnxk:	not in enabled drivers build config
+	mempool/dpaa:	not in enabled drivers build config
+	mempool/dpaa2:	not in enabled drivers build config
+	mempool/octeontx:	not in enabled drivers build config
+	mempool/stack:	not in enabled drivers build config
+	dma/cnxk:	not in enabled drivers build config
+	dma/dpaa:	not in enabled drivers build config
+	dma/dpaa2:	not in enabled drivers build config
+	dma/hisilicon:	not in enabled drivers build config
+	dma/idxd:	not in enabled drivers build config
+	dma/ioat:	not in enabled drivers build config
+	dma/skeleton:	not in enabled drivers build config
+	net/af_packet:	not in enabled drivers build config
+	net/af_xdp:	not in enabled drivers build config
+	net/ark:	not in enabled drivers build config
+	net/atlantic:	not in enabled drivers build config
+	net/avp:	not in enabled drivers build config
+	net/axgbe:	not in enabled drivers build config
+	net/bnx2x:	not in enabled drivers build config
+	net/bnxt:	not in enabled drivers build config
+	net/bonding:	not in enabled drivers build config
+	net/cnxk:	not in enabled drivers build config
+	net/cxgbe:	not in enabled drivers build config
+	net/dpaa:	not in enabled drivers build config
+	net/dpaa2:	not in enabled drivers build config
+	net/e1000:	not in enabled drivers build config
+	net/ena:	not in enabled drivers build config
+	net/enetc:	not in enabled drivers build config
+	net/enetfec:	not in enabled drivers build config
+	net/enic:	not in enabled drivers build config
+	net/failsafe:	not in enabled drivers build config
+	net/fm10k:	not in enabled drivers build config
+	net/hinic:	not in enabled drivers build config
+	net/hns3:	not in enabled drivers build config
+	net/i40e:	not in enabled drivers build config
+	net/iavf:	not in enabled drivers build config
+	net/ice:	not in enabled drivers build config
+	net/igc:	not in enabled drivers build config
+	net/ionic:	not in enabled drivers build config
+	net/ipn3ke:	not in enabled drivers build config
+	net/ixgbe:	not in enabled drivers build config
+	net/kni:	not in enabled drivers build config
+	net/liquidio:	not in enabled drivers build config
+	net/memif:	not in enabled drivers build config
+	net/mlx4:	not in enabled drivers build config
+	net/mlx5:	not in enabled drivers build config
+	net/mvneta:	not in enabled drivers build config
+	net/mvpp2:	not in enabled drivers build config
+	net/netvsc:	not in enabled drivers build config
+	net/nfb:	not in enabled drivers build config
+	net/nfp:	not in enabled drivers build config
+	net/ngbe:	not in enabled drivers build config
+	net/null:	not in enabled drivers build config
+	net/octeontx:	not in enabled drivers build config
+	net/octeontx_ep:	not in enabled drivers build config
+	net/pcap:	not in enabled drivers build config
+	net/pfe:	not in enabled drivers build config
+	net/qede:	not in enabled drivers build config
+	net/ring:	not in enabled drivers build config
+	net/sfc:	not in enabled drivers build config
+	net/softnic:	not in enabled drivers build config
+	net/tap:	not in enabled drivers build config
+	net/thunderx:	not in enabled drivers build config
+	net/txgbe:	not in enabled drivers build config
+	net/vdev_netvsc:	not in enabled drivers build config
+	net/vhost:	not in enabled drivers build config
+	net/virtio:	not in enabled drivers build config
+	net/vmxnet3:	not in enabled drivers build config
+	raw/cnxk_bphy:	not in enabled drivers build config
+	raw/cnxk_gpio:	not in enabled drivers build config
+	raw/dpaa2_cmdif:	not in enabled drivers build config
+	raw/ifpga:	not in enabled drivers build config
+	raw/ioat:	not in enabled drivers build config
+	raw/ntb:	not in enabled drivers build config
+	raw/skeleton:	not in enabled drivers build config
+	crypto/armv8:	not in enabled drivers build config
+	crypto/bcmfs:	not in enabled drivers build config
+	crypto/caam_jr:	not in enabled drivers build config
+	crypto/ccp:	not in enabled drivers build config
+	crypto/cnxk:	not in enabled drivers build config
+	crypto/dpaa_sec:	not in enabled drivers build config
+	crypto/dpaa2_sec:	not in enabled drivers build config
+	crypto/ipsec_mb:	not in enabled drivers build config
+	crypto/mlx5:	not in enabled drivers build config
+	crypto/mvsam:	not in enabled drivers build config
+	crypto/nitrox:	not in enabled drivers build config
+	crypto/null:	not in enabled drivers build config
+	crypto/octeontx:	not in enabled drivers build config
+	crypto/openssl:	not in enabled drivers build config
+	crypto/scheduler:	not in enabled drivers build config
+	crypto/virtio:	not in enabled drivers build config
+	compress/isal:	not in enabled drivers build config
+	compress/mlx5:	not in enabled drivers build config
+	compress/octeontx:	not in enabled drivers build config
+	compress/zlib:	not in enabled drivers build config
+	regex/mlx5:	not in enabled drivers build config
+	regex/cn9k:	not in enabled drivers build config
+	vdpa/ifc:	not in enabled drivers build config
+	vdpa/mlx5:	not in enabled drivers build config
+	vdpa/sfc:	not in enabled drivers build config
+	event/cnxk:	not in enabled drivers build config
+	event/dlb2:	not in enabled drivers build config
+	event/dpaa:	not in enabled drivers build config
+	event/dpaa2:	not in enabled drivers build config
+	event/dsw:	not in enabled drivers build config
+	event/opdl:	not in enabled drivers build config
+	event/skeleton:	not in enabled drivers build config
+	event/sw:	not in enabled drivers build config
+	event/octeontx:	not in enabled drivers build config
+	baseband/acc100:	not in enabled drivers build config
+	baseband/fpga_5gnr_fec:	not in enabled drivers build config
+	baseband/fpga_lte_fec:	not in enabled drivers build config
+	baseband/la12xx:	not in enabled drivers build config
+	baseband/null:	not in enabled drivers build config
+	baseband/turbo_sw:	not in enabled drivers build config
+	gpu/cuda:	not in enabled drivers build config
+	
+
+Build targets in project: 103
+
+DPDK 22.07.0
+
+  User defined options
+    libdir             : lib
+    prefix             : /root/rohan_exp/spdk/dpdk/build
+    c_args             :  -fPIC -Wno-error 
+    c_link_args        : 
+    cpu_instruction_set: native
+    disable_libs       : acl,bbdev,bitratestats,bpf,cfgfile,distributor,efd,eventdev,fib,flow_classify,gpudev,graph,gro,gso,ip_frag,ipsec,jobstats,kni,latencystats,lpm,member,metrics,node,pcapng,pdump,pipeline,port,rawdev,regexdev,rib,sched,stack,table
+    enable_docs        : false
+    enable_drivers     : bus,bus/pci,bus/vdev,mempool/ring
+    enable_kmods       : false
+    tests              : false
+
+Found ninja-1.8.2 at /usr/bin/ninja
+NOTICE: You are using Python 3.6 which is EOL. Starting with v0.62.0, Meson will require Python 3.7 or newer

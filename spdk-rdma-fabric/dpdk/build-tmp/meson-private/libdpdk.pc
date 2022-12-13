@@ -1,0 +1,12 @@
+prefix=/root/rohan_exp/spdk/dpdk/build
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: DPDK
+Description: The Data Plane Development Kit (DPDK).
+Note that CFLAGS might contain an -march flag higher than typical baseline.
+This is required for a number of static inline functions in the public headers.
+Version: 22.07.0
+Requires: libdpdk-libs
+Libs.private: -Wl,--whole-archive -L${libdir} -l:librte_bus_pci.a -l:librte_bus_vdev.a -l:librte_mempool_ring.a -l:librte_vhost.a -l:librte_security.a -l:librte_reorder.a -l:librte_dmadev.a -l:librte_power.a -l:librte_cryptodev.a -l:librte_compressdev.a -l:librte_timer.a -l:librte_hash.a -l:librte_cmdline.a -l:librte_pci.a -l:librte_ethdev.a -l:librte_meter.a -l:librte_net.a -l:librte_mbuf.a -l:librte_mempool.a -l:librte_rcu.a -l:librte_ring.a -l:librte_eal.a -l:librte_telemetry.a -l:librte_kvargs.a -Wl,--no-whole-archive -Wl,--export-dynamic
+Cflags: -I${includedir}

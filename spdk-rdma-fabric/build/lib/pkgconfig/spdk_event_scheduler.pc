@@ -1,0 +1,7 @@
+Description: SPDK event_scheduler library
+Name: spdk_event_scheduler
+Version: 2.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_event_scheduler
+Requires: spdk_event spdk_init spdk_json spdk_log 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

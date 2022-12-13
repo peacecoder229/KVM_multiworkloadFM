@@ -1,0 +1,12 @@
+prefix=/root/rohan_exp/spdk/dpdk/build-tmp
+srcdir=/root/rohan_exp/spdk/dpdk
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: dpdk-libs
+Description: Internal-only DPDK pkgconfig file. Not for direct use.
+Use libdpdk.pc instead of this file to query DPDK compile/link arguments
+Version: 22.07.0
+Libs: -Wl,--as-needed -L${prefix}/lib -lrte_vhost -lrte_security -lrte_reorder -lrte_dmadev -lrte_power -lrte_cryptodev -lrte_compressdev -lrte_timer -lrte_hash -lrte_cmdline -lrte_pci -lrte_ethdev -lrte_meter -lrte_net -lrte_mbuf -lrte_mempool -lrte_rcu -lrte_ring -lrte_eal -lrte_telemetry -lrte_kvargs
+Libs.private: -pthread -lm -ldl -lnuma
+Cflags: -I${prefix}/lib -I${srcdir}/lib -I${prefix}/lib/vhost -I${srcdir}/lib/vhost -I${prefix} -I${srcdir} -I${prefix}/config -I${srcdir}/config -I${prefix}/lib/eal/include -I${srcdir}/lib/eal/include -I${prefix}/lib/eal/linux/include -I${srcdir}/lib/eal/linux/include -I${prefix}/lib/eal/x86/include -I${srcdir}/lib/eal/x86/include -I${prefix}/lib/eal/include -I${srcdir}/lib/eal/include -I${prefix}/lib/eal/common -I${srcdir}/lib/eal/common -I${prefix}/lib/eal/linux/include -I${srcdir}/lib/eal/linux/include -I${prefix}/lib/eal -I${srcdir}/lib/eal -I${prefix}/lib/kvargs -I${srcdir}/lib/kvargs -I${prefix}/lib/telemetry/../metrics -I${srcdir}/lib/telemetry/../metrics -I${prefix}/lib/telemetry -I${srcdir}/lib/telemetry -I${prefix}/lib/ethdev -I${srcdir}/lib/ethdev -I${prefix}/lib/net -I${srcdir}/lib/net -I${prefix}/lib/mbuf -I${srcdir}/lib/mbuf -I${prefix}/lib/mempool -I${srcdir}/lib/mempool -I${prefix}/lib/ring -I${srcdir}/lib/ring -I${prefix}/lib/meter -I${srcdir}/lib/meter -I${prefix}/lib/cryptodev -I${srcdir}/lib/cryptodev -I${prefix}/lib/rcu -I${srcdir}/lib/rcu -I${prefix}/lib/hash -I${srcdir}/lib/hash -I${prefix}/lib/pci -I${srcdir}/lib/pci -I${prefix}/lib/dmadev -I${srcdir}/lib/dmadev -I${prefix}/lib/security -I${srcdir}/lib/security -I${prefix}/lib/reorder -I${srcdir}/lib/reorder -I${prefix}/lib/power -I${srcdir}/lib/power -I${prefix}/lib/timer -I${srcdir}/lib/timer -I${prefix}/lib/compressdev -I${srcdir}/lib/compressdev -I${prefix}/lib/cmdline -I${srcdir}/lib/cmdline -include rte_config.h -march=native

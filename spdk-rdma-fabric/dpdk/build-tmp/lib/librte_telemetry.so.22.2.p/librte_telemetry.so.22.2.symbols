@@ -1,0 +1,19 @@
+ 0x000000000000000e (SONAME)             Library soname: [librte_telemetry.so.22]
+DPDK_22 A
+INTERNAL A
+rte_tel_data_add_array_container@@DPDK_22 T
+rte_tel_data_add_array_int@@DPDK_22 T
+rte_tel_data_add_array_string@@DPDK_22 T
+rte_tel_data_add_array_u64@@DPDK_22 T
+rte_tel_data_add_dict_container@@DPDK_22 T
+rte_tel_data_add_dict_int@@DPDK_22 T
+rte_tel_data_add_dict_string@@DPDK_22 T
+rte_tel_data_add_dict_u64@@DPDK_22 T
+rte_tel_data_alloc@@DPDK_22 T
+rte_tel_data_free@@DPDK_22 T
+rte_tel_data_start_array@@DPDK_22 T
+rte_tel_data_start_dict@@DPDK_22 T
+rte_tel_data_string@@DPDK_22 T
+rte_telemetry_init@@INTERNAL T
+rte_telemetry_legacy_register@@INTERNAL T
+rte_telemetry_register_cmd@@DPDK_22 T

@@ -1,0 +1,7 @@
+Description: SPDK vmd library
+Name: spdk_vmd
+Version: 4.1
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_vmd
+Requires: spdk_log spdk_util 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

@@ -1,0 +1,7 @@
+Description: SPDK scheduler_dpdk_governor library
+Name: spdk_scheduler_dpdk_governor
+Version: 2.0
+Libs: -L/usr/local/lib  -lspdk_scheduler_dpdk_governor
+Requires: spdk_event spdk_log 
+Libs.private: 
+Cflags: -I/usr/local/include

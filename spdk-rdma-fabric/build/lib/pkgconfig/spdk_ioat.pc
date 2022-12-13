@@ -1,0 +1,7 @@
+Description: SPDK ioat library
+Name: spdk_ioat
+Version: 5.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_ioat
+Requires: spdk_log 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

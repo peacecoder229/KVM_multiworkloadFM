@@ -1,0 +1,7 @@
+Description: SPDK ftl library
+Name: spdk_ftl
+Version: 6.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_ftl
+Requires: spdk_log spdk_util spdk_thread spdk_bdev spdk_trace 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include
