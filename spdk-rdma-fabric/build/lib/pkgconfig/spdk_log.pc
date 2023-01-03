@@ -1,0 +1,7 @@
+Description: SPDK log library
+Name: spdk_log
+Version: 5.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_log
+Requires:  
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

@@ -1,0 +1,7 @@
+Description: SPDK rdma library
+Name: spdk_rdma
+Version: 4.1
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_rdma
+Requires: spdk_log spdk_util 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

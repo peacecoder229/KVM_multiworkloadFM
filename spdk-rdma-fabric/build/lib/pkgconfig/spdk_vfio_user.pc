@@ -1,0 +1,7 @@
+Description: SPDK vfio_user library
+Name: spdk_vfio_user
+Version: 3.1
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_vfio_user
+Requires: spdk_log 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

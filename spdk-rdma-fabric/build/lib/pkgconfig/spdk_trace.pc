@@ -1,0 +1,7 @@
+Description: SPDK trace library
+Name: spdk_trace
+Version: 7.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_trace
+Requires: spdk_log spdk_util spdk_json spdk_jsonrpc spdk_rpc 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

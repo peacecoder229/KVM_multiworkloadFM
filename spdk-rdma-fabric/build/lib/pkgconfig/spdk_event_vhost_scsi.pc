@@ -1,0 +1,7 @@
+Description: SPDK event_vhost_scsi library
+Name: spdk_event_vhost_scsi
+Version: 1.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_event_vhost_scsi
+Requires: spdk_init spdk_vhost spdk_event_scheduler spdk_event_scsi 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

@@ -1,0 +1,7 @@
+Description: SPDK lvol library
+Name: spdk_lvol
+Version: 7.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_lvol
+Requires: spdk_log spdk_util spdk_blob 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

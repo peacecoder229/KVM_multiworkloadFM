@@ -1,0 +1,7 @@
+Description: SPDK trace_parser library
+Name: spdk_trace_parser
+Version: 3.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_trace_parser
+Requires: spdk_log 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

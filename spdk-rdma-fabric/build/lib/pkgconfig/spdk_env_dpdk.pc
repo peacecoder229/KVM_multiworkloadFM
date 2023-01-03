@@ -1,0 +1,7 @@
+Description: SPDK env_dpdk library
+Name: spdk_env_dpdk
+Version: 10.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_env_dpdk
+Requires: spdk_log spdk_util spdk_dpdklibs
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

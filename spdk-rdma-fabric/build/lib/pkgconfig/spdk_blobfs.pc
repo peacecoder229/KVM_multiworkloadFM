@@ -1,0 +1,7 @@
+Description: SPDK blobfs library
+Name: spdk_blobfs
+Version: 7.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_blobfs
+Requires: spdk_log spdk_thread spdk_blob spdk_trace spdk_util 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

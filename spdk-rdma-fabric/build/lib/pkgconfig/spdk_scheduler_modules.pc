@@ -1,0 +1,4 @@
+Description: SPDK scheduler modules
+Name: spdk_scheduler_modules
+Version: 1.0
+Requires: spdk_scheduler_dynamic spdk_env_dpdk spdk_scheduler_dpdk_governor spdk_scheduler_gscheduler

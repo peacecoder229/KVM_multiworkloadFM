@@ -1,0 +1,7 @@
+Description: SPDK sock_posix library
+Name: spdk_sock_posix
+Version: 4.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_sock_posix
+Requires: spdk_log spdk_sock spdk_util 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

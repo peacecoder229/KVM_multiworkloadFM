@@ -1,0 +1,7 @@
+Description: SPDK scheduler_dynamic library
+Name: spdk_scheduler_dynamic
+Version: 2.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_scheduler_dynamic
+Requires: spdk_event spdk_log spdk_thread spdk_util spdk_json 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

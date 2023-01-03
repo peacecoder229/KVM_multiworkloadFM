@@ -1,0 +1,7 @@
+Description: SPDK event_vhost_blk library
+Name: spdk_event_vhost_blk
+Version: 1.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_event_vhost_blk
+Requires: spdk_init spdk_vhost 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

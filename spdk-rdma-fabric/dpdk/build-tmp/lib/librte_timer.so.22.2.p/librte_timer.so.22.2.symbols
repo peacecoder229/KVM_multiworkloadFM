@@ -1,0 +1,21 @@
+ 0x000000000000000e (SONAME)             Library soname: [librte_timer.so.22]
+DPDK_22 A
+EXPERIMENTAL A
+rte_timer_alt_dump_stats@@DPDK_22 T
+rte_timer_alt_manage@@DPDK_22 T
+rte_timer_alt_reset@@DPDK_22 T
+rte_timer_alt_stop@@DPDK_22 T
+rte_timer_data_alloc@@DPDK_22 T
+rte_timer_data_dealloc@@DPDK_22 T
+rte_timer_dump_stats@@DPDK_22 T
+rte_timer_init@@DPDK_22 T
+rte_timer_manage@@DPDK_22 T
+rte_timer_next_ticks@@EXPERIMENTAL T
+rte_timer_pending@@DPDK_22 T
+rte_timer_reset@@DPDK_22 T
+rte_timer_reset_sync@@DPDK_22 T
+rte_timer_stop@@DPDK_22 T
+rte_timer_stop_all@@DPDK_22 T
+rte_timer_stop_sync@@DPDK_22 T
+rte_timer_subsystem_finalize@@DPDK_22 T
+rte_timer_subsystem_init@@DPDK_22 T

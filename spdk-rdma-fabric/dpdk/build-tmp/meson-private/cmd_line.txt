@@ -1,0 +1,14 @@
+[options]
+c_args =  -fPIC -Wno-error 
+c_link_args = 
+enable_docs = false
+tests = false
+enable_kmods = false
+cpu_instruction_set = native
+enable_drivers = bus,bus/pci,bus/vdev,mempool/ring
+disable_libs = acl,bbdev,bitratestats,bpf,cfgfile,distributor,efd,eventdev,fib,flow_classify,gpudev,graph,gro,gso,ip_frag,ipsec,jobstats,kni,latencystats,lpm,member,metrics,node,pcapng,pdump,pipeline,port,rawdev,regexdev,rib,sched,stack,table
+prefix = /root/rohan_exp/spdk/dpdk/build
+libdir = lib
+
+[properties]
+

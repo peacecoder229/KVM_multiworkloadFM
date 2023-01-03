@@ -1,0 +1,7 @@
+Description: SPDK event_bdev library
+Name: spdk_event_bdev
+Version: 4.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_event_bdev
+Requires: spdk_init spdk_bdev spdk_event_accel spdk_event_vmd spdk_event_sock 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

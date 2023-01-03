@@ -1,0 +1,7 @@
+Description: SPDK event_nbd library
+Name: spdk_event_nbd
+Version: 4.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_event_nbd
+Requires: spdk_init spdk_nbd spdk_event_bdev 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

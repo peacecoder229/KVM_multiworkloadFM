@@ -1,0 +1,7 @@
+Description: SPDK jsonrpc library
+Name: spdk_jsonrpc
+Version: 4.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_jsonrpc
+Requires: spdk_log spdk_util spdk_json 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

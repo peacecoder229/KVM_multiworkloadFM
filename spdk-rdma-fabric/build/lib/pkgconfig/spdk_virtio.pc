@@ -1,0 +1,7 @@
+Description: SPDK virtio library
+Name: spdk_virtio
+Version: 5.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_virtio
+Requires: spdk_log spdk_util spdk_json spdk_thread spdk_vfio_user 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

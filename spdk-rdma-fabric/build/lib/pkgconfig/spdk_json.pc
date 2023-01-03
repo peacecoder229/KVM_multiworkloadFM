@@ -1,0 +1,7 @@
+Description: SPDK json library
+Name: spdk_json
+Version: 4.0
+Libs: -L/root/rohan_exp/spdk/build/lib  -lspdk_json
+Requires: spdk_log spdk_util 
+Libs.private: 
+Cflags: -I/root/rohan_exp/spdk/build/include

@@ -1,0 +1,63 @@
+dev_ut.o: dev_ut.c /root/rohan_exp/spdk/include/spdk/stdinc.h \
+ /root/rohan_exp/spdk/test/spdk_cunit.h \
+ /root/rohan_exp/spdk/include/spdk/util.h \
+ /root/rohan_exp/spdk/lib/scsi/dev.c \
+ /root/rohan_exp/spdk/lib/scsi/scsi_internal.h \
+ /root/rohan_exp/spdk/include/spdk/bdev.h \
+ /root/rohan_exp/spdk/include/spdk/scsi_spec.h \
+ /root/rohan_exp/spdk/include/spdk/assert.h \
+ /root/rohan_exp/spdk/include/spdk/nvme_spec.h \
+ /root/rohan_exp/spdk/include/spdk/json.h \
+ /root/rohan_exp/spdk/include/spdk/queue.h \
+ /root/rohan_exp/spdk/include/spdk/queue_extras.h \
+ /root/rohan_exp/spdk/include/spdk/histogram_data.h \
+ /root/rohan_exp/spdk/include/spdk/dif.h \
+ /root/rohan_exp/spdk/include/spdk/scsi.h \
+ /root/rohan_exp/spdk/include/spdk_internal/trace_defs.h \
+ /root/rohan_exp/spdk/include/spdk/trace.h \
+ /root/rohan_exp/spdk/include/spdk/log.h \
+ /root/rohan_exp/spdk/lib/scsi/port.c \
+ /root/rohan_exp/spdk/include/spdk/endian.h \
+ /root/rohan_exp/spdk/include/spdk_internal/mock.h
+
+/root/rohan_exp/spdk/include/spdk/stdinc.h:
+
+/root/rohan_exp/spdk/test/spdk_cunit.h:
+
+/root/rohan_exp/spdk/include/spdk/util.h:
+
+/root/rohan_exp/spdk/lib/scsi/dev.c:
+
+/root/rohan_exp/spdk/lib/scsi/scsi_internal.h:
+
+/root/rohan_exp/spdk/include/spdk/bdev.h:
+
+/root/rohan_exp/spdk/include/spdk/scsi_spec.h:
+
+/root/rohan_exp/spdk/include/spdk/assert.h:
+
+/root/rohan_exp/spdk/include/spdk/nvme_spec.h:
+
+/root/rohan_exp/spdk/include/spdk/json.h:
+
+/root/rohan_exp/spdk/include/spdk/queue.h:
+
+/root/rohan_exp/spdk/include/spdk/queue_extras.h:
+
+/root/rohan_exp/spdk/include/spdk/histogram_data.h:
+
+/root/rohan_exp/spdk/include/spdk/dif.h:
+
+/root/rohan_exp/spdk/include/spdk/scsi.h:
+
+/root/rohan_exp/spdk/include/spdk_internal/trace_defs.h:
+
+/root/rohan_exp/spdk/include/spdk/trace.h:
+
+/root/rohan_exp/spdk/include/spdk/log.h:
+
+/root/rohan_exp/spdk/lib/scsi/port.c:
+
+/root/rohan_exp/spdk/include/spdk/endian.h:
+
+/root/rohan_exp/spdk/include/spdk_internal/mock.h:

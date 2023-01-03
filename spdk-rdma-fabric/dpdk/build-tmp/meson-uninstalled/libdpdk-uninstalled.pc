@@ -1,0 +1,13 @@
+prefix=/root/rohan_exp/spdk/dpdk/build-tmp
+srcdir=/root/rohan_exp/spdk/dpdk
+libdir=${prefix}/lib
+includedir=${prefix}/include
+
+Name: DPDK
+Description: The Data Plane Development Kit (DPDK).
+Note that CFLAGS might contain an -march flag higher than typical baseline.
+This is required for a number of static inline functions in the public headers.
+Version: 22.07.0
+Requires: libdpdk-libs
+Libs.private: -Wl,--whole-archive -L${prefix}/drivers -l:librte_bus_pci.a -l:librte_bus_vdev.a -l:librte_mempool_ring.a -L${prefix}/lib -l:librte_vhost.a -l:librte_security.a -l:librte_reorder.a -l:librte_dmadev.a -l:librte_power.a -l:librte_cryptodev.a -l:librte_compressdev.a -l:librte_timer.a -l:librte_hash.a -l:librte_cmdline.a -l:librte_pci.a -l:librte_ethdev.a -l:librte_meter.a -l:librte_net.a -l:librte_mbuf.a -l:librte_mempool.a -l:librte_rcu.a -l:librte_ring.a -l:librte_eal.a -l:librte_telemetry.a -l:librte_kvargs.a -Wl,--no-whole-archive -Wl,--export-dynamic
+Cflags: -I${prefix}/drivers -I${srcdir}/drivers -I${prefix}/drivers/bus/pci -I${srcdir}/drivers/bus/pci -I${prefix}/drivers/bus/pci/linux -I${srcdir}/drivers/bus/pci/linux -I${prefix} -I${srcdir} -I${prefix}/config -I${srcdir}/config -I${prefix}/lib/eal/include -I${srcdir}/lib/eal/include -I${prefix}/lib/eal/linux/include -I${srcdir}/lib/eal/linux/include -I${prefix}/lib/eal/x86/include -I${srcdir}/lib/eal/x86/include -I${prefix}/lib/eal/include -I${srcdir}/lib/eal/include -I${prefix}/lib/eal/common -I${srcdir}/lib/eal/common -I${prefix}/lib/eal/linux/include -I${srcdir}/lib/eal/linux/include -I${prefix}/lib/eal -I${srcdir}/lib/eal -I${prefix}/lib/kvargs -I${srcdir}/lib/kvargs -I${prefix}/lib/telemetry/../metrics -I${srcdir}/lib/telemetry/../metrics -I${prefix}/lib/telemetry -I${srcdir}/lib/telemetry -I${prefix}/lib/pci -I${srcdir}/lib/pci -I${prefix}/drivers/bus/vdev -I${srcdir}/drivers/bus/vdev -I${prefix}/drivers/mempool/ring -I${srcdir}/drivers/mempool/ring -I${prefix}/lib/mempool -I${srcdir}/lib/mempool -I${prefix}/lib/ring -I${srcdir}/lib/ring -I${prefix}/lib -I${srcdir}/lib -I${prefix}/lib/vhost -I${srcdir}/lib/vhost -I${prefix}/lib/ethdev -I${srcdir}/lib/ethdev -I${prefix}/lib/net -I${srcdir}/lib/net -I${prefix}/lib/mbuf -I${srcdir}/lib/mbuf -I${prefix}/lib/meter -I${srcdir}/lib/meter -I${prefix}/lib/cryptodev -I${srcdir}/lib/cryptodev -I${prefix}/lib/rcu -I${srcdir}/lib/rcu -I${prefix}/lib/hash -I${srcdir}/lib/hash -I${prefix}/lib/dmadev -I${srcdir}/lib/dmadev -I${prefix}/lib/security -I${srcdir}/lib/security -I${prefix}/lib/reorder -I${srcdir}/lib/reorder -I${prefix}/lib/power -I${srcdir}/lib/power -I${prefix}/lib/timer -I${srcdir}/lib/timer -I${prefix}/lib/compressdev -I${srcdir}/lib/compressdev -I${prefix}/lib/cmdline -I${srcdir}/lib/cmdline
