@@ -2,6 +2,8 @@
 #Description: Creates a SPDK device over the RDMA and transfers the data
 #!/bin/bash
 
+
+
 echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-1048576kB/nr_hugepages
 echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages
 
@@ -10,7 +12,7 @@ pkill -9 reactor
 killall -9 reactor_24 reactor_0
 
 
-build/bin/nvmf_tgt -m 0x0000060 & # Cores 24,25,26,27
+build/bin/nvmf_tgt -m 0x0000060 & # Cores 24,25,26,27 # 0x3
 
 sleep 1
 scripts/rpc.py nvmf_create_transport -t RDMA -u 8192 -i 131072 -c 8192
