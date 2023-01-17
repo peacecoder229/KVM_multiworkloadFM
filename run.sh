@@ -134,7 +134,17 @@ function setup_workloads()
         scp -r -oStrictHostKeyChecking=no spdk_exp_dir root@${vm_ip}:/root
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/spdk_exp_dir/setup_spdk.sh"
       ;;
-     
+      
+      *"spdk-rdma"*)
+        echo "Setting up SPDK to run with RDMA ....."
+        scp -r -oStrictHostKeyChecking=no spdk_exp_dir root@${vm_ip}:/root
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/spdk_exp_dir/setup_spdk_rdma.sh"
+	# Copy the VM's public key (created in setup_spdk_rdma.sh) to this machine
+        scp -r -oStrictHostKeyChecking=no root@${vm_ip}:/root/.ssh/id_rsa.pub spdk_exp_dir/
+	# Copy the VM's public key from this machine to 319T
+        cat spdk_exp_dir/id_rsa.pub | ssh -oStrictHostKeyChecking=no root@10.242.51.105 "cat >> /root/.ssh/authorized_keys"
+      ;;
+
       *"stressapp"*)
         echo "Setting up stressup ....."
         scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/streeapp.tar root@${vm_ip}:/root/
@@ -289,6 +299,9 @@ function run_exp_vm()
       *"nginx"*)
         workload_script="run_nginx.sh"
       ;;
+      *"spdk-rdma"*)
+	workload_script="run_spdk-rdma.sh"
+      ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."
       ;;
@@ -311,6 +324,7 @@ function run_exp_vm()
   done # VMs
  
  # waiting for the jobs to finish before we copy results back
+ echo "waiting for the jobs to finish before we copy results back"
  for job in `jobs -p`
  do
    echo "Waiting for $job to finish ...."

@@ -18,7 +18,7 @@ def get_linenumber():
 
 #sriov nic devices
 #P_PORT = {"ens11f0", "ens28f0", "ens11f1", "ens28f1"}  #local network
-P_PORT = {"ens1f0"}  #local network
+P_PORT = {"ens11"}  #local network
 C_PORT = {"enp217s0f1", "enp37s0f1"}  #corporate ports 
 DRY_RUN=0
 def get_cpu_pool(socket):
@@ -55,7 +55,8 @@ rsa_key = get_ssh_key()
 
 QAT_VF_SOCKET = collections.OrderedDict()
 vm_storage = r"vmimages2"
-path_prefix = r"/home"
+#path_prefix = r"/home"
+path_prefix = r"/rocknvme/root/"
 
 def download_qcow(image,path="%s/vmimages" % (path_prefix)):
     if not os.path.exists(path):
@@ -98,8 +99,9 @@ def download_qcow(image,path="%s/vmimages" % (path_prefix)):
 #pass through devices (NIC, GPU, NVME),
 PT_Device = {
     "GPU":  [],
-    "NIC":  [],
-    "NVME": [ "pci_0000_49_00_0", "pci_0000_4a_00_0"], # On GDC3200-28T090T 
+    "NIC":  [ "pci_0000_38_00_0" ],
+    #"NVME": [ "pci_0000_49_00_0", "pci_0000_4a_00_0"], # On GDC3200-28T090T 
+    "NVME": [ "pci_0000_81_00_0", "pci_0000_27_00_0"], # On 346T: 0000:81:00.0, 0000:27:00.0
     #"NVME": []
 }
 
@@ -107,7 +109,7 @@ PT_Device = {
 Networking={"SR-IOV":0,
             "Bridge":1,
             "OVS-Bridge":0,
-            "PT":0,
+            "PT":1,
             "None":0
             }
 
@@ -675,7 +677,7 @@ users:
       ssh-authorized-keys: 
         - %s
     
-''' % (iso_name, iso_name,rsa_key))
+''' % (iso_name, iso_name, rsa_key))
 
     #cmd = "-output /vmimages/%s.iso  /vmimages/user-data /vmimages/meta-data /vmimages/network-config" % (
     #    iso_name)
@@ -820,19 +822,39 @@ def generate_commands(assign_random=False):
                 ###################  Networking(start)  ####################
                 for i in range (1,(num_nics+1)):
                     dev="NIC{}".format(i)
-
+                
+                nic_dev = ""
                 if(Networking["PT"]==1):
                     # num_nic = len([v for k, v in PT_Device.items() if k.startswith('NIC')])
                     try:
 
-                        nic_dev =" --host-device={}".format(PT_Device["NIC"].pop())
-                        #print(nic_dev)
+                        nic_dev = " --host-device={}".format(PT_Device["NIC"].pop())
+                        print("****************", nic_dev)
                     except IndexError:
                         print("No more Nics Available")
 
-                if(Networking["SR-IOV"] == 1 and Networking["PT"] ==1):
+                if(Networking["SR-IOV"] == 1 and Networking["PT"] == 1):
                     print("Both SRIOV and PT are being passed to vm.. are you sure? if so edit the code and change the exit to pass ")
                     exit()
+                
+                network_cmd = ""
+                if ( Networking["SR-IOV"] == 1):
+                    port_to_use = virtual_ports.pop()
+                    network_cmd += " --host-device={}".format(port_to_use)
+                
+                if ( Networking["Bridge"] == 1 ):
+                    network_cmd += " --network bridge=virbr0"
+                
+                if ( Networking["OVS-Bridge"] == 1 ):
+                    # one ovs interface
+                    network_cmd += " --network bridge=ovs-br0,model=virtio,virtualport_type=openvswitch"
+                    # two ovs interface
+                    #network_cmd = "--network bridge=virbr0 --network bridge=ovs-br0,model=virtio,virtualport_type=openvswitch --network bridge=ovs-br0,model=virtio,virtualport_type=openvswitch"
+                
+                if(Networking["PT"] == 1 ):
+                    network_cmd += " {}".format(nic_dev)
+
+                ''' 
 
                 if (Networking["SR-IOV"] == 1 and Networking["Bridge"]==0):
                     port_to_use = virtual_ports.pop()
@@ -845,10 +867,13 @@ def generate_commands(assign_random=False):
                     network_cmd = "--network bridge=virbr0 --network bridge=ovs-br0,model=virtio,virtualport_type=openvswitch"
                     # two ovs interface
                     #network_cmd = "--network bridge=virbr0 --network bridge=ovs-br0,model=virtio,virtualport_type=openvswitch --network bridge=ovs-br0,model=virtio,virtualport_type=openvswitch"
-                elif(Networking["SR-IOV"] ==0 and Networking["Bridge"]==1):
-                    network_cmd = "--network bridge=virbr0"
                 elif(Networking["PT"] ==1 and Networking["Bridge"]==1):
                     network_cmd = "--network bridge=virbr0 {}".format(nic_dev)
+                    print("*******", network_cmd)
+
+                elif(Networking["SR-IOV"] ==0 and Networking["Bridge"]==1):
+                    network_cmd = "--network bridge=virbr0"
+                
                 elif(Networking["PT"] ==1 and Networking["Bridge"]==0):
                     network_cmd = "--nonetworks {}".format(nic_dev)
                 elif (Networking["PT"] == 1 and Networking["Bridge"] == 0  and Networking["SR-IOV"] == 1):
@@ -859,7 +884,7 @@ def generate_commands(assign_random=False):
                     #i added this
                     port_to_use = virtual_ports.pop()
                     network_cmd = "--network bridge=virbr0 --host-device={} {} ".format(port_to_use, nic_dev)
-
+                '''
                 ###################  Networking(end)  ####################
 
                 # print("qat_device_to_use=",qat_device_to_use)
@@ -939,12 +964,13 @@ def generate_commands(assign_random=False):
                     # attach NVME pass through devices
                     num_nvme = len( PT_Device["NVME"])
                     print("number of nvme = ", num_nvme)
-                    #for i in range (1,(num_nvme+1)):
-                    
                     storage_pt = ""
-                    if (num_nvme > 0):
+                    while (num_nvme > 0):
                         nvme = PT_Device["NVME"].pop()
                         storage_pt = storage_pt + " --host-device={}".format(nvme)
+                        print(storage_pt)
+                        num_nvme = len( PT_Device["NVME"])
+
 
                     CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     

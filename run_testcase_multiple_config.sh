@@ -5,6 +5,8 @@ config2="2-config.sh"
 config3="3-config.sh"
 config4="4-config.sh"
 
+workloads="mlc"
+cores="6"
 # config 1: No QoS
 echo "VM_CORES=$cores" > $config1
 echo "VM_WORKLOADS=$workloads" >> $config1
@@ -50,7 +52,9 @@ cores=$(echo ${cores//,/-}) # replace comma by dash
 result_dir="/root/nutanix_data/ms_resdir_sst-tf_${workloads}_${cores}"
 mkdir -p $result_dir
 
+./run_testcases.sh $result_dir $config1
+
 # Run experiments with the configs
-for config in $config1 $config2; do
-  ./run_testcases.sh $result_dir $config
-done
+#for config in $config1 $config2; do
+#  ./run_testcases.sh $result_dir $config
+#done

@@ -2,7 +2,7 @@
 #Description: Creates a SPDK device over the RDMA and transfers the data
 #!/bin/bash
 
-
+scripts/setup.sh
 
 echo 1024 > /sys/devices/system/node/node0/hugepages/hugepages-1048576kB/nr_hugepages
 echo 1024 > /sys/devices/system/node/node1/hugepages/hugepages-1048576kB/nr_hugepages

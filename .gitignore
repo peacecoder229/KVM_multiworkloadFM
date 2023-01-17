@@ -10,3 +10,4 @@ output_*
 *config.sh
 turbostat_pids.txt
 my_run_testcases.sh
+spdk_exp_dir/id_rsa.pub
