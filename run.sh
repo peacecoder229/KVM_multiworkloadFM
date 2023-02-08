@@ -1,4 +1,5 @@
 #!/bin/bash
+
 TARGET=""
 STAGE=""
 TestCase_s=""
@@ -134,8 +135,8 @@ function setup_workloads()
         scp -r -oStrictHostKeyChecking=no spdk_exp_dir root@${vm_ip}:/root
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/spdk_exp_dir/setup_spdk.sh"
       ;;
-      
-      *"spdk-rdma"*)
+       
+      *"spdk-rdma"*) # Run spdk-rdma experiment b/w 346T and 319T
         echo "Setting up SPDK to run with RDMA ....."
         scp -r -oStrictHostKeyChecking=no spdk_exp_dir root@${vm_ip}:/root
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/spdk_exp_dir/setup_spdk_rdma.sh"

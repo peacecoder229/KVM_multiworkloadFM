@@ -961,8 +961,8 @@ def generate_commands(assign_random=False):
                     # floating or affitinized
                     cpuaffinity = f"--cpuset {cpu_set}" if CPU_AFFINITY else "" 
                     
-                    # attach NVME pass through devices
-                    num_nvme = len( PT_Device["NVME"])
+                    # attach NVME pass through devices to a single VM
+                    num_nvme = len(PT_Device["NVME"])
                     print("number of nvme = ", num_nvme)
                     storage_pt = ""
                     while (num_nvme > 0):

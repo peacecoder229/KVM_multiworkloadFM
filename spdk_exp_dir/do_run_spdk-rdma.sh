@@ -18,9 +18,11 @@ bitmask_dec=$((2#${bitmask}))
 
 echo "build/bin/nvmf_tgt -m 0x$bitmask_dec"
 #./build/bin/nvmf_tgt -m 0x$bitmask_dec & # Cores 24,25,26,27 # 0x3
+
+# TODO: Hard-coded for now, assuming that VM has 4 cpus. Make it generic.
 ./build/bin/nvmf_tgt -m 0xf & # Cores 24,25,26,27 # 0x3
 
-# Get PCI address of nvme
+# Get the list of PCI address of nvme devices
 ./scripts/setup.sh status | grep NVMe > nvme.txt
 nvme_pci_addr=$(cat nvme.txt | awk '{print $2}')
 nvme_pci_addr=${nvme_pci_addr//:/.}
