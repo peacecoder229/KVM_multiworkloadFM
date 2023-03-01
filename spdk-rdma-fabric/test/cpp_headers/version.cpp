@@ -1,1 +1,0 @@
-#include "spdk/version.h"

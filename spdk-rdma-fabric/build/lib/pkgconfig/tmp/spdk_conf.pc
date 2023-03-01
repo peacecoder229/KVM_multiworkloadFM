@@ -1,7 +1,0 @@
-Description: SPDK conf library
-Name: spdk_conf
-Version: 4.0
-Libs: -L/usr/local/lib  -lspdk_conf
-Requires: spdk_log spdk_util 
-Libs.private: 
-Cflags: -I/usr/local/include

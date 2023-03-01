@@ -1,4 +1,0 @@
-Description: SPDK sock modules
-Name: spdk_sock_modules
-Version: 1.0
-Requires: spdk_sock_posix
