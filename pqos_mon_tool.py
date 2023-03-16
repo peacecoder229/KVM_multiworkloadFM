@@ -19,8 +19,6 @@ def perflineout(buf):
         if not re.findall(r'time', l):
             yield l
 
-
-
 def run_and_capture_pqos(cmd, outfile):
     pqos = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True, universal_newlines=True)
     getpqos = perflineout(pqos.stdout)
@@ -59,9 +57,6 @@ def run_and_capture_pqos(cmd, outfile):
             data[metric] = list()
             metlist.append(metric)
 
-
-
-
     while pqos.poll() is None:
         if getpqos:
             try:
@@ -77,7 +72,7 @@ def run_and_capture_pqos(cmd, outfile):
                         data[colname].append(metinfo[i])
 
             except KeyboardInterrupt:
-                print(data)
+                #print(data)
                 df = pd.DataFrame.from_dict(data, orient='index').transpose()
                 df.to_csv(outfile, index=False)
                 pqos.send_signal(signal.SIGINT)

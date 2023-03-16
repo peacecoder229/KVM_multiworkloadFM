@@ -121,7 +121,15 @@ function setup_workloads()
       *"mlc"*)
   	echo "Setting up mlc ....."
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
-	scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/mlc root@${vm_ip}:/usr/local/bin/
+	scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/mlc root@${vm_ip}:/usr/local/bin/	
+	
+	# Increase the memory of VM
+        echo "Increasing memory of VM $vm_name ..."
+	virsh shutdown $vm_name; sleep 1m
+	virsh setmaxmem $vm_name 50G --config
+	virsh setmem $vm_name 50G --config 
+	virsh start $vm_name; sleep 1m
+        echo "Done increasing memory of VM $vm_name."
       ;;
       
       *"rn50"*)

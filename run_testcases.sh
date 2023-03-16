@@ -1,3 +1,5 @@
+#!/bin/bash
+
 RESULT_DIR=$1
 CONFIG=$2
 
@@ -7,9 +9,6 @@ source $CONFIG
 declare -a VM_CORE_RANGE # list of core ranges
 declare -a VM_WORKLOAD_LIST
 VM_NAMES="" # Comma separated names of the VMs
-
-# pqos monitoring on/off
-MONITORING=0 # 1:on; 0:off TODO: Need to fix
 
 # turbostat monitoring process id
 declare -A turbostat_pids
@@ -27,9 +26,9 @@ function init_vm_core_range() {
     temp_hi=$((temp_hi - vm_core))
   done
 
-  for vm_core_range in "${VM_CORE_RANGE[@]}"; do
-    echo "$vm_core_range"
-  done
+  #for vm_core_range in "${VM_CORE_RANGE[@]}"; do
+  #  echo "$vm_core_range"
+  #done
 }
 
 # Initializes a comma seperated string of VM names.
@@ -48,13 +47,13 @@ function init_vm_names() {
     fi
   done
 
-  echo $VM_NAMES
+  echo "VM Names: $VM_NAMES"
 }
 
 function setup_env() {
-  if (($SST_ENABLE == 0)); then
+  if [[ $SST_ENABLE -eq 0 ]]; then
     echo "cpupower frequency-set -u 2300Mhz -d 2300Mhz"
-    cpupower frequency-set -u 2300Mhz -d 2300Mhz
+    cpupower frequency-set -u 2300Mhz -d 2300Mhz > /dev/null
   fi
 
   sst_reset
@@ -73,6 +72,8 @@ function setup_env() {
 }
 
 function setup_llc_ways() {
+  echo "Setting up LLC cache ways ...."
+
   declare -a LLC_COS_WAYS_LIST
   
   for llc_way in ${LLC_COS_WAYS//,/ }; do
@@ -80,7 +81,7 @@ function setup_llc_ways() {
   done
   # Associate each COS LLC with the cacheways
   i=0
-  for cos in ${HWDRC_COS_WL//,/ }; do
+  for cos in ${LLC_COS_WL//,/ }; do
     echo "pqos -e "llc:$cos=${LLC_COS_WAYS_LIST[i]}""
     pqos -e "llc:$cos=${LLC_COS_WAYS_LIST[i]}"
     i=$((i+1))
@@ -93,6 +94,9 @@ function setup_llc_ways() {
     pqos -a "llc:$cos=${VM_CORE_RANGE[i]}"
     i=$((i+1))
   done
+
+  echo "Done setting up LLC ways."
+  pqos -s -V | grep L3CA
 }
 
 function restart_vms() {
@@ -115,22 +119,20 @@ function start_monitoring() {
   core_ranges=""
   for i in "${!VM_CORE_RANGE[@]}"; do
     core_ranges+="[${VM_CORE_RANGE[i]}]"
-    echo "${VM_CORE_RANGE[i]}" 
+    #echo "${VM_CORE_RANGE[i]}" 
     if [[ $i != $((${#VM_CORE_RANGE[@]}-1)) ]]; then
       core_ranges+=","
     fi
   done 
-  echo "$core_ranges" 
   
-  # monitor local memory bandwidth on the core ranges 
-  exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:$core_ranges" $RESULT_DIR/${mon_file} &
+  # monitor local memory bandwidth on the core ranges
+  #exec python3 pqos_mon_tool.py "pqos -r -i 20 -m mbl:$core_ranges" $RESULT_DIR/${mon_file} &
+  
+  # monitor local memory bandwidth and llc occupancy on the core ranges
+  echo "Starting Memory Bandwidth and Cache monitoring ..."
+  exec python3 pqos_mon_tool.py "pqos -r -i 20 -m all:$core_ranges" $RESULT_DIR/${mon_file} &
+  
   mon_pid=$!
-}
-
-function stop_monitoring() {
-  if (( $MONITORING == 1)); then
-    kill -SIGINT $mon_pid
-  fi
 }
 
 function hwdrc_reset() {
@@ -151,17 +153,13 @@ function hp_lp_corun() {
     result_file_suffix=${result_file_suffix}_llc-${llc_ways}
   fi
 
-  if [[ $SST_ENABLE -eq 1 ]]; then
-    sst_config
-  fi
-  
   #start_frequency_monitoring "$result_file_suffix"
 
   # start pqos monitor, if enabled
   if (( $MONITORING == 1)); then
     mon_file=$( echo ${VM_NAMES//,/_} )
     mon_file=${mon_file}_${result_file_suffix}_mon
-    echo ${mon_file}
+    #echo ${mon_file}
     start_monitoring "${mon_file}"
   fi
   
@@ -172,11 +170,6 @@ function hp_lp_corun() {
   #stop_frequency_monitoring
   #process_sst_data "$result_file_suffix"
 
-  # Reset and clean up
-  stop_monitoring # stop monitor, if enabled
-  destroy_vms
-  rm -rf /home/vmimages2/*
-  pkill -f server.py
 }
 
 function hp_solo_run() {
@@ -199,6 +192,14 @@ function hp_solo_run() {
 function hp_lp_corun_wo_cos() {
   echo "Running hp lp workloads in corun without CoS."
   
+  # start pqos monitor, if enabled
+  if (( $MONITORING == 1)); then
+    mon_file=$( echo ${VM_NAMES//,/_} )
+    mon_file=${mon_file}_${result_file_suffix}_mon
+    #echo ${mon_file}
+    start_monitoring "${mon_file}"
+  fi
+ 
   # Launch the VMs 
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
@@ -233,6 +234,17 @@ function hp_lp_corun_mba() {
   hp_lp_corun "MBA"
 }
 
+function cleanup() {
+  # stop pqos monitoring, if enabled
+  if (( $MONITORING == 1)); then
+    kill -SIGINT $mon_pid
+  fi
+
+  destroy_vms
+  rm -rf /home/vmimages2/*
+  pkill -f server.py
+}
+
 function hp_lp_corun_resctrl_mba() {
   echo "Running hp lp workloads in corun resctrl-mba mode."
   
@@ -261,7 +273,7 @@ function hp_lp_corun_hwdrc() {
   
   # Associate each COS LLC with the cores where each VM is running.
   i=0
-  for cos in ${HWDRC_COS_WL//,/ }; do
+  for cos in ${LLC_COS_WL//,/ }; do
     echo "pqos -a "llc:$cos=${VM_CORE_RANGE[i]}""
     pqos -a "llc:$cos=${VM_CORE_RANGE[i]}"
     i=$((i+1))
@@ -295,7 +307,11 @@ function disable_resctrl() {
 }
 
 # enable sst
-function sst_config() {
+function setup_sst() {
+  # Start vm monitoring server in the background
+  # Note: Some workloads does not produce output when killed, so killing the corresponding turbostat process
+  #python3 server.py &
+
   # reset to default state before applying the changes
   sst_reset
   
@@ -532,28 +548,26 @@ function main() {
   if [[ $LLC_CACHE_WAYS_ENABLE -eq 1 ]]; then
     setup_llc_ways
   fi
-  # Start vm monitoring server in the background
-  # Note: Some workloads does not produce output when killed, so killing the corresponding turbostat process
-  python3 server.py &
+  
+  if [[ $SST_ENABLE -eq 1 ]]; then
+    setup_sst
+  fi
 
-  #TODO: Need to add option for these: hp_solo_run, hp_lp_corun_mba, hp_lp_corun_resctrl_mba, hp_lp_corun_resctrl_hwdrc
+  #TODO: Add config option for hp_solo_run, hp_lp_corun_resctrl_mba, hp_lp_corun_resctrl_hwdrc
   
-  if [[ ($SST_ENABLE -eq 1 || $NO_QOS -eq 1) && $HWDRC_ENABLE -eq 0 ]]; then
-   echo "hp_lp_corun_wo_cos"
-   hp_lp_corun_wo_cos
-  fi
-   
   if [[ $HWDRC_ENABLE -eq 1 ]]; then
-    echo "hp_lp_corun_hwdrc"
+    echo "Running colocation w/ HWDRC .... "
     hp_lp_corun_hwdrc
-  fi
-  
-  if [[ $MBA_ENABLE -eq 1 ]]; then
-    echo "hp_lp_corun_mba"
+  elif [[ $MBA_ENABLE -eq 1 ]]; then
+    echo "Running colocation w/ MBA .... "
     hp_lp_corun_mba
+  else
+    echo "Running colocation w/o HWDRC or MBA .... "
+    hp_lp_corun_wo_cos
   fi
- 
-  #append_compiled_csv "HWDRC"
+
+  # Destroy vms, delete temp files etc.
+  cleanup
 }
 
 main $@

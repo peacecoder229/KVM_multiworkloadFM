@@ -30,4 +30,4 @@ total_runtime=$(awk '{ if(NR > 1) {total += $11; count++} } END {print total}' $
 
 #echo "physcores, totalcores,instance, connections, min, max, avg, p99, p75, throughput, Total Runtime" > $result_file
 #echo "$lcore, $total, $instances, $connections, $avg_min, $avg_max, $avg_avg, $avg_p75, $avg_p99, $avg_throughput, $total_runtime" >> $result_file
-python3 client.py $result_file
+#python3 client.py $result_file

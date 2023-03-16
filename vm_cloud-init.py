@@ -55,8 +55,8 @@ rsa_key = get_ssh_key()
 
 QAT_VF_SOCKET = collections.OrderedDict()
 vm_storage = r"vmimages2"
-#path_prefix = r"/home"
-path_prefix = r"/rocknvme/root/"
+path_prefix = r"/home"
+#path_prefix = r"/rocknvme/root/"
 
 def download_qcow(image,path="%s/vmimages" % (path_prefix)):
     if not os.path.exists(path):
@@ -99,10 +99,11 @@ def download_qcow(image,path="%s/vmimages" % (path_prefix)):
 #pass through devices (NIC, GPU, NVME),
 PT_Device = {
     "GPU":  [],
-    "NIC":  [ "pci_0000_38_00_0" ],
+    #"NIC":  [ "pci_0000_38_00_0" ], # On 346T?
+    "NIC":  [],
     #"NVME": [ "pci_0000_49_00_0", "pci_0000_4a_00_0"], # On GDC3200-28T090T 
-    "NVME": [ "pci_0000_81_00_0", "pci_0000_27_00_0"], # On 346T: 0000:81:00.0, 0000:27:00.0
-    #"NVME": []
+    #"NVME": [ "pci_0000_81_00_0", "pci_0000_27_00_0"], # On 346T to run spdk-rdma: 0000:81:00.0, 0000:27:00.0
+    "NVME": []
 }
 
 # what type of networking do you want for the vm ?
