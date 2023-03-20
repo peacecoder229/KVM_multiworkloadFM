@@ -11,16 +11,15 @@ import argparse
 import requests
 import pkg_check
 from inspect import currentframe
+import yaml
 
 def get_linenumber():
     cf = currentframe()
     return cf.f_back.f_lineno
 
-#sriov nic devices
-#P_PORT = {"ens11f0", "ens28f0", "ens11f1", "ens28f1"}  #local network
-P_PORT = {"ens11"}  #local network
 C_PORT = {"enp217s0f1", "enp37s0f1"}  #corporate ports 
 DRY_RUN=0
+
 def get_cpu_pool(socket):
     print("get_cpu_pool. socket: ", socket)
     cmd = f"numactl -H | grep 'node {socket} cpus'"
@@ -51,14 +50,13 @@ def get_ssh_key():
     return rsa_key 
 rsa_key = get_ssh_key()
 
-
-
 QAT_VF_SOCKET = collections.OrderedDict()
-vm_storage = r"vmimages2"
-path_prefix = r"/home"
+#vm_storage = r"vmimages2"
+#path_prefix = r"/home"
 #path_prefix = r"/rocknvme/root/"
 
-def download_qcow(image,path="%s/vmimages" % (path_prefix)):
+def download_qcow(image, path_prefix):
+    path="%s/vmimages" % (path_prefix)
     if not os.path.exists(path):
         os.makedirs(path)
         #os.makedirs("%s/vmimages2" % (path_prefix))
@@ -97,6 +95,7 @@ def download_qcow(image,path="%s/vmimages" % (path_prefix)):
 
 
 #pass through devices (NIC, GPU, NVME),
+'''
 PT_Device = {
     "GPU":  [],
     #"NIC":  [ "pci_0000_38_00_0" ], # On 346T?
@@ -113,7 +112,7 @@ Networking={"SR-IOV":0,
             "PT":1,
             "None":0
             }
-
+'''
 # to get system information , memory and cpu .
 class getsysinfo():
     def unique(self, list1):
@@ -376,10 +375,10 @@ def get_qat_vf():
     print("-------------------------END.. get_qat_vf().......................")
 
 
-def get_vports():
+def get_vports(P_PORTS):
     COUNT = 0
     #print("-------------------------started get_vports()............................")
-    for P_Name in P_PORT:
+    for P_Name in P_PORTS:
         # key="PORT%d"%(COUNT)
         # V_PORT[key]=[]
         print("P_Name =", P_Name)
@@ -457,7 +456,7 @@ def is_vm_available():
     else:
         return True
 
-def create_iso(iso_name, tile_no, tile):
+def create_iso(iso_name, tile_no, tile, vm_storage):
     os.system("mkdir -p /{}/iso_test".format(vm_storage))
     print(f"create_iso(): mkdir -p /{vm_storage}/iso_test")
 
@@ -584,7 +583,7 @@ users:
     #p = subprocess.run(["genisoimage",cmd], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #print("the commandline is {}".format(p.args))
 
-def create_iso_centos(iso_name, tile_no, tile):
+def create_iso_centos(iso_name, tile_no, tile, vm_storage, path_prefix):
     os.system("mkdir -p {}/{}/iso_test".format(path_prefix, vm_storage))
     print(f"create_iso_centos(): mkdir -p {path_prefix}/{vm_storage}/iso_test")
     
@@ -701,7 +700,7 @@ users:
         print("using qat golden image ")
         image_name = Tile_Resource.get('QAT').get('IMG')
         if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
-            download_qcow(image_name)
+            download_qcow(image_name, path_prefix)
         
         os.system("cp %s/vmimages/qat-golden-images.qcow2 /%s/%s.qcow2" %
                   (path_prefix, vm_storage, iso_name))
@@ -724,14 +723,14 @@ users:
         
         image_name = Tile_Resource.get('SPEC').get('IMG')
         if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
-            download_qcow(image_name)
+            download_qcow(image_name, path_prefix)
         os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
                   (path_prefix, path_prefix, vm_storage,iso_name))
     elif ("5g" in iso_name):   
         print("using CPU golden image ")
         image_name = Tile_Resource.get('SPEC').get('IMG')
         if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
-            download_qcow(image_name)
+            download_qcow(image_name, path_prefix)
         
         print(f"Copying  {path_prefix}/vmimages/spec-golden-image.qcow2 {path_prefix}/{vm_storage}/{iso_name}.qcow2")
         os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
@@ -740,7 +739,7 @@ users:
         print("using CPU golden image ")
         image_name = Tile_Resource.get('FIO').get('IMG')
         if not os.path.isfile(f"%s/vmimages/{image_name}" %(path_prefix)):
-            download_qcow(image_name)
+            download_qcow(image_name, path_prefix)
         os.system("cp %s/vmimages/cpu_inference_golden_vmimage.qcow2 %s/%s/%s.qcow2" %
                   (path_prefix, path_prefix, vm_storage,iso_name))
 
@@ -754,8 +753,7 @@ users:
     #p = subprocess.run(["genisoimage",cmd], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #print("the commandline is {}".format(p.args))
 
-
-def generate_commands(assign_random=False):
+def generate_commands(Networking, PT_Device, vm_storage, path_prefix, assign_random=False):
     test_commands = []
     test_commands_remove_cd = []
     storage_pt=""
@@ -901,7 +899,7 @@ def generate_commands(assign_random=False):
                 iso_name = "%s-%02d" % (tile.lower(), tile_no)
                 print("iso-name= ", iso_name)
                 if not DRY_RUN :
-                    create_iso_centos(iso_name, tile_no, tile)
+                    create_iso_centos(iso_name, tile_no, tile, vm_storage, path_prefix)
 
                 #CMD_FORMAT = "virt-install --import -n tile%02d-%s -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=/vmimages/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/vmimages/%s.iso,device=cdrom   --host-device=%s --host-device=%s --noautoconsole"
                 #test_cmd = CMD_FORMAT % (tile_no, tile.lower(),(int(t_resource["MEMORY"]) * 1024), t_resource["VCPU"],iso_name, iso_name, port_to_use, corp_port_to_use)
@@ -1074,7 +1072,7 @@ def generate_commands(assign_random=False):
     return (test_commands, test_commands_remove_cd)
 
 
-def run_test(test_commands, test_commands_remove_cd):
+def run_test(test_commands, test_commands_remove_cd, vm_storage):
     print("***** run_test: writing commands to virt-install-cmds.sh.")
     # file1 = open("/{}/virt-install-cmds.sh".format(vm_storage), "w")
     # file2 = open("/{}/remove-cd-virt-install-cmds.sh".format(vm_storage), "w")
@@ -1112,25 +1110,12 @@ def find(key, dictionary):
 
 
 if __name__ == '__main__':
-    print("sriov vm images")
-    qat_enabled=0
-
-    if(Networking["SR-IOV"]==1):
-        get_vports()
-    #print("Line Number ..... -> {}".format(get_linenumber()))
-    num_sockets_qat_vm_requested=list(find("QAT", Tile_Map))
-    is_qat_enabled = [item for item in num_sockets_qat_vm_requested if item > 0]
-
-    if (len(is_qat_enabled)):
-        get_qat_vf()
-        
-        if(len(QAT_VF_SOCKET.values()) < 1 ):
-            sys.exit("QAT VM is requested but QAT VF devices are not present, check QAT driver installed ")
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-c', '--CPUS_PER_VM', type=str, help = 'Comma seperated list of physical cpus each vm is pinned to.')
     parser.add_argument('-w', '--WORKLOAD_PER_VM', type=str, help = 'Comma seperated list of the name of the workloads each VM will run.')
     parser.add_argument('--cpu_affinity', action = 'store_true', help = 'Do not set cpu affinity to VMs.', default = False)
+    parser.add_argument('-f', '--VM_CONFIG', type=str, help = 'Comma seperated list of physical cpus each vm is pinned to.')
 
     args = parser.parse_args()
     
@@ -1141,14 +1126,39 @@ if __name__ == '__main__':
     
     print ("List Workload Name per vm: ", WORKLOAD_PER_VM, "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM, "Number of VMs: ", Tile_Map["SOCKET0"]["5G"])
 
-    #WORKLOAD_NAME = args.workload_name
+    with open(args.VM_CONFIG, 'r') as file:
+      config = yaml.safe_load(file)
+    
+    P_PORTS = config["P_PORTS"]
+    Networking = config["Networking"]
+    PT_Device = config["PT_Device"]
+    vm_storage = config["VM_Storage"]
+    path_prefix = config["Path_Prefix"]
+
+    print(Networking)
+    print(PT_Device)
+    
     #print ("Workload Name: ", WORKLOAD_NAME , "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)
+
+    qat_enabled=0
+
+    if(Networking["SR-IOV"]==1):
+        get_vports(P_PORTS)
+    #print("Line Number ..... -> {}".format(get_linenumber()))
+    num_sockets_qat_vm_requested=list(find("QAT", Tile_Map))
+    is_qat_enabled = [item for item in num_sockets_qat_vm_requested if item > 0]
+
+    if (len(is_qat_enabled)):
+        get_qat_vf()
+        
+        if(len(QAT_VF_SOCKET.values()) < 1 ):
+            sys.exit("QAT VM is requested but QAT VF devices are not present, check QAT driver installed ")
+
 
     #get_cports()
     if is_vm_available():
-        test_commands, test_commands_remove_cd = generate_commands(
-            ASSIGN_RANDOM_PORTS)
+        test_commands, test_commands_remove_cd = generate_commands(Networking, PT_Device, vm_storage, path_prefix, ASSIGN_RANDOM_PORTS)
         print("is_vm_available: Total test commands : ", len(test_commands))
-        run_test(test_commands, test_commands_remove_cd)
+        run_test(test_commands, test_commands_remove_cd, vm_storage)
     
 

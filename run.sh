@@ -9,6 +9,7 @@ file_suffix=""
 cpu_affinity=0
 
 BENCHMARK_DIR="/home"
+vm_config="sample-vm-config.yaml"
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -81,11 +82,11 @@ function setup_vm()
 {
   echo "Creating VMs with the following configurations: number of cpus per vm = $n_cpus_per_vm, workload per vm = $workload_per_vm."
   if (( $cpu_affinity == 0 )); then
-    echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm"
-    python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm
+    echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm -f $vm_config"
+    python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm -f $vm_config
   else
-    echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm --cpu_affinity"
-    python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm --cpu_affinity
+    echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm --cpu_affinity -f $vm_config"
+    python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm --cpu_affinity -f $vm_config
   fi
   
   chmod 777 ./virt-install-cmds.sh
@@ -124,12 +125,12 @@ function setup_workloads()
 	scp -oStrictHostKeyChecking=no $BENCHMARK_DIR/mlc root@${vm_ip}:/usr/local/bin/	
 	
 	# Increase the memory of VM
-        echo "Increasing memory of VM $vm_name ..."
-	virsh shutdown $vm_name; sleep 1m
-	virsh setmaxmem $vm_name 50G --config
-	virsh setmem $vm_name 50G --config 
-	virsh start $vm_name; sleep 1m
-        echo "Done increasing memory of VM $vm_name."
+        #echo "Increasing memory of VM $vm_name ..."
+	#virsh shutdown $vm_name; sleep 1m
+	#virsh setmaxmem $vm_name 50G --config
+	#virsh setmem $vm_name 50G --config 
+	#virsh start $vm_name; sleep 1m
+        #echo "Done increasing memory of VM $vm_name."
       ;;
       
       *"rn50"*)

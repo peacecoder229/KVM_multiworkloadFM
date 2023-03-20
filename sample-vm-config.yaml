@@ -1,0 +1,19 @@
+VM_Storage: "vmimages2"
+Path_Prefix: "/home"
+
+P_PORTS: ["ens1f1"]
+
+Networking:
+  SR-IOV: 1 # VFs specified in P_PORTS
+  Bridge: 1
+  OVS-Bridge: 1 # ens1f0
+  PT: 0
+  None: 0
+
+PT_Device:
+  GPU:  []
+  #"NIC":  [ "pci_0000_38_00_0" ], # On 346T?
+  NIC:  []
+  #"NVME": [ "pci_0000_49_00_0", "pci_0000_4a_00_0"] # On GDC3200-28T090T 
+  #"NVME": [ "pci_0000_81_00_0", "pci_0000_27_00_0"] # On 346T to run spdk-rdma: 0000:81:00.0, 0000:27:00.0
+  NVME: []
