@@ -753,7 +753,7 @@ users:
     #p = subprocess.run(["genisoimage",cmd], universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     #print("the commandline is {}".format(p.args))
 
-def generate_commands(Networking, PT_Device, vm_storage, path_prefix, assign_random=False):
+def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory, assign_random=False):
     test_commands = []
     test_commands_remove_cd = []
     storage_pt=""
@@ -955,6 +955,8 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, assign_ran
                     
                     # number of virtual cpus same as host's physical cpu
                     n_vcpus = CPUS_PER_VM[count] 
+                    v_memory = vm_memory[count]
+                    
                     # name of the same as workload name
                     vm_name = WORKLOAD_PER_VM[count]
                     # floating or affitinized
@@ -974,7 +976,7 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, assign_ran
                     CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
                     test_cmd = CMD_FORMAT % (vm_name.lower(), tile_no,
-                                             (int(t_resource["MEMORY"]) *
+                                             (int(v_memory) *
                                               1024), n_vcpus,  # t_resource["VCPU"],
                                              path_prefix, vm_storage, iso_name, 
                                              path_prefix, vm_storage,
@@ -984,7 +986,7 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, assign_ran
                     CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
                         tile.lower(), tile_no,
-                        (int(t_resource["MEMORY"]) * 1024), n_vcpus, # t_resource["VCPU"],
+                        (int(v_memory) * 1024), n_vcpus, # t_resource["VCPU"],
                         path_prefix, vm_storage, iso_name, network_cmd)
 
                 elif(tile == "GPU_INFERENCE"):
@@ -1106,9 +1108,6 @@ def find(key, dictionary):
                 for result in find(key, d):
                     yield result
 
-
-
-
 if __name__ == '__main__':
     
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
@@ -1134,10 +1133,11 @@ if __name__ == '__main__':
     PT_Device = config["PT_Device"]
     vm_storage = config["VM_Storage"]
     path_prefix = config["Path_Prefix"]
+    vm_memory = config["VM_Memory"]
 
     print(Networking)
     print(PT_Device)
-    
+    print(vm_memory)    
     #print ("Workload Name: ", WORKLOAD_NAME , "List of physcial and virtual cpus for each vm: ", CPUS_PER_VM)
 
     qat_enabled=0
@@ -1157,7 +1157,7 @@ if __name__ == '__main__':
 
     #get_cports()
     if is_vm_available():
-        test_commands, test_commands_remove_cd = generate_commands(Networking, PT_Device, vm_storage, path_prefix, ASSIGN_RANDOM_PORTS)
+        test_commands, test_commands_remove_cd = generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory, ASSIGN_RANDOM_PORTS)
         print("is_vm_available: Total test commands : ", len(test_commands))
         run_test(test_commands, test_commands_remove_cd, vm_storage)
     

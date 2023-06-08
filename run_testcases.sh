@@ -15,6 +15,7 @@ declare -A turbostat_pids
 
 # Initializes the VM_CORE_RANGE array, for example ["2-4", "5-6"]
 function init_vm_core_range() {
+  
   local total_core=$(lscpu | grep node0 | cut -f2 -d:)
   local hi_core=$(echo $total_core | cut -f2 -d-)
   local lo_core=$(echo $total_core | cut -f1 -d-)
@@ -25,10 +26,13 @@ function init_vm_core_range() {
     VM_CORE_RANGE+=("${temp_lo}-${temp_hi}")
     temp_hi=$((temp_hi - vm_core))
   done
+  
+  # VM_CORE_RANGE+=("0-0")
+  # VM_CORE_RANGE+=("96-96")
 
-  #for vm_core_range in "${VM_CORE_RANGE[@]}"; do
-  #  echo "$vm_core_range"
-  #done
+  for vm_core_range in "${VM_CORE_RANGE[@]}"; do
+    echo "$vm_core_range"
+  done
 }
 
 # Initializes a comma seperated string of VM names.
@@ -89,7 +93,7 @@ function setup_llc_ways() {
 
   # Associate each COS LLC with the cores where each VM is running.
   i=0
-  for cos in ${HWDRC_COS_WL//,/ }; do
+  for cos in ${LLC_COS_WL//,/ }; do
     echo "pqos -a "llc:$cos=${VM_CORE_RANGE[i]}""
     pqos -a "llc:$cos=${VM_CORE_RANGE[i]}"
     i=$((i+1))
@@ -97,6 +101,36 @@ function setup_llc_ways() {
 
   echo "Done setting up LLC ways."
   pqos -s -V | grep L3CA
+}
+
+function setup_l2c_ways() {
+  echo "Setting up L2C cache ways ...."
+
+  declare -a L2C_COS_WAYS_LIST
+  
+  for l2c_way in ${L2C_COS_WAYS//,/ }; do
+    L2C_COS_WAYS_LIST+=($l2c_way)
+  done
+
+  # Associate each COS L2C with the cacheways
+  i=0
+  for cos in ${L2C_COS_WL//,/ }; do
+    echo "pqos -e "l2:$cos=${L2C_COS_WAYS_LIST[i]}""
+    pqos -e "l2:$cos=${L2C_COS_WAYS_LIST[i]}"
+    i=$((i+1))
+  done
+
+  # Associate each COS LLC with the cores where each VM is running.
+  i=0
+  for cos in ${L2C_COS_WL//,/ }; do
+    echo "pqos -a "llc:$cos=${VM_CORE_RANGE[i]}""
+    pqos -a "llc:$cos=${VM_CORE_RANGE[i]}"
+    i=$((i+1))
+  done
+
+  echo "Done setting up LLC ways."
+  pqos -s -V | grep L3CA
+
 }
 
 function restart_vms() {
@@ -152,6 +186,10 @@ function hp_lp_corun() {
     llc_ways=$( echo ${LLC_COS_WAYS//,/-} )
     result_file_suffix=${result_file_suffix}_llc-${llc_ways}
   fi
+  if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    l2c_ways=$( echo ${L2C_COS_WAYS//,/-} )
+    result_file_suffix=${result_file_suffix}_l2c-${l2c_ways}
+  fi
 
   #start_frequency_monitoring "$result_file_suffix"
 
@@ -203,7 +241,8 @@ function hp_lp_corun_wo_cos() {
   # Launch the VMs 
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
-  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  echo "./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG"
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG
   #restart_vms
 
   # Run experiments
@@ -215,7 +254,7 @@ function hp_lp_corun_mba() {
  
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
-  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG
   
   # Associate each COS MBA with the cores where each VM is running.
   i=0
@@ -240,7 +279,7 @@ function cleanup() {
     kill -SIGINT $mon_pid
   fi
 
-  destroy_vms
+  #destroy_vms
   rm -rf /home/vmimages2/*
   pkill -f server.py
 }
@@ -250,7 +289,7 @@ function hp_lp_corun_resctrl_mba() {
   
   echo "Launching VMs without cpu affinity."
   sudo dhclient -r $ sudo dhclient
-  ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  ./run.sh -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG
   
   echo "Configuring resctrl mba ...."
   config_resctrl_mba
@@ -263,8 +302,8 @@ function hp_lp_corun_hwdrc() {
 
   echo "Launching VMs with cpu affinity."
   sudo dhclient -r $ sudo dhclient
-  echo "./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES"
-  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES
+  echo "./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG"
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG
   
   # Enable HWDRC
   cd $PWD/hwdrc_postsi/scripts
@@ -548,7 +587,11 @@ function main() {
   if [[ $LLC_CACHE_WAYS_ENABLE -eq 1 ]]; then
     setup_llc_ways
   fi
-  
+
+  if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    setup_l2c_ways
+  fi
+
   if [[ $SST_ENABLE -eq 1 ]]; then
     setup_sst
   fi

@@ -4,6 +4,9 @@ VM_CORES="5,3,3"
 # Name of workloads to be run on the VMs accroding to their priority
 VM_WORKLOADS=rn50,mlc,redis
 
+# Configuration file for launching the VMs
+VM_CONFIG="sample_vm_config.yaml"
+
 # enable/disable monitoring technology (CMT and MBM)
 MONITORING=0 # 1:enable; 0:disable TODO: Need to fix
 
@@ -21,6 +24,12 @@ HWDRC_COS_WL="4,7,7" # CoS association of each workload: Smaller the value, high
 LLC_CACHE_WAYS_ENABLE=1
 LLC_COS_WL="1,2,2"
 LLC_COS_WAYS="0x7fff,0x7fff,0x7fff"
+
+# CoS L2C ways parameters
+L2C_CACHE_WAYS_ENABLE=1
+L2C_COS_WL="1,2,2"
+L2C_COS_WAYS="0x7fff,0x7fff,0x7fff"
+
 
 # SST CoS parameters
 SST_ENABLE=1 # on=1, off=0

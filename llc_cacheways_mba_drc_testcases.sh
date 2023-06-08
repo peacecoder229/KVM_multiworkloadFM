@@ -1,7 +1,7 @@
 #for workloads in "redis,speccpu" "memcache,speccpu" "redis,mlc" "memcache,unet" "redis,unet"; do
 for workloads in "redis,mlc_w3"; do
 #for workloads in "mlc_w6"; do
-  cores="24,24"
+  cores="4,4"
   config1="1-config.sh"
   config2="2-config.sh"
   config3="3-config.sh"
@@ -15,6 +15,7 @@ for workloads in "redis,mlc_w3"; do
   echo "LLC_CACHE_WAYS_ENABLE=0" >> $config1
   echo "HWDRC_ENABLE=0" >> $config1
   echo "MBA_ENABLE=0" >> $config1
+  echo "VM_CONFIG=\"sample_vm_config.yaml\"" >> $config1
   
   # config 2: MBA (10% for mlc)
   echo "VM_CORES=$cores" > $config2
@@ -61,7 +62,7 @@ for workloads in "redis,mlc_w3"; do
   result_dir="/root/nutanix_data/ms_resdir_llc_only_${workloads}_${cores}"
   mkdir -p $result_dir
 
-  ./run_testcases.sh $result_dir $config3
+  ./run_testcases.sh $result_dir $config1
   
   # Run experiments with the configs
   #for i in {1..4}; do

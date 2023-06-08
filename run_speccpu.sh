@@ -1,7 +1,8 @@
 
 result_file=$1
 n_copies=$(getconf _NPROCESSORS_ONLN)
-workload="502.gcc_r"
+#workload="502.gcc_r"
+workload="541.leela_r"
 n_iteration=2 #1=???s, 2=815s, 3=1215s
 
 start=`date +%s`

@@ -9,7 +9,7 @@ file_suffix=""
 cpu_affinity=0
 
 BENCHMARK_DIR="/home"
-vm_config="sample-vm-config.yaml"
+vm_config=""
 
 # Since we don't support host experiments, we don't use it.
 function get_config()
@@ -42,7 +42,7 @@ function get_config()
 function handle_args()
 {
  echo "handle args."
- while getopts "AT:S:C:W:O:D:" opt
+ while getopts "AT:S:C:W:F:O:D:" opt
  do 
    case $opt in 
      A) cpu_affinity=1
@@ -55,6 +55,8 @@ function handle_args()
      C) n_cpus_per_vm="$OPTARG"
 	;;
      W) workload_per_vm="$OPTARG"
+	;;
+     F) vm_config="$OPTARG"
 	;;
      O) file_suffix="$OPTARG"
 	;;
@@ -80,7 +82,7 @@ function get_ip_from_vm_name()
 
 function setup_vm() 
 {
-  echo "Creating VMs with the following configurations: number of cpus per vm = $n_cpus_per_vm, workload per vm = $workload_per_vm."
+  echo "Creating VMs with the following configurations: number of cpus per vm = $n_cpus_per_vm, workload per vm = $workload_per_vm. vm config = $vm_config"
   if (( $cpu_affinity == 0 )); then
     echo "python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm -f $vm_config"
     python3 vm_cloud-init.py -c $n_cpus_per_vm -w $workload_per_vm -f $vm_config
@@ -164,12 +166,12 @@ function setup_workloads()
         echo "Setting up redis ....."
         
 	# Increase the memory of VM
-        echo "Increasing memory of VM $vm_name ..."
-	virsh shutdown $vm_name; sleep 1m
-	virsh setmaxmem $vm_name 100G --config
-	virsh setmem $vm_name 100G --config 
-	virsh start $vm_name; sleep 1m
-        echo "Done increasing memory of VM $vm_name."
+        #echo "Increasing memory of VM $vm_name ..."
+	#virsh shutdown $vm_name; sleep 1m
+	#virsh setmaxmem $vm_name 100G --config
+	#virsh setmem $vm_name 100G --config 
+	#virsh start $vm_name; sleep 1m
+        #echo "Done increasing memory of VM $vm_name."
 	
 	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
