@@ -1,6 +1,10 @@
 
 ############################# Note ##################################
-# Before running make sure to do "echo on > /sys/devices/system/cpu/smt/control" in the setup_env() in run_testcases.sh
+# Before running make sure to do the following in run_testcases.sh:
+# 1. "echo on > /sys/devices/system/cpu/smt/control" in the setup_env() in run_testcases.sh
+# 2. Comment out the for loop and add the following in init_vm_core_range() function: 
+# 	VM_CORE_RANGE+=("0-0")
+#    	VM_CORE_RANGE+=("96-96")
 #####################################################################
 
 
@@ -37,8 +41,10 @@ for workloads in "redis"; do
   echo "LLC_CACHE_WAYS_ENABLE=0" >> $config2
   
   echo "L2C_CACHE_WAYS_ENABLE=1" >> $config2
-  echo "L2C_COS_WL=4,7" >> $config2
-  echo "L2C_COS_WAYS=0xfff8,0x7" >> $config2
+  #echo "L2C_COS_WL=4,7" >> $config2
+  #echo "L2C_COS_WAYS=0xfff8,0x7" >> $config2
+  echo "L2C_COS_WL=4" >> $config2
+  echo "L2C_COS_WAYS=0x7" >> $config2
    
   # Create result directory
   workloads=$(echo ${workloads//,/-}) # replace comma by dash
@@ -47,6 +53,8 @@ for workloads in "redis"; do
   mkdir -p $result_dir
 
   ./run_testcases.sh $result_dir $config1
+  #./run_testcases.sh $result_dir $config2
+  #echo "L2C_COS_WAYS=0xfff8" >> $config2
   #./run_testcases.sh $result_dir $config2
   
   # Run experiments with the configs
