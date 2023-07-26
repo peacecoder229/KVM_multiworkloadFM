@@ -1,18 +1,41 @@
 #!/bin/bash
 
+echo "run_redis.sh"
+
 result_file=$1
-cc=$(getconf _NPROCESSORS_ONLN)
-servcore=$(( cc/2 ))
-phi=$(( servcore-1 ))
+start_core=${2:-0}
+end_core=${3:-$[$(getconf _NPROCESSORS_ONLN)-1]}
+VM_EXP=${4:-True}
+
+# Params for Baremetal
+memtier_core_start=48 # run memtier in another socket
+server_core_end=$end_core # run redis/memcache in the start_core to end_core
+export runnuma="yes"
+
+# Do the following when running VM experiments
+if [[ $VM_EXP == True ]]; then
+  cc=$((end_core-start_core+1))
+  servcore=$((cc/2))
+  server_core_end=$((servcore-1))
+  memtier_core_start=$servcore
+  export runnuma="None"
+fi
 
 # 1 iteration: 393216 = 836s, 1048576 = ???s
 no_of_iteration=1
 no_of_requests=393216
 #no_of_requests=786432
 
-cd /root/memc_redis
+cd memc_redis
 for (( i=1; i<=$no_of_iteration; i++)); do
-  ./mc_rds_in_vm.sh 0-${phi} /root/$result_file 1 125 "redis" $servcore $no_of_requests
+  #if [[ $VM_EXP == True ]]; then
+    echo "./mc_rds_in_vm.sh ${start_core}-${server_core_end} ../$result_file 1 125 "redis" $memtier_core_start $no_of_requests"
+    ./mc_rds_in_vm.sh ${start_core}-${server_core_end} ../$result_file 1 125 "redis" $memtier_core_start $no_of_requests
+  #else
+  #  echo "./memc_redis_host/run_mc_rds.sh --lcore ${start_core}-${server_core_end} --res_dir $result_file --ins 1 --mccon $con --type redis --memtiercore $memtier_core_start --benchdir ./memc_redis_host/ --ratio 1:10 --dsize 64 --pipe 4 --servIP 127.0.0.1 > temp.out &"
+  #  ./memc_redis_host/run_mc_rds.sh --lcore ${start_core}-${server_core_end} --res_dir $result_file --ins 1 --mccon $con --type redis --memtiercore $memtier_core_start --benchdir ./memc_redis_host/ --ratio 1:10 --dsize 64 --pipe 4 --servIP 127.0.0.1
+    pid=$!
+  #fi
 done
 cd -
 

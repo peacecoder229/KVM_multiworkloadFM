@@ -22,8 +22,9 @@
 
 # Select workload and config
 workload=$1
-copies=$2
-no_of_iterations=$3
+start=$2
+end=$3
+no_of_iterations=$4
 
 # Config files
 speed_cfg='ic19.1u1-lin-core-avx512-speed-20200306_revA.cfg'
@@ -37,7 +38,7 @@ source shrc
 ulimit -s unlimited
 sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
 
-for (( copy=0; copy < copies; copy++)); do
+for (( copy=start; copy <= end; copy++)); do
   if [[ ${workload#*_}  == "s" ]]; then
     config=${speed_cfg}
     spec_cmd="numactl --localalloc -C ${copy} runcpu -c ${config} --nobuild --noreportable --define cores=1 --threads=1 --iterations ${no_of_iterations} ${workload}"
@@ -50,18 +51,8 @@ for (( copy=0; copy < copies; copy++)); do
 
   # run the speccpu command
   echo "Running: $spec_cmd"
-  $spec_cmd | tee /root/workload_${copy}.log &
+  $spec_cmd | tee workload_${copy}.log &
 done
-
-#runcpu \
-#    -c ${config} \
-#    --nobuild \
-#    --noreportable \
-#    --define cores=${copies} \
-#    --threads=${copies} \
-#    --define numcopies=${copies} \
-#    --iterations 1 \
-#    ${workload} |  tee -a workload.log
 
 for job in `jobs -p`; do
   wait $job

@@ -72,7 +72,7 @@ function setup_env() {
   sleep 5 
   
   pkill -f server.py
-  destroy_vms
+  #destroy_vms
 }
 
 function setup_llc_ways() {
@@ -174,6 +174,40 @@ function hwdrc_reset() {
   cd $PWD/hwdrc_postsi/scripts
   ./hwdrc_icx_2S_xcc_disable.sh
   cd -
+}
+
+function hp_lp_corun_host() {
+  local cos_mode=na # na, MBA, HWDRC, RESCTRL-MBA, or RESCTRL-HWDRC
+  if [[ $HWDRC_ENABLE -eq 1 ]]; then
+    cos_mode="HWDRC"
+  elif [[ $MBA_ENABLE -eq 1 ]]; then
+    echo "Running colocation w/ MBA .... "
+    cos_mode="MBA"
+  fi
+  echo "Running hp lp corun in $cos_mode mode."
+  
+  result_file_suffix="co_${cos_mode}_sst-${SST_ENABLE}"
+  
+  if [[ $LLC_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    llc_ways=$( echo ${LLC_COS_WAYS//,/-} )
+    result_file_suffix=${result_file_suffix}_llc-${llc_ways}
+  fi
+  if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    l2c_ways=$( echo ${L2C_COS_WAYS//,/-} )
+    result_file_suffix=${result_file_suffix}_l2c-${l2c_ways}
+  fi
+
+  #start_frequency_monitoring "$result_file_suffix"
+
+  # start pqos monitor, if enabled
+  if (( $MONITORING == 1)); then
+    mon_file=$( echo ${VM_NAMES//,/_} )
+    mon_file=${mon_file}_${result_file_suffix}_mon
+    #echo ${mon_file}
+    start_monitoring "${mon_file}"
+  fi
+ 
+  ./run_in_host.sh $VM_NAMES $result_file_suffix $RESULT_DIR
 }
 
 function hp_lp_corun() {
@@ -598,7 +632,11 @@ function main() {
 
   #TODO: Add config option for hp_solo_run, hp_lp_corun_resctrl_mba, hp_lp_corun_resctrl_hwdrc
   
-  if [[ $HWDRC_ENABLE -eq 1 ]]; then
+
+  if [[ $HOST_EXP -eq 1 ]]; then
+    echo "Running exp in host."
+    hp_lp_corun_host
+  elif [[ $HWDRC_ENABLE -eq 1 ]]; then
     echo "Running colocation w/ HWDRC .... "
     hp_lp_corun_hwdrc
   elif [[ $MBA_ENABLE -eq 1 ]]; then

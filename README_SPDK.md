@@ -62,19 +62,19 @@ LD_PRELOAD=/root/spdk/build/fio/spdk_nvme /root/fio/fio fio_config
 ```
 
 ## Running FIO with SPDK in VM
-1. Open `vm_cloud-init.py` and add the pci addresses of your NVME devices in PT_Device["NVME"]. An example is given below:
+1. Open `spdk_exp_dir/fio_vm_config.yaml` and add the pci addresses of your NVME devices in PT_Device["NVME"]. An example is given below:
 ```
 #pass through devices (NIC, GPU, NVME),
 PT_Device = {
-    "GPU":  [],
-    "NIC":  [],
-    "NVME": [ "pci_0000_49_00_0" ], # Add the PCI addresses of the NVME devices here (seperated by comma)
+    GPU:  []
+    NIC:  []
+    NVME: [ "pci_0000_49_00_0" ], # Add the PCI addresses of the NVME devices here (seperated by comma)
     #"NVME": []
 }
 ```
 2. Spawn a VM with 5 cores and specify `spdk_fio`  
 ```
-./run.sh -A -T vm -S setup -C 5 -W spdk_fio
+./run.sh -A -T vm -S setup -C 5 -W spdk_fio -F spdk_exp_dir/fio_vm_config.yaml
 ```
 2. Now follow the steps from (2)-(5) in `Running FIO with SPDK in host`.
 

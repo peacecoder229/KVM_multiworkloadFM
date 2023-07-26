@@ -1,3 +1,6 @@
+# Turn on the flag to run the exp in host; turn it off to run the exp in VM
+HOST_EXP=1
+
 # Number of cpus for different VMs according to their priority
 VM_CORES="5,3,3"
 

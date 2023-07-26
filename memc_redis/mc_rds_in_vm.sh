@@ -19,7 +19,7 @@ start=`date +%s`
 hypt="off"
 dsize=8192 #2048, 4096, 8192
 rundir="/root/memc_redis"
-
+rundir="."
 
 #ci=48
 lcore=$1
@@ -81,8 +81,8 @@ else
 fi
 
 
-#export runnuma="yes"
-export runnuma="None"
+#export runnuma="yes" # for baremetal
+#export runnuma="None" # for vm
 serv=0
 port=9000
 #below for taking core boundaryies for collecting perf stat 
@@ -198,6 +198,7 @@ fi
  sleep 1
 
 #All files are being removed here insance files as well as ip127files 
+pwd
 cd $rundir/core_scale;  rm -rf inst*; rm -rf memtier_ip*; sleep 1;
 rm -f ip127.0.0.1prt90*
 sleep 1
@@ -261,6 +262,7 @@ for pid in ${ldpids[*]}; do
  echo "FUll read/write done"
 sleep 1 
 echo "processing all runs launched with each of the amd_memcached..sh call"
+pwd
 cd $rundir/core_scale
 #./process_stats_of_file.py  --filepattern="inst*${core}_con${connections}_d${dsize}.txt" --indexpattern="GET" --statpos=1 --indexpos=0 --outfile=testsum
 #./process_stats_of_file.py  --filepattern="inst[0-9]${core}_con${connections}_d${dsize}.txt" --indexpattern="GET" --statpos=1 --indexpos=0 --outfile=testsum

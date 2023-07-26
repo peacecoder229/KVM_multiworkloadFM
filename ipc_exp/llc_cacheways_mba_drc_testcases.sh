@@ -1,8 +1,7 @@
-#for workloads in "redis,speccpu" "memcache,speccpu" "redis,mlc" "memcache,unet" "redis,unet"; do
-#for workloads in "redis,mlc_w3"; do
-for workloads in "speccpu,mlc"; do
-#for workloads in "mlc_w6"; do
-  cores="24,24"
+#for workloads in "spdk_fio,redis,speccpu,mlc"; do
+for workloads in "mlc"; do
+  #cores="6,12,16,12"
+  cores="12"
   config1="1-config.sh"
   config2="2-config.sh"
   config3="3-config.sh"
@@ -17,7 +16,7 @@ for workloads in "speccpu,mlc"; do
   echo "LLC_CACHE_WAYS_ENABLE=0" >> $config1
   echo "HWDRC_ENABLE=0" >> $config1
   echo "MBA_ENABLE=0" >> $config1
-  echo "VM_CONFIG=\"sample_vm_config.yaml\"" >> $config1
+  echo "VM_CONFIG=\"ipc_exp/redis_fio_gcc_mlc_vm_config.yaml\"" >> $config1
   
   # config 2: MBA (10% for mlc)
   echo "HOST_EXP=0" > $config2
@@ -29,7 +28,7 @@ for workloads in "speccpu,mlc"; do
   echo "MBA_ENABLE=1" >> $config2
   echo "MBA_COS_WL=0,3" >> $config2
   echo "MBA_COS_VAL=\"0=100,3=10\"" >> $config2
-  echo "VM_CONFIG=\"sample_vm_config.yaml\"" >> $config2
+  echo "VM_CONFIG=\"ipc_exp/redis_fio_gcc_mlc_vm_config.yaml\"" >> $config2
 
   # config 3: MBA (10% for mlc) + CAT (13 ways to redis and 2 ways to MLC)
   echo "VM_CORES=$cores" > $config3
@@ -65,9 +64,7 @@ for workloads in "speccpu,mlc"; do
   cores=$(echo ${cores//,/-}) # replace comma by dash
   result_dir="/root/nutanix_data/ms_resdir_llc_mba_${workloads}_${cores}"
   mkdir -p $result_dir
-
-  ./run_testcases.sh $result_dir $config2
-  
+  ./run_testcases.sh $result_dir $config1
   # Run experiments with the configs
   #for i in {1..4}; do
   #  config="$i-config.sh"
