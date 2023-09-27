@@ -1,6 +1,6 @@
 #for workloads in "redis,speccpu" "memcache,speccpu" "redis,mlc" "memcache,unet" "redis,unet"; do
 #for workloads in "redis,mlc_w3"; do
-for workloads in "speccpu,mlc"; do
+for workloads in "mlc,mlc"; do
 #for workloads in "mlc_w6"; do
   cores="24,24"
   config1="1-config.sh"

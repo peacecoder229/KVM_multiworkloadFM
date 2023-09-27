@@ -1,6 +1,8 @@
 #!/bin/bash
 #Launch all servers
 
+echo "core_scale/client_memt.sh"
+
 con=$1
 d=$2
 p=$3
@@ -14,6 +16,8 @@ ratio=${10}
 proto=${11}
 ccore=${12}
 dir=${13}
+keymax=20000 #82061 #82061(L2) #1500001(L3)
+
 cd $dir
 
 rm -rf ip192*prt*.txt
@@ -32,11 +36,11 @@ fi
 			#below port all for memcached
 			if [ "$proto" = "memcache_text" ]
 			then
-				#./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port=all  --keymax=1500001 --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
-				./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port="useallccore"  --keymax=1500001 --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
+				#./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port=all  --keymax=$keymax --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
+				./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port="useallccore"  --keymax=$keymax --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
 			else
-				#./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port="onecperserv"  --keymax=1500001 --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
-				./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port="useallccore"  --keymax=1500001 --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
+				#./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port="onecperserv"  --keymax=$keymax --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
+				./run_client_and_server_memtier_r1p1_emon.py --ratio ${ratio}  --scores=${core} --mark ip6_${act}_d${d}_c${con} --host ${host} --ccores=${ccore} --port="useallccore"  --keymax=$keymax --con_num=$con -n $n -p $p -d $d --sport ${servport} --proto ${proto}
 			fi
 
 mkdir -p  ${act}_d${d}_c${con}

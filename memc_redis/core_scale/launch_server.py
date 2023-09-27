@@ -65,6 +65,7 @@ def get_opts():
 
 
 if __name__ == "__main__": 
+    print("launch_server.py")
     options = get_opts()
     if(options.ratio!="0:1"):
         run_redis_server(options)

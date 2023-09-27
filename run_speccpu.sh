@@ -8,12 +8,12 @@ result_file=$1
 start_core=${2:-0}
 end_core=${3:-$[$(getconf _NPROCESSORS_ONLN)-1]}
 VM_EXP=${4:-True}
+workload=$5
+n_iteration=$6 #1=???s, 2=815s, 3=1215s
 
 n_copies=$((end_core-start_core+1))
-workload="502.gcc_r" # n_iteration 2
 #workload="541.leela_r" # n_iteration 2
 #workload="511.povray_r" # n_iteration 2
-n_iteration=2 #1=???s, 2=815s, 3=1215s
 
 start=`date +%s`
 
@@ -56,3 +56,7 @@ avg_elapsed_time=$(awk "BEGIN { print $total/$n_copies }")
 echo "Average_Elapsed_time(s): $avg_elapsed_time,$runtime"
 echo "Average_Elapsed_time(s), Runtime" > $result_file
 echo "$avg_elapsed_time,$runtime" >> $result_file
+
+# To get the performance data in tmc file
+echo "**************** $result_file ************"
+echo "$avg_elapsed_time, $runtime"

@@ -1,6 +1,6 @@
 result_file=$1
 
-runtime=1000
+runtime=100
 #mlc --loaded_latency -R -t600 -d0 -k1-$[$(getconf _NPROCESSORS_ONLN)-1] > ${result_file}_temp
 #time mlc --loaded_latency -W6 -t1200 -d0 -k1-$[$(getconf _NPROCESSORS_ONLN)-1] > ${result_file}_temp
 
@@ -11,8 +11,10 @@ end_core=${3:-$[$(getconf _NPROCESSORS_ONLN)-1]}
 
 
 start=`date +%s`
-echo "time mlc --loaded_latency -W3 -t${runtime} -d0 -c${latency_core} -k${start_core}-${end_core} -b512000 > ${result_file}_temp"
-time mlc --loaded_latency -W3 -t${runtime} -d0 -c${latency_core} -k${start_core}-${end_core} -b512000 > ${result_file}_temp
+#time mlc --loaded_latency -d0 -R -k1 -b2M -t${runtime} -T > ${result_file}_temp
+#time mlc --loaded_latency -W3 -t${runtime} -d0 -c${latency_core} -k${start_core}-${end_core} -b512000 > ${result_file}_temp
+time mlc --loaded_latency -d0 -W5 -k${start_core}-${end_core} -b1M -t${runtime} -T > ${result_file}_temp
+
 end=`date +%s`
 runtime=$((end-start))
 

@@ -42,6 +42,7 @@ for (( copy=start; copy <= end; copy++)); do
   if [[ ${workload#*_}  == "s" ]]; then
     config=${speed_cfg}
     spec_cmd="numactl --localalloc -C ${copy} runcpu -c ${config} --nobuild --noreportable --define cores=1 --threads=1 --iterations ${no_of_iterations} ${workload}"
+    #spec_cmd="taskset -c ${copy} runcpu -c ${config} --nobuild --noreportable --define cores=1 --threads=1 --iterations ${no_of_iterations} ${workload}"
   else
     config=${rate_cfg}
     cp -f config/${config} config/${copy}_${config}

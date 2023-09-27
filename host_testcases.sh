@@ -8,6 +8,7 @@ for workloads in "redis,speccpu"; do
   echo "VM_WORKLOADS=$workloads" >> $config1
   echo "MONITORING=1" >> $config1 
   echo 'SST_ENABLE=0' >> $config1
+  echo "L2C_CACHE_WAYS_ENABLE=0" >> $config1
   echo "LLC_CACHE_WAYS_ENABLE=0" >> $config1
   echo "HWDRC_ENABLE=0" >> $config1
   echo "MBA_ENABLE=0" >> $config1

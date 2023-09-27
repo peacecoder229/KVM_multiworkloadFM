@@ -17,7 +17,8 @@
 
 start=`date +%s`
 hypt="off"
-dsize=8192 #2048, 4096, 8192
+# use small data size (32) for l2 cache exp.
+dsize=8 #1024, 2048, 4096, 8192
 rundir="/root/memc_redis"
 rundir="."
 
@@ -81,8 +82,10 @@ else
 fi
 
 
+# Doing the following in run_redis.sh
 #export runnuma="yes" # for baremetal
 #export runnuma="None" # for vm
+
 serv=0
 port=9000
 #below for taking core boundaryies for collecting perf stat 
@@ -129,7 +132,8 @@ then
 	echo "./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${ms}-${me} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype} &"
 	if [ "${protocol}" == "redis" ]
 	then
-		./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype} &
+        echo "Loading redis db(135): ./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} 4 ${dsize} ${servtype}"
+        ./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype} &
 	else
 
 		echo "Line 131 ....."
@@ -142,8 +146,11 @@ else
 	echo "Line 137: ./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${ms}-${me} $rundir/core_scale ${stc1}-${edc1} ${port} "4" ${dsize} ${servtype} &"
 	if [ "${protocol}" == "redis" ]
 	then
-		./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype} &
-	else
+        # The following line is executed for loading
+        echo "Loading redis db(149): ./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} 4 ${dsize} ${servtype}"
+        ./amd_memcached_core_scale.sh 4000 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${cstc1}-${cedc1} $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} "4" ${dsize} ${servtype}
+	    redis-cli -h 127.0.0.1 -p 9001 info | grep used_memory
+    else
 		echo "Line 141 ...."
 		./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:0 inst${serv}${core} ${protocol} ${ms}-${me} $rundir/core_scale ${stc1}-${edc1} ${port} "4" ${dsize} ${servtype} &
 	fi
@@ -232,9 +239,10 @@ then
 else
 	# The following line gets executed. Change the param in this line. 
 	# 393216 = 10 min, 1048576 = 30 min
-	echo "./amd_memcached_core_scale.sh $no_of_requests 127.0.0.1 2:3(write:read) inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
+	echo "./amd_memcached_core_scale.sh $no_of_requests 127.0.0.1 19:1(write:read) inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &"
 	#./amd_memcached_core_scale.sh 393216 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
-	./amd_memcached_core_scale.sh $no_of_requests 127.0.0.1 2:3 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
+	./amd_memcached_core_scale.sh $no_of_requests 127.0.0.1 19:1 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
+	#./amd_memcached_core_scale.sh $no_of_requests 127.0.0.1 2:3 inst${serv}${core} ${protocol} ${cstc1}-${cedc1}  $rundir/core_scale ${stc1}-${edc1} ${port} ${connections} ${dsize} &
 fi
 
 #echo "./amd_memcached_core_scale.sh 1048576 127.0.0.1 1:4 inst${serv}${core} ${protocol} ${cstc1}-${cedc1},${cstc2}-${cedc2}  $rundir/core_scale ${stc1}-${edc1},${stc2}-${edc2} ${port} ${connections} &"

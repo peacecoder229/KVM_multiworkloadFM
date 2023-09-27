@@ -29,6 +29,8 @@ then
                         #./launch_server.py --ratio "1:4"  --scores=${server}  --host=${host}   --port=all  --keymax=10000001 --con_num=10  --pclient=Yes --mtcp='yes'
 			cd ${cdir}
                         ./launch_server.py --ratio "1:4"  --scores=${server}  --host=${host}   --port=all  --keymax=10000001 --con_num=10 >& /dev/null
+                        echo "./launch_server.py --ratio "1:4"  --scores=${server}  --host=${host}   --port=all  --keymax=10000001 --con_num=10"
+                        #./launch_server.py --ratio "1:4"  --scores=${server}  --host=${host}   --port=all  --keymax=10000001 --con_num=10
 			cd -
  sleep 2
 

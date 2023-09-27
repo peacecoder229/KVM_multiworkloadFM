@@ -1,11 +1,21 @@
 #!/bin/bash
 
-echo "run_redis.sh"
-
 result_file=$1
 start_core=${2:-0}
 end_core=${3:-$[$(getconf _NPROCESSORS_ONLN)-1]}
 VM_EXP=${4:-True}
+
+# Script for running L2
+./run_redis_l2.sh $result_file $start_core
+#pkill redis-server
+exit
+
+# Total no. of keys in the dump.rdb is 738557, size (18MB). For L2 using --key-maximum 82061 (size of the L2 cache)
+# Also load lower number of keys during load phase. Search for "Loading" in memc_redis/mc_rds_in_vm.sh
+
+# Find the memtier_benchmark command in exhaustclientcores() of  memc_redis/core_scale/memtier_client_server_modules.py. Can change the memtier parameter there or in memc_redis/core_scale/client_memt.sh
+
+no_of_connections=20
 
 # Params for Baremetal
 memtier_core_start=48 # run memtier in another socket
@@ -23,21 +33,23 @@ fi
 
 # 1 iteration: 393216 = 836s, 1048576 = ???s
 no_of_iteration=1
-no_of_requests=393216
-#no_of_requests=786432
+#no_of_requests=393216
+no_of_requests=1966080 # for L2 exp when we use smaller data size need to use more no. of requests to increase the experiment runtime
 
 cd memc_redis
 for (( i=1; i<=$no_of_iteration; i++)); do
   #if [[ $VM_EXP == True ]]; then
-    echo "./mc_rds_in_vm.sh ${start_core}-${server_core_end} ../$result_file 1 125 "redis" $memtier_core_start $no_of_requests"
-    ./mc_rds_in_vm.sh ${start_core}-${server_core_end} ../$result_file 1 125 "redis" $memtier_core_start $no_of_requests
-  #else
-  #  echo "./memc_redis_host/run_mc_rds.sh --lcore ${start_core}-${server_core_end} --res_dir $result_file --ins 1 --mccon $con --type redis --memtiercore $memtier_core_start --benchdir ./memc_redis_host/ --ratio 1:10 --dsize 64 --pipe 4 --servIP 127.0.0.1 > temp.out &"
-  #  ./memc_redis_host/run_mc_rds.sh --lcore ${start_core}-${server_core_end} --res_dir $result_file --ins 1 --mccon $con --type redis --memtiercore $memtier_core_start --benchdir ./memc_redis_host/ --ratio 1:10 --dsize 64 --pipe 4 --servIP 127.0.0.1
+    echo "./mc_rds_in_vm.sh ${start_core}-${server_core_end} ../$result_file 1 $no_of_connections redis $memtier_core_start $no_of_requests"
+    ./mc_rds_in_vm.sh ${start_core}-${server_core_end} ../$result_file 1 $no_of_connections "redis" $memtier_core_start $no_of_requests
     pid=$!
-  #fi
+    sleep 15
+    memsize=$( ps aux | grep redis-server | awk '{print $2}' | xargs -I{} pmap -x {} | awk '/total/ {print $4}' | awk '{sum += $1} END {print sum}')
+    wait $pid
 done
+
 cd -
+
+#pkill redis-server
 
 lcore=$(tail -1 $result_file | cut -d, -f1)
 total=$(tail -1 $result_file | cut -d, -f2)

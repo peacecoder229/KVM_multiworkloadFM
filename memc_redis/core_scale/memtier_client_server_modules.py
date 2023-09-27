@@ -30,6 +30,7 @@ def run_redis_server(options):
     """
     start redis server on the host
     """
+    print("core_scale/memtier_client_server_modules.py: run_redis_server")
     cores = get_core_list(corecount=options.loop, cores=options.servercores)
     core_rev_list = list(reversed(cores))
     corenum = len(cores)
@@ -54,6 +55,7 @@ def run_redis_server(options):
              cmd = "numactl --membind=0 --physcpubind=%s redis-server --bind %s --port %s   --maxclients 20000 --tcp-backlog 65536"" &"  % (core,options.host_ip,port)
            else:
              cmd = "numactl -N 0 redis-server --bind %s --port %s   --maxclients 20000 --tcp-backlog 65536"" &"  % (options.host_ip,port)
+             print("redis cmd:", cmd)
         else:
            #cmd = "export MTCP_CONFIG=/pnpdata/redis-intel/src/config/mtcp.conf ; ulimit -n 1024 ; export MTCP_CORE_ID=%s ; cd /pnpdata/redis-intel/src ; ./redis-server --bind %s --port %s "  % (core,options.host_ip,port)
            cmd = "export MTCP_CONFIG=/root/redis-stable/src/config/mtcp.conf ; ulimit -n 16384 ; export MTCP_CORE_ID=%s ; cd /root/redis-stable ; ./redis-mtcp --bind %s --port %s --tcp-backlog 10000 "  % (core,options.host_ip,port)
@@ -101,6 +103,7 @@ def send_cmd_to_remote2(ip, cmd):
     os.system('ssh -f  %s  "%s" ' % (ip, cmd))
 
 def run_memtier(options):
+    print("core_scale/memtier_client_server_modules.py: run_memtier")
     #emon_name = options.mark_name+ options.ratio
     #print(emon_name)
     #os.system("/root/emon/run_emon.sh %s &" % emon_name )
@@ -169,6 +172,7 @@ def run_memtier(options):
 
 
 def singleclientperserver(clientcores, startport, endport, options, proto):
+    print("singleclientperserver")
     benchmark_process = []
     tmp_ccore=clientcores[:]
     for port in range(startport, endport):
@@ -180,11 +184,12 @@ def singleclientperserver(clientcores, startport, endport, options, proto):
 
         with open("ip"+options.host_ip+"prt"+str(port)+"cc"+str(core)+".txt", "w") as outfile:
             benchmark_process.append(subprocess.Popen(cmd, stdout=outfile, shell=True))
-            print(cmd)
+            print("singleclientperserver: ", cmd)
             #print(str(startport) + " " + str(endport))
     return benchmark_process
 
 def exhaustclientcores(clientcores, startport, endport, options, proto):
+    print("exhaustclientcores")
     benchmark_process = []
     tmp_ccore=clientcores[:]
     portlist = [i for i in range(startport, endport)]
@@ -201,11 +206,12 @@ def exhaustclientcores(clientcores, startport, endport, options, proto):
 
         with open("ip"+options.host_ip+"prt"+str(port)+"cc"+str(core)+".txt", "w") as outfile:
             benchmark_process.append(subprocess.Popen(cmd, stdout=outfile, shell=True))
-            print(cmd)
+            print("exhaustclientcores: ", cmd)
             #print(str(startport) + " " + str(endport))
     return benchmark_process
 
 def multiclentperserver(clientcores, startport, endport, options, proto):
+    print("multiclentperserver")
     benchmark_process = []
     for port in range(startport, endport):
       tmp_ccore=clientcores[:]
@@ -220,7 +226,7 @@ def multiclentperserver(clientcores, startport, endport, options, proto):
         #print(cmd)
         with open("ip"+options.host_ip+"prt"+str(port)+"cc"+str(core)+".txt", "w") as outfile:
             benchmark_process.append(subprocess.Popen(cmd, stdout=outfile, shell=True))
-            print(cmd)
+            print("multiclentperserver: ", cmd)
             #print(str(startport) + " " + str(endport))
     return benchmark_process
 

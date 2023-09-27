@@ -21,14 +21,16 @@ function init_vm_core_range() {
   local lo_core=$(echo $total_core | cut -f1 -d-)
 
   local temp_hi=$hi_core
-  for vm_core in ${VM_CORES//,/ }; do
-    local temp_lo=$((temp_hi - vm_core + 1))
-    VM_CORE_RANGE+=("${temp_lo}-${temp_hi}")
-    temp_hi=$((temp_hi - vm_core))
-  done
-  
-  # VM_CORE_RANGE+=("0-0")
-  # VM_CORE_RANGE+=("96-96")
+  #if [[ $L2C_CACHE_WAYS_ENABLE -eq 0 ]]; then
+  #  for vm_core in ${VM_CORES//,/ }; do
+  #    local temp_lo=$((temp_hi - vm_core + 1))
+  #    VM_CORE_RANGE+=("${temp_lo}-${temp_hi}")
+  #    temp_hi=$((temp_hi - vm_core))
+  #  done
+  #else # for L2 Cache experiments, need
+    VM_CORE_RANGE+=("47")
+    VM_CORE_RANGE+=("143")
+  #fi
 
   for vm_core_range in "${VM_CORE_RANGE[@]}"; do
     echo "$vm_core_range"
@@ -36,15 +38,15 @@ function init_vm_core_range() {
 }
 
 # Initializes a comma seperated string of VM names.
-# Each VM is named in the following format: <workload name>_<core range>: mlc_1-15, mlc_16-32
+# Each VM is named in the following format: <workload name>:<core range>: mlc:1-15, mlc:16-32
 function init_vm_names() {
   for vm_wl in ${VM_WORKLOADS//,/ }; do
     VM_WORKLOAD_LIST+=($vm_wl)
   done
   
   for i in "${!VM_WORKLOAD_LIST[@]}"; do
-   echo "${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}"
-    VM_NAMES+="${VM_WORKLOAD_LIST[i]}_${VM_CORE_RANGE[i]}"
+   echo "${VM_WORKLOAD_LIST[i]}:${VM_CORE_RANGE[i]}"
+   VM_NAMES+="${VM_WORKLOAD_LIST[i]}:${VM_CORE_RANGE[i]}"
     
     if [[ $i != $((${#VM_WORKLOAD_LIST[@]}-1)) ]]; then
       VM_NAMES+=","
@@ -57,7 +59,7 @@ function init_vm_names() {
 function setup_env() {
   if [[ $SST_ENABLE -eq 0 ]]; then
     echo "cpupower frequency-set -u 2300Mhz -d 2300Mhz"
-    cpupower frequency-set -u 2300Mhz -d 2300Mhz > /dev/null
+    cpupower frequency-set -u 2700Mhz -d 2700Mhz > /dev/null
   fi
 
   sst_reset
@@ -68,7 +70,11 @@ function setup_env() {
   
   rm -rf /root/.ssh/known_hosts
   
-  echo off > /sys/devices/system/cpu/smt/control
+  #if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
+   echo on > /sys/devices/system/cpu/smt/control
+  #else
+  #  echo off > /sys/devices/system/cpu/smt/control
+  #fi
   sleep 5 
   
   pkill -f server.py
