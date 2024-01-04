@@ -973,9 +973,9 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                         num_nvme = len( PT_Device["NVME"])
 
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     
-                    test_cmd = CMD_FORMAT % (vm_name.lower(), tile_no,
+                    test_cmd = CMD_FORMAT % (vm_name.lower(),
                                              (int(v_memory) *
                                               1024), n_vcpus,  # t_resource["VCPU"],
                                              path_prefix, vm_storage, iso_name, 
@@ -983,9 +983,9 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                                              iso_name, network_cmd,
                                              storage_pt, cpuaffinity)
                     print(test_cmd)
-                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
+                    CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
-                        tile.lower(), tile_no,
+                        tile.lower(),
                         (int(v_memory) * 1024), n_vcpus, # t_resource["VCPU"],
                         path_prefix, vm_storage, iso_name, network_cmd)
 

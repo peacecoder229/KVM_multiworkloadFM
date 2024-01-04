@@ -5,9 +5,9 @@
 SPEC_DIR="/home/spec17"
 
 result_file=$1
-start_core=${2:-0}
-end_core=${3:-$[$(getconf _NPROCESSORS_ONLN)-1]}
-VM_EXP=${4:-True}
+start_core=${2}
+end_core=${3}
+VM_EXP=${4}
 workload=$5
 n_iteration=$6 #1=???s, 2=815s, 3=1215s
 
@@ -22,6 +22,8 @@ if [[ $VM_EXP == True ]]; then
   cd /root/spec17/cpu2017
   cp /root/speccpu_script/workload.sh ./
   cp /root/speccpu_script/shrc ./
+  start_core=0
+  end_core=$(($(getconf _NPROCESSORS_ONLN)-1))
   ./workload.sh $workload $start_core $end_core $n_iteration
 else
   cp speccpu_script/workload.sh $SPEC_DIR/cpu2017

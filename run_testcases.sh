@@ -6,6 +6,13 @@ CONFIG=$2
 # Initializes VM_CORES, VM_WORKLOADS, and HWDRC and MBA related parameters
 source $CONFIG
 
+: '
+if [ $HOST_EXP -eq 1 ] && [ $RESCTRL -eq 1 ]; then
+  ./run_resctrl_host_exp.sh
+  exit
+fi
+'
+
 declare -a VM_CORE_RANGE # list of core ranges
 declare -a VM_WORKLOAD_LIST
 VM_NAMES="" # Comma separated names of the VMs
@@ -28,10 +35,13 @@ function init_vm_core_range() {
   #    temp_hi=$((temp_hi - vm_core))
   #  done
   #else # for L2 Cache experiments, need
-    VM_CORE_RANGE+=("47")
-    VM_CORE_RANGE+=("143")
+    #VM_CORE_RANGE+=("0") # for vm need to use 0 and 96
+    VM_CORE_RANGE+=("0-47")
+    #VM_CORE_RANGE+=("96-143")
+    #VM_CORE_RANGE+=("1")
+    #VM_CORE_RANGE+=("143")
   #fi
-
+  
   for vm_core_range in "${VM_CORE_RANGE[@]}"; do
     echo "$vm_core_range"
   done
@@ -66,12 +76,13 @@ function setup_env() {
   
   hwdrc_reset
 
+  disable_resctrl
   pqos -R
   
   rm -rf /root/.ssh/known_hosts
   
   #if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
-   echo on > /sys/devices/system/cpu/smt/control
+  echo on > /sys/devices/system/cpu/smt/control
   #else
   #  echo off > /sys/devices/system/cpu/smt/control
   #fi
@@ -491,6 +502,43 @@ function process_sst_data() {
   done
 }
 
+function hp_lp_corun_host_resctrl() {
+  : '
+  # Run exp script, run_in_host.sh will store the pids in file
+  ./run_in_host.sh $VM_NAMES $result_file_suffix $RESULT_DIR
+
+  mount -t resctrl resctrl /sys/fs/resctrl
+  
+
+  # L2:<cache_id0>=<mask> 
+  # setup resctrl
+  if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    declare -a L2C_COS_WAYS_LIST
+    for l2c_way in ${L2C_COS_WAYS//,/ }; do
+      L2C_COS_WAYS_LIST+=($l2c_way)
+    done
+  
+    declare -a L2C_COS_WL_LIST
+    for l2c_cos in ${L2C_COS_WL//,/ }; do
+      L2C_COS_WL_LIST+=($l2c_cos)
+    done
+    
+    i=0
+    for clos in ${L2C_COS_WL//,/ }; do
+      mkdir /sys/fs/resctrl/clos$clos
+      start_core=$(echo ${VM_CORE_RANGE[i]} | cut -d- -f1)
+      end_core=$(echo ${VM_CORE_RANGE[i]} | cut -d- -f2)
+      for ((core=start_core; core<=end_core; core++)); do
+        cache_id=$(cat "/sys/devices/system/cpu/cpu$core/cache/index2/id")
+        mask=${L2C_COS_WAYS_LIST[i]}
+        echo "L2:$cache_id=$mask" > /sys/fs/resctrl/clos$clos/schemata
+        clos=$((clos+1))
+      done
+    done
+  fi
+  '
+}
+
 function config_resctrl_mba() {
    echo "Configuring RESCTRL MBA."
 
@@ -638,10 +686,14 @@ function main() {
 
   #TODO: Add config option for hp_solo_run, hp_lp_corun_resctrl_mba, hp_lp_corun_resctrl_hwdrc
   
-
   if [[ $HOST_EXP -eq 1 ]]; then
-    echo "Running exp in host."
-    hp_lp_corun_host
+    if [[ $RESCTRL -eq 1 ]]; then
+        echo "Running exp in host using resctrl interface."
+        hp_lp_corun_host_resctrl 
+     else    
+        echo "Running exp in host."
+        hp_lp_corun_host
+    fi
   elif [[ $HWDRC_ENABLE -eq 1 ]]; then
     echo "Running colocation w/ HWDRC .... "
     hp_lp_corun_hwdrc

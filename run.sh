@@ -11,6 +11,8 @@ cpu_affinity=0
 BENCHMARK_DIR="/home"
 vm_config=""
 
+declare -A result_file_ip # list of result file names and their corresponding vm's ip
+
 # Since we don't support host experiments, we don't use it.
 function get_config()
 {
@@ -173,8 +175,8 @@ function setup_workloads()
 	#virsh start $vm_name; sleep 1m
         #echo "Done increasing memory of VM $vm_name."
 	
-	scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
+	    scp -r -oStrictHostKeyChecking=no memc_redis root@${vm_ip}:/root
+	    ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "/root/memc_redis/install.sh"
       ;;
       
@@ -300,7 +302,22 @@ function run_exp_vm()
         workload_script="run_rnnt.sh"
       ;;
       *"speccpu"*)
-        workload_script="run_speccpu.sh"
+        # speccpu has the following format: speccpu:502.gcc_r:3:46-47, so run the exp and store the result_file here
+        benchmark=$(echo $vm_name | cut -d: -f2)
+        n_iteration=$(echo $vm_name | cut -d: -f3)
+        start_core=$(echo $vm_name | cut -d: -f4 | cut -d- -f1)
+        end_core=$(echo $vm_name | cut -d: -f4 | cut -d- -f2)
+        echo "$benchmark will run in core range: $start_core-$end_core"
+
+        result_file=${benchmark}_${start_core}-${end_core}_${file_suffix}
+
+        for iteration in 1
+        do
+          scp -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
+          ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash chmod +x /root/run_speccpu.sh"
+          ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash run_speccpu.sh ${result_file}_${iteration} $start_core $end_core True $benchmark $n_iteration" &
+          result_file_ip[${result_file}_${iteration}]=$vm_ip
+        done
       ;;
       *"unet"*)
         workload_script="run_3dunet.sh"
@@ -312,27 +329,31 @@ function run_exp_vm()
         workload_script="run_nginx.sh"
       ;;
       *"spdk-rdma"*)
-	workload_script="run_spdk-rdma.sh"
+	    workload_script="run_spdk-rdma.sh"
       ;;
       *)
         echo "The VM name should match the name of the workload in lowercase."
       ;;
     esac
     
-    echo "Run $workload_script in $vm_name: $vm_ip"   
+    # For workloads other than speccpu do the following 
+    if [[ "$vm_name" != *"speccpu"* ]]; then
+      echo "Run $workload_script in $vm_name: $vm_ip"
   
-    for iteration in 1
-    do
-      wl_name=$(echo $vm_name | cut -d"_" -f1 )
-      start_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f1)
-      end_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f2)
-      result_file=${wl_name}_${start_core}-${end_core}_${file_suffix}_rep_${iteration}
-      echo "Result file is $result_file"
+      for iteration in 1
+      do
+        wl_name=$(echo $vm_name | cut -d: -f1 )
+        start_core=$(echo $vm_name | cut -d: -f2 | cut -d"-" -f1)
+        end_core=$(echo $vm_name | cut -d: -f2 | cut -d"-" -f2)
+        result_file=${wl_name}_${start_core}-${end_core}_${file_suffix}_rep_${iteration}
+        echo "Store $result_file in dictionary."
+        result_file_ip[${result_file}]=$vm_ip
       
-      scp -oStrictHostKeyChecking=no ${workload_script} root@${vm_ip}:/root/
-      ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash chmod +x /root/$workload_script"
-      ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/$workload_script $result_file" &
-    done # iteration
+        scp -oStrictHostKeyChecking=no ${workload_script} root@${vm_ip}:/root/
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash chmod +x /root/$workload_script"
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash /root/$workload_script $result_file" &
+      done # iteration
+    fi
   done # VMs
  
  # waiting for the jobs to finish before we copy results back
@@ -348,23 +369,12 @@ function copy_result_from_vms()
 {
   # Copy the result data to `nutanix_data` directory, create if does not exist.
   mkdir -p  $res_dir #/root/nutanix_data
-
-  vm_name_list=$(virsh list --name)
-  
-  for vm_name in $vm_name_list
-  do
-   local vm_ip=$(get_ip_from_vm_name "$vm_name")
-   
-   for iteration in 1
-   do
-     wl_name=$(echo $vm_name | cut -d"_" -f1 )
-     start_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f1)
-     end_core=$(echo $vm_name | cut -d"_" -f2 | cut -d"-" -f2)
-     result_file=${wl_name}_${start_core}-${end_core}_${file_suffix}_rep_${iteration}
-
-     echo "Copy result: $result_file"
+  # loop over the keys
+  echo "Copy result data to $res_dir ....."
+  for result_file in "${!result_file_ip[@]}"; do
+     vm_ip=${result_file_ip[${result_file}]}
+     echo "Copy $result_file from $vm_ip to $res_dir"
      scp -oStrictHostKeyChecking=no root@${vm_ip}:/root/${result_file} $res_dir
-    done
   done
 }
 

@@ -4,7 +4,7 @@ wl_core_range=$1 #comma sperated list of workload:startcore-workload_endcore, e.
 file_suffix=$2
 result_dir=$3
 
-echo "run_in_host.sh"
+echo "run_in_host.sh $wl_core_range $file_suffix $result_dir"
 
 declare -a result_file_list # list of result file names
 
@@ -21,6 +21,8 @@ for wl_core in ${wl_core_range//,/ }; do
       result_file_list+=($result_file)
 
       bash run_speccpu.sh $result_file $start_core $end_core False $benchmark $n_iteration & # VM_EXP flag is false
+      
+      cat $! > $wl_core.txt 
   else 
       wl=$(echo $wl_core | cut -d: -f1)
       start_core=$(echo $wl_core | cut -d: -f2 | cut -d- -f1)
@@ -32,6 +34,7 @@ for wl_core in ${wl_core_range//,/ }; do
   
       echo "bash run_${wl}.sh $result_file $start_core $end_core False"
       bash run_${wl}.sh $result_file $start_core $end_core False  & # VM_EXP flag is false
+      cat $! > $wl_core.txt 
   fi
 done
 

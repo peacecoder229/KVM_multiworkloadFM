@@ -6,8 +6,8 @@ end_core=${3:-$[$(getconf _NPROCESSORS_ONLN)-1]}
 VM_EXP=${4:-True}
 
 # Script for running L2
-./run_redis_l2.sh $result_file $start_core
-#pkill redis-server
+echo "./run_redis_l2.sh $result_file $start_core $end_core"
+./run_redis_l2.sh $result_file $start_core $end_core
 exit
 
 # Total no. of keys in the dump.rdb is 738557, size (18MB). For L2 using --key-maximum 82061 (size of the L2 cache)

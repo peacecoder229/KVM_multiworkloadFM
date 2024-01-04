@@ -41,3 +41,5 @@ SST_COS_WL="0,3,3"
 # If MaxFrequency=0 only MinFreqency will be specified in the SST command
 SST_COS_FREQ="0:3000-3100,3:0-500"
 
+# Resctrl flag; if turned on uses resctrl interface rathher than pqos tool
+RESCTRL=1 #
