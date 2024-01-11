@@ -71,11 +71,11 @@ row_names_llc = [
 total_l2_mpi = 0
 total_l1_mpi = 0
 #for core_no in [1]:
-for core_range in ['0,48', '96,144']:
+for core_range in ['0,23']:
     start_core = int(core_range.split(',')[0])
     end_core = int(core_range.split(',')[1])
     
-    for core_no in range(start_core, end_core):
+    for core_no in range(start_core, end_core+1):
         core_column = 'socket 0 core ' + str(core_no)
         data_l2_l1 = df_core.loc[row_names_l2_l1, core_column].to_frame().transpose()
         #print(data_l2_l1)

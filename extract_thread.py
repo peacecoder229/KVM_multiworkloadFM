@@ -71,19 +71,19 @@ row_names_llc = [
 total_l2_mpi = 0
 total_l1_mpi = 0
 thread_no = 0
-for cpu_range in ['0,48', '96,144']:
+for cpu_range in ['0,0', '96,96']:
     start_cpu = int(cpu_range.split(',')[0])
     end_cpu = int(cpu_range.split(',')[1])
     core_no = 0
-    for cpu_no in range(start_cpu, end_cpu):
+    for cpu_no in range(start_cpu, end_cpu+1):
         cpu_column = 'cpu ' + str(cpu_no) + ' (' + 'S0' + 'C'  + str(core_no) + 'T' + str(thread_no) + ')'
-        #print(cpu_column)
+        print(cpu_column)
         data_l2_l1 = df_thread.loc[row_names_l2_l1, cpu_column].to_frame().transpose()
         #print(data_l2_l1)
         total_l1_mpi += data_l2_l1['metric_L1-I code read misses (w/ prefetches) per instr'][0] + data_l2_l1['metric_L1D MPI (includes data+rfo w/ prefetches)'][0]
         total_l2_mpi += data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'][0]
-        #print(total_l2_mpi)
-        #print(total_l1_mpi)
+        print(total_l2_mpi)
+        print(total_l1_mpi)
         core_no += 1
     
     l2_hit_rate = 1 - (total_l2_mpi/total_l1_mpi)
