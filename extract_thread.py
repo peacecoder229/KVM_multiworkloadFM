@@ -68,22 +68,23 @@ row_names_llc = [
 #data_l2_l1['L1 MPI (data+code+rfo)'] = data_l2_l1['metric_L1-I code read misses (w/ prefetches) per instr'] + data_l2_l1['metric_L1D MPI (includes data+rfo w/ prefetches)']
 #data_l2_l1['L2_Hit_Rate'] = 1 - (data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'] / data_l2_l1['L1 MPI (data+code+rfo)'])
 
-total_l2_mpi = 0
-total_l1_mpi = 0
 thread_no = 0
-for cpu_range in ['0,0', '96,96']:
+for cpu_range in ['0,31', '64,95']:
+    total_l2_mpi = 0
+    total_l1_mpi = 0
+
     start_cpu = int(cpu_range.split(',')[0])
     end_cpu = int(cpu_range.split(',')[1])
     core_no = 0
     for cpu_no in range(start_cpu, end_cpu+1):
-        cpu_column = 'cpu ' + str(cpu_no) + ' (' + 'S0' + 'C'  + str(core_no) + 'T' + str(thread_no) + ')'
-        print(cpu_column)
-        data_l2_l1 = df_thread.loc[row_names_l2_l1, cpu_column].to_frame().transpose()
+        thread_column = 'cpu ' + str(cpu_no) + ' (' + 'S0' + 'C'  + str(core_no) + 'T' + str(thread_no) + ')'
+        
+        data_l2_l1 = df_thread.loc[row_names_l2_l1, thread_column].to_frame().transpose()
         #print(data_l2_l1)
         total_l1_mpi += data_l2_l1['metric_L1-I code read misses (w/ prefetches) per instr'][0] + data_l2_l1['metric_L1D MPI (includes data+rfo w/ prefetches)'][0]
         total_l2_mpi += data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'][0]
-        print(total_l2_mpi)
-        print(total_l1_mpi)
+        #print(total_l2_mpi)
+        #print(total_l1_mpi)
         core_no += 1
     
     l2_hit_rate = 1 - (total_l2_mpi/total_l1_mpi)
@@ -97,7 +98,7 @@ for cpu_range in ['0,0', '96,96']:
     #print("L2 Hit Rate: ", data_l2_l1['L2_Hit_Rate'][0])
     #print("L3 Hit rate: ", data_llc['L3 Hit Rate'][0])
     #print(cpu_range , " L3 Hit rate: ", l3_hit_rate)
-    print(cpu_range, "L2 Hit Rate: ", l2_hit_rate)
+    print(cpu_range, "--> L2 Hit Rate: ", l2_hit_rate, ", L2 Total MPI:", total_l2_mpi)
     #data = data_l2_l1[['L2_LINES_IN.ALL', 'L2_Hit_Rate']]
     #data.to_csv('l2_emon_data.csv', index=True)
 

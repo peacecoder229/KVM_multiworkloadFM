@@ -68,13 +68,12 @@ row_names_llc = [
 #data_l2_l1['L1 MPI (data+code+rfo)'] = data_l2_l1['metric_L1-I code read misses (w/ prefetches) per instr'] + data_l2_l1['metric_L1D MPI (includes data+rfo w/ prefetches)']
 #data_l2_l1['L2_Hit_Rate'] = 1 - (data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'] / data_l2_l1['L1 MPI (data+code+rfo)'])
 
-total_l2_mpi = 0
-total_l1_mpi = 0
-#for core_no in [1]:
-for core_range in ['0,23']:
+for core_range in ['0,31']:
     start_core = int(core_range.split(',')[0])
     end_core = int(core_range.split(',')[1])
     
+    total_l2_mpi = 0
+    total_l1_mpi = 0
     for core_no in range(start_core, end_core+1):
         core_column = 'socket 0 core ' + str(core_no)
         data_l2_l1 = df_core.loc[row_names_l2_l1, core_column].to_frame().transpose()
@@ -85,19 +84,19 @@ for core_range in ['0,23']:
         #print(total_l1_mpi)
     
     l2_hit_rate = 1 - (total_l2_mpi/total_l1_mpi)
+    print(core_range, "-> L2 Hit Rate: ", l2_hit_rate, ", L2 MPI: ", total_l2_mpi)
 
-    data_llc = df_socket.loc[row_names_llc, 'socket 0'] #.to_frame() #.transpose()
-    #data_llc['L3 Hit Rate'] = 1 - (data_llc['metric_LLC MPI (includes code+data+rfo w/ prefetches)']/data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'])
-    l3_hit_rate = 1 - (data_llc['metric_LLC MPI (includes code+data+rfo w/ prefetches)']/total_l2_mpi)
+data_llc = df_socket.loc[row_names_llc, 'socket 0'] #.to_frame() #.transpose()
+#data_llc['L3 Hit Rate'] = 1 - (data_llc['metric_LLC MPI (includes code+data+rfo w/ prefetches)']/data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'])
+l3_hit_rate = 1 - (data_llc['metric_LLC MPI (includes code+data+rfo w/ prefetches)']/total_l2_mpi)
 
-    #print(data_llc['metric_LLC MPI (includes code+data+rfo w/ prefetches)'])
-    #print(data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'])
-    #print("L2 Hit Rate: ", data_l2_l1['L2_Hit_Rate'][0])
-    #print("L3 Hit rate: ", data_llc['L3 Hit Rate'][0])
-    print(core_range , " L3 Hit rate: ", l3_hit_rate)
-    print(core_range, "L2 Hit Rate: ", l2_hit_rate)
-    #data = data_l2_l1[['L2_LINES_IN.ALL', 'L2_Hit_Rate']]
-    #data.to_csv('l2_emon_data.csv', index=True)
+#print(data_llc['metric_LLC MPI (includes code+data+rfo w/ prefetches)'])
+#print(data_l2_l1['metric_L2 MPI (includes code+data+rfo w/ prefetches)'])
+#print("L2 Hit Rate: ", data_l2_l1['L2_Hit_Rate'][0])
+#print("L3 Hit rate: ", data_llc['L3 Hit Rate'][0])
+print(core_range , "-> L3 Hit rate: ", l3_hit_rate)
+#data = data_l2_l1[['L2_LINES_IN.ALL', 'L2_Hit_Rate']]
+#data.to_csv('l2_emon_data.csv', index=True)
 
-    #data = pd.concat([data, data_llc], axis=1)
-    #os.system("cat l2_emon_data.csv")
+#data = pd.concat([data, data_llc], axis=1)
+#os.system("cat l2_emon_data.csv")
