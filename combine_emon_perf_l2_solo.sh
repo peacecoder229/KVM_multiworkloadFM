@@ -1,20 +1,19 @@
 
 #wl="speccpu:511.povray_r:1"
 #wl_perf="511.povray_r"
-#wl="speccpu:502.gcc_r:1"
-#wl_perf="502.gcc_r"
+wl="speccpu:502.gcc_r:1"
+wl_perf="502.gcc_r"
 
 #wl="mlc"
 #wl_perf="mlc"
-#parent_dir="hostexp_l2c_${wl}_1_256kb-w5"
 
-wl="nginx"
-wl_perf="nginx"
+#wl="nginx"
+#wl_perf="nginx"
 
-no_of_cores=48
-core_range="96-143"
+no_of_cores=32
+core_range="0-31"
 root_dir="/home/muktadir/nutanix_data"
-parent_dir="hostexp_l2c_${wl}_${no_of_cores}_1"
+parent_dir="hostexp_l2c_${wl}_${no_of_cores}"
 
 echo "Default"
 cat $root_dir/$parent_dir/${wl}_${no_of_cores}_l2c-default/${wl_perf}_${core_range}_co_na_sst-0
