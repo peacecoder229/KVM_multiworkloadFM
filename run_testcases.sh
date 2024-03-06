@@ -6,13 +6,6 @@ CONFIG=$2
 # Initializes VM_CORES, VM_WORKLOADS, and HWDRC and MBA related parameters
 source $CONFIG
 
-: '
-if [ $HOST_EXP -eq 1 ] && [ $RESCTRL -eq 1 ]; then
-  ./run_resctrl_host_exp.sh
-  exit
-fi
-'
-
 declare -a VM_CORE_RANGE # list of core ranges
 declare -a VM_WORKLOAD_LIST
 VM_NAMES="" # Comma separated names of the VMs
@@ -28,19 +21,18 @@ function init_vm_core_range() {
   local lo_core=$(echo $total_core | cut -f1 -d-)
 
   local temp_hi=$hi_core
-  #if [[ $L2C_CACHE_WAYS_ENABLE -eq 0 ]]; then
-  #  for vm_core in ${VM_CORES//,/ }; do
-  #    local temp_lo=$((temp_hi - vm_core + 1))
-  #    VM_CORE_RANGE+=("${temp_lo}-${temp_hi}")
-  #    temp_hi=$((temp_hi - vm_core))
-  #  done
+  for vm_core in ${VM_CORES//,/ }; do
+    local temp_lo=$((temp_hi - vm_core + 1))
+    VM_CORE_RANGE+=("${temp_lo}-${temp_hi}")
+    temp_hi=$((temp_hi - vm_core))
+  done
+  
   #else # for L2 Cache experiments, need
     #VM_CORE_RANGE+=("0") # for vm need to use 0 and 96
-    VM_CORE_RANGE+=("0-47")
+    #VM_CORE_RANGE+=("0-47")
     #VM_CORE_RANGE+=("96-143")
     #VM_CORE_RANGE+=("1")
     #VM_CORE_RANGE+=("143")
-  #fi
   
   for vm_core_range in "${VM_CORE_RANGE[@]}"; do
     echo "$vm_core_range"
@@ -503,15 +495,49 @@ function process_sst_data() {
 }
 
 function hp_lp_corun_host_resctrl() {
-  : '
-  # Run exp script, run_in_host.sh will store the pids in file
-  ./run_in_host.sh $VM_NAMES $result_file_suffix $RESULT_DIR
-
-  mount -t resctrl resctrl /sys/fs/resctrl
+  local cos_mode=na # na, MBA, HWDRC, RESCTRL-MBA, or RESCTRL-HWDRC
+  if [[ $HWDRC_ENABLE -eq 1 ]]; then
+    cos_mode="HWDRC"
+  elif [[ $MBA_ENABLE -eq 1 ]]; then
+    echo "Running colocation w/ MBA .... "
+    cos_mode="MBA"
+  fi
+  echo "Running hp lp corun in $cos_mode mode."
   
+  result_file_suffix="co_${cos_mode}_sst-${SST_ENABLE}"
+  
+  if [[ $LLC_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    llc_ways=$( echo ${LLC_COS_WAYS//,/-} )
+    result_file_suffix=${result_file_suffix}_llc-${llc_ways}
+  fi
+  if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
+    l2c_ways=$( echo ${L2C_COS_WAYS//,/-} )
+    result_file_suffix=${result_file_suffix}_l2c-${l2c_ways}
+  fi
+
+  #start_frequency_monitoring "$result_file_suffix"
+
+  # start pqos monitor, if enabled
+  if (( $MONITORING == 1)); then
+    mon_file=$( echo ${VM_NAMES//,/_} )
+    mon_file=${mon_file}_${result_file_suffix}_mon
+    #echo ${mon_file}
+    start_monitoring "${mon_file}"
+  fi
+
+  # Run exp script, run_in_host.sh will store the pids in file
+  coproc host_script {
+    echo "./run_in_host.sh $VM_NAMES $result_file_suffix $RESULT_DIR";
+    ./run_in_host.sh $VM_NAMES $result_file_suffix $RESULT_DIR;
+  }
+  echo "Started the workload ....."
+  sleep 2s
+
+  echo "Mounting resctrl interface ..."
+  mount -t resctrl resctrl /sys/fs/resctrl
 
   # L2:<cache_id0>=<mask> 
-  # setup resctrl
+  # setup resctrl for L2 cache
   if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
     declare -a L2C_COS_WAYS_LIST
     for l2c_way in ${L2C_COS_WAYS//,/ }; do
@@ -524,19 +550,28 @@ function hp_lp_corun_host_resctrl() {
     done
     
     i=0
+    echo "Start setting the L2 cacheways ..."
     for clos in ${L2C_COS_WL//,/ }; do
+      # make directory for each clos
+      echo "mkdir /sys/fs/resctrl/clos$clos"
       mkdir /sys/fs/resctrl/clos$clos
+      
+      # Get the L2 cache id of the cores where the process is running and allocate user specified cacheways to that L2 cache
       start_core=$(echo ${VM_CORE_RANGE[i]} | cut -d- -f1)
       end_core=$(echo ${VM_CORE_RANGE[i]} | cut -d- -f2)
+      mask=${L2C_COS_WAYS_LIST[i]}
       for ((core=start_core; core<=end_core; core++)); do
         cache_id=$(cat "/sys/devices/system/cpu/cpu$core/cache/index2/id")
-        mask=${L2C_COS_WAYS_LIST[i]}
         echo "L2:$cache_id=$mask" > /sys/fs/resctrl/clos$clos/schemata
-        clos=$((clos+1))
       done
+      
+      # populate the 'tasks' file with corresponding process id (it is in $start_core-$end_core.txt file)
+      cat $start_core-$end_core.txt > /sys/fs/resctrl/clos$clos/tasks
+      i=$((i+1))
     done
   fi
-  '
+
+  wait "${host_script_PID}"
 }
 
 function config_resctrl_mba() {
@@ -676,7 +711,8 @@ function main() {
     setup_llc_ways
   fi
 
-  if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
+  #if [ $L2C_CACHE_WAYS_ENABLE -eq 1 ] && [ $RESCTRL -ne 1 ]; then
+  if [ $L2C_CACHE_WAYS_ENABLE -eq 1 ]; then
     setup_l2c_ways
   fi
 
@@ -689,7 +725,7 @@ function main() {
   if [[ $HOST_EXP -eq 1 ]]; then
     if [[ $RESCTRL -eq 1 ]]; then
         echo "Running exp in host using resctrl interface."
-        hp_lp_corun_host_resctrl 
+        hp_lp_corun_host_resctrl
      else    
         echo "Running exp in host."
         hp_lp_corun_host

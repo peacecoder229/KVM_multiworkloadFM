@@ -1,6 +1,6 @@
 #!/bin/bash
 
-wl_core_range=$1 #comma sperated list of workload:startcore-workload_endcore, e.g. redis:46-47, mlc:44-45
+wl_core_range=$1 #comma sperated list of workload:startcore-endcore, e.g. redis:46-47, mlc:44-45
 file_suffix=$2
 result_dir=$3
 
@@ -22,7 +22,11 @@ for wl_core in ${wl_core_range//,/ }; do
 
       bash run_speccpu.sh $result_file $start_core $end_core False $benchmark $n_iteration & # VM_EXP flag is false
       
-      cat $! > $wl_core.txt 
+      pid=$!
+      echo "echo $pid > $core_range.txt"
+      echo $pid > $core_range.txt
+      cat $core_range.txt
+
   else 
       wl=$(echo $wl_core | cut -d: -f1)
       start_core=$(echo $wl_core | cut -d: -f2 | cut -d- -f1)
@@ -34,7 +38,11 @@ for wl_core in ${wl_core_range//,/ }; do
   
       echo "bash run_${wl}.sh $result_file $start_core $end_core False"
       bash run_${wl}.sh $result_file $start_core $end_core False  & # VM_EXP flag is false
-      cat $! > $wl_core.txt 
+      
+      pid=$!
+      echo "echo $pid > $core_range.txt"
+      echo $pid > $core_range.txt
+      cat $core_range.txt
   fi
 done
 

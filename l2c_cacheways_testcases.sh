@@ -1,4 +1,3 @@
-
 ############################# Note ##################################
 # Before running make sure to do the following in run_testcases.sh:
 # 1. "echo on > /sys/devices/system/cpu/smt/control" in the setup_env() in run_testcases.sh
@@ -13,11 +12,11 @@
 #for workloads in "speccpu:502.gcc_r:1,speccpu:511.povray_r:1"; do
 #for workloads in "speccpu:511.povray_r:1,mlc"; do
 #for workloads in "speccpu:502.gcc_r:1,speccpu:502.gcc_r:1"; do
-for workloads in "mlc"; do
+for workloads in "mlc,mlc"; do
 #for workloads in "speccpu:511.povray_r:1"; do
 #for workloads in "redis"; do
 #for workloads in "nginx"; do
-  cores="48"
+  cores="48,48"
   config1="1-config.sh"
   config2="2-config.sh"
   config2="3-config.sh"
@@ -48,17 +47,17 @@ for workloads in "mlc"; do
 
   echo "L2C_CACHE_WAYS_ENABLE=1" >> $config2
   #echo "L2C_COS_WL=4,7" >> $config2
-  echo "L2C_COS_WL=4" >> $config2
+  echo "L2C_COS_WL=4,7" >> $config2
   
   #echo "RESCTRL=1" >> $config2
 
   # Create result directory
   workloads=$(echo ${workloads//,/-}) # replace comma by dash
   cores=$(echo ${cores//,/-}) # replace comma by dash
-  result_dir="/home/muktadir/nutanix_data/hostexp_l2c_${workloads}_${cores}_d10"
+  result_dir="/home/muktadir/nutanix_data/hostexp_resctrl_l2c_${workloads}_${cores}"
   
   # Run default case
-    
+   
   case_name="${workloads}_${cores}_l2c-default"
   mkdir -p $result_dir/$case_name
   tmc -c "./run_testcases.sh $result_dir $config1" -n -x mchowdh1 -e /opt/intel/sep/config/edp/filtered_events.txt -u -S 5 -a "l2cat" -i "$case_name" -w thread,socket,core -D $case_name
@@ -66,7 +65,7 @@ for workloads in "mlc"; do
   # move data to case directory in result dir
   find $result_dir -maxdepth 1 -type f | xargs mv -t $result_dir/$case_name
   echo "Sleep for 10 min to make sure edp generated the excel file."
-  sleep 600
+  #sleep 600
   wget --no-check-certificate https://fl31ca104ja0301.deacluster.intel.com/data/mchowdh1/GDC3200-28T090T/Global/$case_name/${case_name}_edp_r1/${case_name}_edp_r1.xlsx
   mv ${case_name}_edp_r1.xlsx $result_dir/$case_name/emon.xlsx
   mkdir -p $result_dir/$case_name/emon_plots
@@ -75,9 +74,9 @@ for workloads in "mlc"; do
   # sweep cacheways
   #cache_list=()
   #cache_list=("0x1,0xfffe" "0x3,0xfffc" "0xf,0xfff0" "0xff,0xff00" "0xfffe,0x1")
-  #cache_list=("0x3,0xfffc") 
-  cache_list=("0x1" "0x3" "0xf" "0xff" "0xfff" "0xfffe" "0xffff")
-  #cache_list=("0x1" "0xffff")
+  cache_list=("0x1,0xfffe")
+  #cache_list=("0x1" "0x3" "0xf" "0xff" "0xfff" "0xfffe" "0xffff")
+  #cache_list=("0x1")
   for cache in "${cache_list[@]}"; do
     echo "L2C_COS_WAYS=$cache" >> $config2
     l2c_ways=$( echo ${cache//,/-} )
@@ -90,7 +89,7 @@ for workloads in "mlc"; do
     find $result_dir -maxdepth 1 -type f | xargs mv -t $result_dir/$case_name
     
     echo "Sleep for 10 min to make sure edp generated the excel file."
-    sleep 600
+    #sleep 600
     wget --no-check-certificate https://fl31ca104ja0301.deacluster.intel.com/data/mchowdh1/GDC3200-28T090T/Global/$case_name/${case_name}_edp_r1/${case_name}_edp_r1.xlsx
     mv ${case_name}_edp_r1.xlsx $result_dir/$case_name/emon.xlsx
     mkdir -p $result_dir/$case_name/emon_plots

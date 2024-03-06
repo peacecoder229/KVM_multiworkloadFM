@@ -10,7 +10,7 @@ start_core=${2:-1}
 end_core=${3:-$[$(getconf _NPROCESSORS_ONLN)-1]}
 
 start=`date +%s`
-delay=10
+delay=0
 #time mlc --loaded_latency -d0 -R -k${start_core}-${end_core} -b512K -t${runtime} -T > ${result_file}_temp
 #time mlc --loaded_latency -W3 -t${runtime} -d0 -c${latency_core} -k${start_core}-${end_core} -b512000 > ${result_file}_temp
 echo "time mlc --loaded_latency -d$delay -W5 -k${start_core}-${end_core} -b1M -t${runtime} -T > ${result_file}_temp"
