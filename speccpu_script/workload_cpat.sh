@@ -30,30 +30,19 @@ asm=$5
 # Config files
 speed_cfg="ic19.1u1-lin-core-${asm}-speed-20200306_revA.cfg"
 rate_cfg="ic19.1u1-lin-core-${asm}-rate-20200306_revA.cfg"
-echo "$speed_cfg"
+
 # source spec17 environment if needed
-#hash runcpu || source shrc 
 source shrc 
 
 # Clear Cache again inside the docker
 ulimit -s unlimited
 sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
 
-for (( copy=start; copy <= end; copy++)); do
-  if [[ ${workload#*_}  == "s" ]]; then
+if [[ ${workload#*_}  == "s" ]]; then
     config=${speed_cfg}
-    spec_cmd="numactl --localalloc -C ${copy} runcpu -c ${config} --nobuild --noreportable --define cores=1 --threads=1 --iterations ${no_of_iterations} ${workload}"
   else
     config=${rate_cfg}
-    cp -f config/${config} config/${copy}_${config}
-    sed -i "s/\$SPECCOPYNUM/$copy/" config/${copy}_${config}
-    spec_cmd="runcpu -c ${copy}_${config} --nobuild --noreportable --iterations ${no_of_iterations} --threads=1 --define cores=1 ${workload}"
-  fi
-
-  # run the speccpu command
-  echo "Running: $spec_cmd"
-  $spec_cmd | tee workload_${copy}.log &
-done
+fi
 
 copies=$((end-start+1))
 
@@ -64,7 +53,7 @@ runcpu \
     --nobuild \
     --noreportable \
     --define cores=${copies} \
-    --threads=${copies} \
+    --threads=1 \
     --define numcopies=${copies} \
     --iterations 1 \
     ${workload} |  tee -a workload.log
@@ -74,4 +63,3 @@ for job in `jobs -p`; do
 done
 
 sleep 1
-

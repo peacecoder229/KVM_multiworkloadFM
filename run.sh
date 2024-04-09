@@ -6,7 +6,7 @@ TestCase_s=""
 n_cpus_per_vm=""
 workload_per_vm=""
 file_suffix=""
-cpu_affinity=0
+cpu_affinity=1
 
 BENCHMARK_DIR="/home"
 vm_config=""
@@ -47,7 +47,7 @@ function handle_args()
  while getopts "AT:S:C:W:F:O:D:" opt
  do 
    case $opt in 
-     A) cpu_affinity=1
+     A) cpu_affinity=0
 	;;
      T) TARGET="$OPTARG"
         TestCase_s=$(echo "${TestCase_s}_${TARGET}")
@@ -226,8 +226,10 @@ function setup_workloads()
         echo "Install speccpu in VM."
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y python3"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y libnsl"
-        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl"
-        scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/spec17 root@${vm_ip}:/root/
+        ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl "
+        scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/spec17.tar.gz root@${vm_ip}:/root/
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "cd /root; tar -xvf spec17.tar.gz; cd .."
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "rm -rf /root/spec17.tar.gz"
         scp -r -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
         scp -r -oStrictHostKeyChecking=no speccpu_script/ root@${vm_ip}:/root/
       ;;
@@ -305,8 +307,9 @@ function run_exp_vm()
         # speccpu has the following format: speccpu:502.gcc_r:3:46-47, so run the exp and store the result_file here
         benchmark=$(echo $vm_name | cut -d: -f2)
         n_iteration=$(echo $vm_name | cut -d: -f3)
-        start_core=$(echo $vm_name | cut -d: -f4 | cut -d- -f1)
-        end_core=$(echo $vm_name | cut -d: -f4 | cut -d- -f2)
+        asm=$(echo $vm_name | cut -d: -f4)
+        start_core=$(echo $vm_name | cut -d: -f5 | cut -d- -f1)
+        end_core=$(echo $vm_name | cut -d: -f5 | cut -d- -f2)
         echo "$benchmark will run in core range: $start_core-$end_core"
 
         result_file=${benchmark}_${start_core}-${end_core}_${file_suffix}
@@ -315,7 +318,7 @@ function run_exp_vm()
         do
           scp -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
           ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash chmod +x /root/run_speccpu.sh"
-          ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash run_speccpu.sh ${result_file}_${iteration} $start_core $end_core True $benchmark $n_iteration" &
+          ssh -oStrictHostKeyChecking=no root@${vm_ip} "bash run_speccpu.sh ${result_file}_${iteration} $start_core $end_core True $benchmark $n_iteration $asm" &
           result_file_ip[${result_file}_${iteration}]=$vm_ip
         done
       ;;

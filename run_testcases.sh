@@ -19,7 +19,7 @@ function init_vm_core_range() {
   local total_core=$(lscpu | grep node0 | cut -f2 -d:)
   local hi_core=$(echo $total_core | cut -f2 -d-)
   local lo_core=$(echo $total_core | cut -f1 -d-)
-
+  
   local temp_hi=$hi_core
   for vm_core in ${VM_CORES//,/ }; do
     local temp_lo=$((temp_hi - vm_core + 1))
@@ -29,7 +29,7 @@ function init_vm_core_range() {
   
   #else # for L2 Cache experiments, need
     #VM_CORE_RANGE+=("0") # for vm need to use 0 and 96
-    #VM_CORE_RANGE+=("0-47")
+    #VM_CORE_RANGE+=("0-29")
     #VM_CORE_RANGE+=("96-143")
     #VM_CORE_RANGE+=("1")
     #VM_CORE_RANGE+=("143")
@@ -74,9 +74,9 @@ function setup_env() {
   rm -rf /root/.ssh/known_hosts
   
   #if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
-  echo on > /sys/devices/system/cpu/smt/control
+  #echo on > /sys/devices/system/cpu/smt/control
   #else
-  #  echo off > /sys/devices/system/cpu/smt/control
+  echo off > /sys/devices/system/cpu/smt/control
   #fi
   sleep 5 
   

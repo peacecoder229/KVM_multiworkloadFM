@@ -691,7 +691,8 @@ users:
     os.system("cat {}/{}/iso_test/meta-data".format(path_prefix, vm_storage))
     os.system("cat {}/{}/iso_test/network-config".format(path_prefix, vm_storage))
     os.system(
-        "mkisofs -input-charset=utf-8 -output %s/%s/%s.iso -volid cidata -joliet -rock  %s/%s/iso_test/ >>iso.log"
+        #"mkisofs -input-charset=utf-8 -output %s/%s/%s.iso -volid cidata -joliet -rock  %s/%s/iso_test/ >>iso.log"
+        "mkisofs -output %s/%s/%s.iso -volid cidata -joliet -rock  %s/%s/iso_test/ >>iso.log"
         % (path_prefix, vm_storage, iso_name, path_prefix, vm_storage))
     os.system("rm {}/{}/iso_test/user-data".format(path_prefix, vm_storage))
     os.system("rm {}/{}/iso_test/meta-data".format(path_prefix, vm_storage))
@@ -732,8 +733,13 @@ users:
         if not os.path.isfile(f"%s/vmimages/{image_name}" % (path_prefix)):
             download_qcow(image_name, path_prefix)
         
-        print(f"Copying  {path_prefix}/vmimages/spec-golden-image.qcow2 {path_prefix}/{vm_storage}/{iso_name}.qcow2")
-        os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
+        # for spr
+        #print(f"Copying  {path_prefix}/vmimages/spec-golden-image.qcow2 {path_prefix}/{vm_storage}/{iso_name}.qcow2")
+        #print("Using image prepared for SPR machine.")
+        #os.system("cp %s/vmimages/spec-golden-image.qcow2 %s/%s/%s.qcow2" %
+        # for emr
+        print("Using image prepared for EMR machine.")
+        os.system("cp %s/vmimages/spr-emr-golden-image.qcow2 %s/%s/%s.qcow2" %
                   (path_prefix, path_prefix, vm_storage,iso_name))
     elif ("5g" in iso_name): 
         print("using CPU golden image ")
@@ -933,7 +939,7 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                     cpuaffinity = f"--cpuset {cpu_set}"
 
 
-                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=/%s/%s.iso,device=cdrom %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
                     test_cmd = CMD_FORMAT % (tile.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), t_resource["VCPU"],
@@ -950,17 +956,24 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                     cpu_set=str(cpupool.pop())
                     print("No of cpus needed is : ", CPUS_PER_VM[count], cpu_set, cpupool)
                     #for _ in range(Tile_Resource["QAT"]['VCPU'] - 1):
-                    for _ in range(1, CPUS_PER_VM[count]):
-                        cpu_set = cpu_set + "," + str(cpupool.pop())
+                    
+                    cpuaffinity = ""
+                    numaaffinity = ""
+                    if CPU_AFFINITY:
+                      for _ in range(1, CPUS_PER_VM[count]):
+                          cpu_set = cpu_set + "," + str(cpupool.pop())
+                      cpuaffinity = f"--cpuset {cpu_set}"
+                    else:
+                      numacpu_range = result = subprocess.run("lscpu | grep node0 | cut -d: -f2", shell=True, capture_output=True, text=True).stdout.strip()
+                      numaaffinity = f"--cpuset {numacpu_range}"
                     
                     # number of virtual cpus same as host's physical cpu
-                    n_vcpus = CPUS_PER_VM[count] 
+                    n_vcpus = CPUS_PER_VM[count]
                     v_memory = vm_memory[count]
                     
                     # name of the same as workload name
                     vm_name = WORKLOAD_PER_VM[count]
                     # floating or affitinized
-                    cpuaffinity = f"--cpuset {cpu_set}" if CPU_AFFINITY else "" 
                     
                     # attach NVME pass through devices to a single VM
                     num_nvme = len(PT_Device["NVME"])
@@ -972,8 +985,7 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                         print(storage_pt)
                         num_nvme = len( PT_Device["NVME"])
 
-
-                    CMD_FORMAT = "virt-install --import -n %s -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough --nographics"
+                    CMD_FORMAT = "virt-install --import -n %s -r %s --vcpus=%s --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback --disk path=%s/%s/%s.iso,device=cdrom %s %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough %s --nographics"
                     
                     test_cmd = CMD_FORMAT % (vm_name.lower(),
                                              (int(v_memory) *
@@ -981,7 +993,7 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                                              path_prefix, vm_storage, iso_name, 
                                              path_prefix, vm_storage,
                                              iso_name, network_cmd,
-                                             storage_pt, cpuaffinity)
+                                             storage_pt, cpuaffinity, numaaffinity)
                     print(test_cmd)
                     CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
                     test_cmd_remove_cd = CMD_FORMAT_REMOVE_CD % (
@@ -1009,7 +1021,7 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                     test_cmd = CMD_FORMAT % (tile.lower(), tile_no,
                                              (int(t_resource["MEMORY"]) *
                                               1024), t_resource["VCPU"],
-                                             path_prefix, vm_storage, iso_name, 
+                                             path_prefix, vm_storage, iso_name,
                                              path_prefix, vm_storage,
                                              iso_name, network_cmd,gpu_pt, cpuaffinity)
                     CMD_FORMAT_REMOVE_CD = "virt-install --import -n %s-%02d -r %s --vcpus=%s --os-type=linux --os-variant=centos7.0 --accelerate --disk path=%s/%s/%s.qcow2,format=raw,bus=virtio,cache=writeback %s %s --noautoconsole --cpu host-passthrough,cache.mode=passthrough"
@@ -1109,7 +1121,7 @@ def find(key, dictionary):
                     yield result
 
 if __name__ == '__main__':
-    
+    print("vm_cloud-init.py")
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument('-c', '--CPUS_PER_VM', type=str, help = 'Comma seperated list of physical cpus each vm is pinned to.')
     parser.add_argument('-w', '--WORKLOAD_PER_VM', type=str, help = 'Comma seperated list of the name of the workloads each VM will run.')
