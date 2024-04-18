@@ -19,23 +19,24 @@ function init_vm_core_range() {
   local total_core=$(lscpu | grep node0 | cut -f2 -d:)
   local hi_core=$(echo $total_core | cut -f2 -d-)
   local lo_core=$(echo $total_core | cut -f1 -d-)
-  
+  : ' 
   local temp_hi=$hi_core
   for vm_core in ${VM_CORES//,/ }; do
     local temp_lo=$((temp_hi - vm_core + 1))
     VM_CORE_RANGE+=("${temp_lo}-${temp_hi}")
     temp_hi=$((temp_hi - vm_core))
   done
-  
+  '
   #else # for L2 Cache experiments, need
     #VM_CORE_RANGE+=("0") # for vm need to use 0 and 96
-    #VM_CORE_RANGE+=("0-29")
+    VM_CORE_RANGE+=("0-29")
+    VM_CORE_RANGE+=("30-59")
     #VM_CORE_RANGE+=("96-143")
     #VM_CORE_RANGE+=("1")
     #VM_CORE_RANGE+=("143")
   
   for vm_core_range in "${VM_CORE_RANGE[@]}"; do
-    echo "$vm_core_range"
+    echo "vm_core_range: $vm_core_range"
   done
 }
 
@@ -74,9 +75,9 @@ function setup_env() {
   rm -rf /root/.ssh/known_hosts
   
   #if [[ $L2C_CACHE_WAYS_ENABLE -eq 1 ]]; then
-  #echo on > /sys/devices/system/cpu/smt/control
+  echo on > /sys/devices/system/cpu/smt/control
   #else
-  echo off > /sys/devices/system/cpu/smt/control
+  #echo off > /sys/devices/system/cpu/smt/control
   #fi
   sleep 5 
   
@@ -314,6 +315,51 @@ function hp_lp_corun_mba() {
   done
 
   hp_lp_corun "MBA"
+}
+
+function hp_lp_corun_cpat() {
+  cd cpat
+  ./cpat_resctrl.sh # Init cpat
+  cd ..
+  mount resctrl -t resctrl /sys/fs/resctrl/
+
+  mkdir -p /sys/fs/resctrl/{COS1,COS2,COS3,COS4,COS5,COS6,COS7}
+  
+  # Launch the VM
+  ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG
+  
+  # smt cores of socket0, need to do it because of a bug in the patch
+  echo "120-179" > /sys/fs/resctrl/COS7/cpus_list
+  cat /sys/fs/resctrl/COS7/cpus_list
+ 
+  # After launcing vm/workload, associate the corresponding pid to clos
+  declare -a cos_list
+  for cos in ${CPAT_COS//,/ }; do
+    cos_list+=($cos)
+  done
+  echo "$cos_list"
+  
+  echo "Associating VM pids with corresponding clos."
+  i=0
+  for vm in ${VM_NAMES//,/ }; do
+    vm_pid=$(ps aux | grep $vm | awk '{print $2}' | head -1)
+    cos_no=${cos_list[i]}
+    parent_pid=$(cat /var/run/libvirt/qemu/$vm.xml | grep "pid" | head -1 | cut -d= -f4 | cut -d\' -f2)
+    child_pid_list=$(cat /var/run/libvirt/qemu/$vm.xml | grep "vcpu id" | awk '{print $3}' | cut -d\' -f2)
+    echo "$parent_pid > /sys/fs/resctrl/COS$cos_no/tasks"
+    echo $parent_pid > /sys/fs/resctrl/COS$cos_no/tasks
+    
+    for pid in $child_pid_list
+    do
+      echo $pid > /sys/fs/resctrl/COS$cos_no/tasks
+    done
+    
+    cat /sys/fs/resctrl/COS$cos_no/tasks
+    
+    i=$((i+1))
+  done
+  
+  hp_lp_corun "CPAT"
 }
 
 function cleanup() {
@@ -736,6 +782,9 @@ function main() {
   elif [[ $MBA_ENABLE -eq 1 ]]; then
     echo "Running colocation w/ MBA .... "
     hp_lp_corun_mba
+  elif [[ $CPAT_ENABLE -eq 1 ]]; then
+    echo "Running colocation w/ CPAT ...."
+    hp_lp_corun_cpat
   else
     echo "Running colocation w/o HWDRC or MBA .... "
     hp_lp_corun_wo_cos

@@ -18,4 +18,4 @@ PT_Device:
   #"NVME": [ "pci_0000_81_00_0", "pci_0000_27_00_0"] # On 346T to run spdk-rdma: 0000:81:00.0, 0000:27:00.0
   NVME: []
 
-VM_Memory: [40,40]
+VM_Memory: [100,100]

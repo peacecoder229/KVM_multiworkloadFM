@@ -228,7 +228,7 @@ function setup_workloads()
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y libnsl"
         ssh -oStrictHostKeyChecking=no root@${vm_ip} "yum install -y numactl "
         scp -r -oStrictHostKeyChecking=no $BENCHMARK_DIR/spec17.tar.gz root@${vm_ip}:/root/
-	ssh -oStrictHostKeyChecking=no root@${vm_ip} "cd /root; tar -xvf spec17.tar.gz; cd .."
+	ssh -oStrictHostKeyChecking=no root@${vm_ip} "cd /root; tar -xf spec17.tar.gz; cd .."
 	ssh -oStrictHostKeyChecking=no root@${vm_ip} "rm -rf /root/spec17.tar.gz"
         scp -r -oStrictHostKeyChecking=no run_speccpu.sh root@${vm_ip}:/root/
         scp -r -oStrictHostKeyChecking=no speccpu_script/ root@${vm_ip}:/root/

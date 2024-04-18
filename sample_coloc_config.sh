@@ -43,3 +43,8 @@ SST_COS_FREQ="0:3000-3100,3:0-500"
 
 # Resctrl flag; if turned on uses resctrl interface rathher than pqos tool
 RESCTRL=1 #
+
+
+# CPAT flag
+CPAT=1
+CPAT_COS="0,3"

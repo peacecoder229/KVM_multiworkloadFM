@@ -964,7 +964,7 @@ def generate_commands(Networking, PT_Device, vm_storage, path_prefix, vm_memory,
                           cpu_set = cpu_set + "," + str(cpupool.pop())
                       cpuaffinity = f"--cpuset {cpu_set}"
                     else:
-                      numacpu_range = result = subprocess.run("lscpu | grep node0 | cut -d: -f2", shell=True, capture_output=True, text=True).stdout.strip()
+                      numacpu_range = result = subprocess.run("lscpu | grep node0 | cut -d: -f2 | cut -d, -f1", shell=True, capture_output=True, text=True).stdout.strip()
                       numaaffinity = f"--cpuset {numacpu_range}"
                     
                     # number of virtual cpus same as host's physical cpu
