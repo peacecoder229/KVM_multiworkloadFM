@@ -318,47 +318,64 @@ function hp_lp_corun_mba() {
 }
 
 function hp_lp_corun_cpat() {
-  cd cpat
-  ./cpat_resctrl.sh # Init cpat
-  cd ..
-  mount resctrl -t resctrl /sys/fs/resctrl/
-
-  mkdir -p /sys/fs/resctrl/{COS1,COS2,COS3,COS4,COS5,COS6,COS7}
+  
+  if [[ $RESCTRL -eq 1 ]]; then # for pid association
+    cd cpat
+    ./cpat_resctrl.sh # Init cpat
+    cd ..
+    mount resctrl -t resctrl /sys/fs/resctrl/
+    mkdir -p /sys/fs/resctrl/{COS1,COS2,COS3,COS4,COS5,COS6,COS7}  
+    # smt cores of socket0, need to do it because of a bug in the patch
+    echo "120-179" > /sys/fs/resctrl/COS7/cpus_list
+    cat /sys/fs/resctrl/COS7/cpus_list
+  else # for core association
+    echo "Initing cpat for core association."
+    cd cpat
+    ./cpat_pqos.sh # Init cpat
+    cd ..
+  fi
   
   # Launch the VM
   ./run.sh -A -T vm -S setup -C $VM_CORES -W $VM_NAMES -F $VM_CONFIG
-  
-  # smt cores of socket0, need to do it because of a bug in the patch
-  echo "120-179" > /sys/fs/resctrl/COS7/cpus_list
-  cat /sys/fs/resctrl/COS7/cpus_list
  
-  # After launcing vm/workload, associate the corresponding pid to clos
-  declare -a cos_list
-  for cos in ${CPAT_COS//,/ }; do
-    cos_list+=($cos)
-  done
-  echo "$cos_list"
   
-  echo "Associating VM pids with corresponding clos."
-  i=0
-  for vm in ${VM_NAMES//,/ }; do
-    vm_pid=$(ps aux | grep $vm | awk '{print $2}' | head -1)
-    cos_no=${cos_list[i]}
-    parent_pid=$(cat /var/run/libvirt/qemu/$vm.xml | grep "pid" | head -1 | cut -d= -f4 | cut -d\' -f2)
-    child_pid_list=$(cat /var/run/libvirt/qemu/$vm.xml | grep "vcpu id" | awk '{print $3}' | cut -d\' -f2)
-    echo "$parent_pid > /sys/fs/resctrl/COS$cos_no/tasks"
-    echo $parent_pid > /sys/fs/resctrl/COS$cos_no/tasks
-    
-    for pid in $child_pid_list
-    do
-      echo $pid > /sys/fs/resctrl/COS$cos_no/tasks
+  if [[ $RESCTRL -eq 1 ]]; then # for pid association
+    echo "Associating VM pids with corresponding clos."
+    declare -a cos_list
+    for cos in ${CPAT_COS//,/ }; do
+      cos_list+=($cos)
     done
+    echo "$cos_list"
+
+    i=0
+    for vm in ${VM_NAMES//,/ }; do
+      vm_pid=$(ps aux | grep $vm | awk '{print $2}' | head -1)
+      cos_no=${cos_list[i]}
+      parent_pid=$(cat /var/run/libvirt/qemu/$vm.xml | grep "pid" | head -1 | cut -d= -f4 | cut -d\' -f2)
+      child_pid_list=$(cat /var/run/libvirt/qemu/$vm.xml | grep "vcpu id" | awk '{print $3}' | cut -d\' -f2)
+      echo "$parent_pid > /sys/fs/resctrl/COS$cos_no/tasks"
+      echo $parent_pid > /sys/fs/resctrl/COS$cos_no/tasks
     
-    cat /sys/fs/resctrl/COS$cos_no/tasks
+      for pid in $child_pid_list
+      do
+        echo $pid > /sys/fs/resctrl/COS$cos_no/tasks
+      done
     
-    i=$((i+1))
-  done
-  
+      cat /sys/fs/resctrl/COS$cos_no/tasks
+    
+      i=$((i+1))
+    done
+  else 
+    echo "Associating cores to cpat cos."
+    i=0 
+    for cos in ${CPAT_COS//,/ }; do
+       echo "pqos -a "core:$cos=${VM_CORE_RANGE[i]}""
+       pqos -a "core:$cos=${VM_CORE_RANGE[i]}"
+       i=$((i+1))
+    done
+    pqos -a "core:7=120-179"
+  fi
+
   hp_lp_corun "CPAT"
 }
 
